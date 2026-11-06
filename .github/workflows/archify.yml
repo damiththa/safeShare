@@ -1,0 +1,62 @@
+name: Render & Verify Archify Architecture
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "docs/architecture/safeshare.architecture.json"
+      - "scripts/render_archify.py"
+      - ".github/workflows/archify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archify-render:
+    name: Validate & Render SafeShare Archify v3.0 Diagram
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout safeShare Repository (Full History for Source Evidence)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 20 (Archify Runtime)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Clone Official Archify v3.0 Skill
+        run: |
+          git clone --depth 1 https://github.com/tt-a1i/archify.git /tmp/archify
+
+      - name: Validate Repository Evidence & Compile Archify HTML + GitHub Inline SVG
+        run: |
+          python3 scripts/render_archify.py
+
+      - name: Commit Updated Archify Viewer HTML & Inline SVG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/architecture/safeshare-architecture.svg docs/architecture/safeshare-architecture.html
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(archify): compile verified Archify v3.0 SVG & interactive HTML [skip ci]"
+            git push
+          fi
+
+      - name: Upload Archify Architecture Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: safeshare-archify-architecture
+          path: |
+            docs/architecture/safeshare.architecture.json
+            docs/architecture/safeshare-architecture.html
+            docs/architecture/safeshare-architecture.svg

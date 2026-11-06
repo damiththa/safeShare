@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — {{APP_NAME}}</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body class="legal-body">
+  <main class="legal-card">
+    <h1>Terms of Service — {{APP_NAME}}</h1>
+    <p class="muted">Effective Date: November 2026</p>
+
+    <h2>1. Service Description</h2>
+    <p>
+      <strong>{{APP_NAME}}</strong> provides in-browser metadata inspection, byte-destructive document and image
+      redaction, and personal Box Shared Link / external collaborator auditing via Box OAuth 2.0 Web App Integrations.
+    </p>
+
+    <h2>2. User Responsibility &amp; Verification of Redactions</h2>
+    <p>
+      While {{APP_NAME}} performs destructive bitmap flattening and metadata stripping locally in your browser,
+      automated PII pattern detection is an assistive feature and cannot guarantee 100% recall across every formatting
+      variation or handwriting style. <strong>You are solely responsible for visually inspecting every exported
+      <code>_SafeCopy</code> file prior to sharing or publishing it externally.</strong>
+    </p>
+
+    <h2>3. Box Account Permissions</h2>
+    <p>
+      Actions you trigger within {{APP_NAME}}—such as saving sanitized copies, revoking Shared Links, modifying link
+      expiration dates, or removing external collaborators—are executed directly against your Box account using your
+      authenticated Box session permissions.
+    </p>
+
+    <h2>4. Warranty Disclaimer &amp; Limitation of Liability</h2>
+    <p>
+      {{APP_NAME}} is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, express or implied.
+      To the maximum extent permitted by applicable law, the authors and operators of {{APP_NAME}} shall not be liable
+      for any indirect, incidental, special, or consequential damages arising out of your use of the service.
+    </p>
+
+    {{CONTACT_BLOCK}}
+  </main>
+</body>
+</html>

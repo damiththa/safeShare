@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — {{APP_NAME}}</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body class="legal-body">
+  <main class="legal-card">
+    <div class="badge badge-safe">Zero-PII Architecture</div>
+    <h1>Privacy Policy — {{APP_NAME}}</h1>
+    <p class="muted">Effective Date: November 2026</p>
+
+    <h2>1. Core Privacy Guarantee: Your Files Never Touch Our Servers</h2>
+    <p>
+      <strong>{{APP_NAME}}</strong> is engineered around a strict client-side, zero-retention architecture.
+      When you inspect metadata, redact documents or images, or audit Shared Links across your Box folders,
+      all file reading, WebAssembly processing, redaction rendering, and folder metadata scanning execute
+      <strong>directly inside your web browser memory</strong> communicating over HTTPS with Box's official APIs
+      (<code>api.box.com</code> and <code>upload.box.com</code>).
+    </p>
+
+    <h2>2. Information We Do NOT Collect or Store</h2>
+    <ul>
+      <li>We <strong>never</strong> download, proxy, log, or store your Box file contents on our servers.</li>
+      <li>We <strong>never</strong> store your name, email address, filenames, folder structures, or Shared Link URLs.</li>
+      <li>We <strong>never</strong> persist Box OAuth 2.0 access tokens or refresh tokens in any database; your short-lived session token lives exclusively in volatile browser memory until you close the modal.</li>
+    </ul>
+
+    <h2>3. Anonymous Quota &amp; Subscription Accounting</h2>
+    <p>
+      To enforce monthly Free and Pro plan limits without storing personal data, our stateless Google Cloud Run
+      service computes a one-way cryptographic hash (<code>HMAC-SHA256</code>) of your numeric Box account identifier
+      and stores only that irreversible hash alongside an integer usage counter and plan tier (<code>free</code> or <code>pro</code>)
+      in Google Cloud Firestore.
+    </p>
+
+    <h2>4. User-Owned Snapshots &amp; Outputs</h2>
+    <p>
+      Any sanitized copies (<code>_SafeCopy</code>), exported CSV audit reports, or optional ShareRadar traffic-delta
+      snapshots (<code>_safeshare_radar_snapshot.json</code>) are saved strictly inside <strong>your own Box account</strong>
+      under your organization's governance and access controls.
+    </p>
+
+    {{CONTACT_BLOCK}}
+  </main>
+</body>
+</html>
