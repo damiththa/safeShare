@@ -1,0 +1,543 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 600" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="blueprint" data-theme="dark" data-quality-profile="showcase" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
+        <title id="archify-diagram-title">BoxDiff for Box — Zero-PII Multi-Modal Browser Diff Architecture</title>
+        <desc id="archify-diagram-description">100% Client-Side Version History &amp; Sibling File Redlines (.pdf, .docx, .xlsx, .csv, Images) · Stateless Cloud Run OAuth &amp; Anonymous Firestore Quotas</desc>
+        <style>
+
+  svg {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --bg: #030816;
+    --grid: #16263f;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #475569;
+    --arrow: #64748b;
+    --arrow-emphasis: #34d399;
+    --mask: #0b1528;
+    --frontend-fill: rgba(8, 51, 68, 0.55);
+    --frontend-stroke: #22d3ee;
+    --backend-fill: rgba(6, 78, 59, 0.55);
+    --backend-stroke: #34d399;
+    --database-fill: rgba(76, 29, 149, 0.55);
+    --database-stroke: #a78bfa;
+    --cloud-fill: rgba(120, 53, 15, 0.45);
+    --cloud-stroke: #fbbf24;
+    --security-fill: rgba(136, 19, 55, 0.55);
+    --security-stroke: #fb7185;
+    --messagebus-fill: rgba(154, 52, 18, 0.50);
+    --messagebus-stroke: #fb923c;
+    --external-fill: rgba(30, 41, 59, 0.65);
+    --external-stroke: #94a3b8;
+  }
+  .c-grid { stroke: var(--grid); fill: none; }
+  .c-mask { fill: var(--mask); stroke: none; }
+  .c-region { fill: rgba(251, 191, 36, 0.05); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
+  .c-security-group { fill: rgba(251, 113, 133, 0.04); stroke: var(--security-stroke); stroke-dasharray: 4,4; }
+  .c-frontend { fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
+  .c-backend { fill: var(--backend-fill); stroke: var(--backend-stroke); }
+  .c-database { fill: var(--database-fill); stroke: var(--database-stroke); }
+  .c-cloud { fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
+  .c-security { fill: var(--security-fill); stroke: var(--security-stroke); }
+  .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
+  .c-external { fill: var(--external-fill); stroke: var(--external-stroke); }
+  .t-primary { fill: var(--text); }
+  .t-muted { fill: var(--text-muted); }
+  .t-dim { fill: var(--text-dim); }
+  .t-frontend { fill: var(--frontend-stroke); }
+  .t-backend { fill: var(--backend-stroke); }
+  .t-database { fill: var(--database-stroke); }
+  .t-cloud { fill: var(--cloud-stroke); }
+  .t-security { fill: var(--security-stroke); }
+  .t-messagebus { fill: var(--messagebus-stroke); }
+  .t-external { fill: var(--external-stroke); }
+  .t-edge-default { fill: var(--arrow); }
+  .t-edge-emphasis { fill: var(--arrow-emphasis); }
+  .t-edge-security { fill: var(--security-stroke); }
+  .t-edge-dashed { fill: var(--database-stroke); }
+  .a-default { stroke: var(--arrow); fill: none; }
+  .a-emphasis { stroke: var(--arrow-emphasis); fill: none; }
+  .a-security { stroke: var(--security-stroke); fill: none; stroke-dasharray: 5,5; }
+  .a-dashed { stroke: var(--database-stroke); fill: none; stroke-dasharray: 4,4; }
+  .m-default { fill: var(--arrow); }
+  .m-emphasis { fill: var(--arrow-emphasis); }
+  .m-security { fill: var(--security-stroke); }
+  .m-dashed { fill: var(--database-stroke); }
+  .semantic-sigil {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.82;
+  }
+  .semantic-sigil .sigil-fill { fill: currentColor; stroke: none; }
+  .s-frontend { color: var(--frontend-stroke); }
+  .s-backend { color: var(--backend-stroke); }
+  .s-database { color: var(--database-stroke); }
+  .s-cloud { color: var(--cloud-stroke); }
+  .s-security { color: var(--security-stroke); }
+  .s-messagebus { color: var(--messagebus-stroke); }
+  .s-external { color: var(--external-stroke); }
+  .brand-mark-badge { fill: #ffffff; stroke: none; }
+  .brand-mark-frame { fill: none; stroke: #cbd5e1; stroke-width: 0.8; }
+  .source-evidence-beacon rect {
+    fill: #072227;
+    stroke: #34d399;
+    stroke-width: 0.9;
+  }
+  .source-evidence-beacon text {
+    fill: #34d399;
+    font-size: 6.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-anchor: middle;
+  }
+
+        </style>
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#030816" />
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        <text x="36" y="34" class="t-primary" font-size="15" font-weight="700">BoxDiff for Box — Zero-PII Multi-Modal Browser Diff Architecture</text>
+        <text x="36" y="52" class="t-muted" font-size="9.5">100% Client-Side Version History &amp; Sibling File Redlines (.pdf, .docx, .xlsx, .csv, Images) · Stateless Cloud Run OAuth &amp; Anonymous Firestore Quotas</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Box.com Enterprise Cloud (User&#x27;s Content Governance)" x="30" y="72" width="252" height="430" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="1" data-composition-frame-label="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" x="334" y="72" width="568" height="430" rx="8" class="c-security-group" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane" x="962" y="72" width="334" height="440" rx="12" class="c-region" stroke-width="1"/>
+        <path data-edge-from="box-web-ui" data-edge-to="spa-orchestrator" data-edge-label="GET /launch (?auth_code, file_id)" data-edge-key="0" data-edge-id="box-launch-to-spa" data-composition-points="264,134;308,134;308,139;352,139" d="M 264 134 L 308 134 L 308 139 L 352 139" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="spa-orchestrator" data-edge-to="cloudrun-fastapi" data-edge-label="POST /api/oauth/exchange &amp; /entitlement/consume (Zero File Bytes)" data-edge-key="1" data-edge-id="spa-to-cloudrun-exchange" data-composition-points="471,96;471,62;1129,62;1129,96" d="M 471 96 L 471 62 L 1129 62 L 1129 96" class="a-security" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="cloudrun-fastapi" data-edge-to="box-oauth-api" data-edge-label="Stateless Code -&gt; Token + Numeric Box ID" data-edge-key="2" data-edge-id="cloudrun-to-box-oauth" data-composition-points="1129,180;952,188;156,188;156,200" d="M 1129 180 L 952 188 L 156 188 L 156 200" class="a-dashed" data-animate="edge" style="--step:2" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="spa-orchestrator" data-edge-to="cors-box-client" data-edge-label="Timeline + Pair" data-edge-key="3" data-edge-id="spa-to-cors-client" data-composition-points="471,182;471,224" d="M 471 182 L 471 224" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="cors-box-client" data-edge-to="box-versions-api" data-edge-label="CORS 302 Stream (v1..vN)" data-edge-key="4" data-edge-id="cors-to-box-versions" data-composition-points="352,267;308,267;308,326;264,326" d="M 352 267 L 308 267 L 308 326 L 264 326" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="vendored-wasm" data-edge-to="spreadsheet-engine" data-edge-label="pdf.js / JSZip / pdf-lib" data-edge-key="5" data-edge-id="wasm-to-engines" data-composition-points="590,405;616,405;616,362;642,362" d="M 590 405 L 616 405 L 616 362 L 642 362" class="a-dashed" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="spa-orchestrator" data-edge-to="text-redline-engine" data-edge-label=".pdf / .docx / .txt" data-edge-key="6" data-edge-id="spa-to-text-diff" data-composition-points="590,139;616,139;616,136;642,136" d="M 590 139 L 616 139 L 616 136 L 642 136" class="a-emphasis" data-animate="edge" style="--step:6" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="cors-box-client" data-edge-to="visual-diff-engine" data-edge-label="PDF / Image Uint8Array" data-edge-key="7" data-edge-id="cors-to-visual-diff" data-composition-points="590,253;616,253;616,240;642,240" d="M 590 253 L 616 253 L 616 240 L 642 240" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="cors-box-client" data-edge-to="spreadsheet-engine" data-edge-label=".xlsx / .csv Bytes" data-edge-key="8" data-edge-id="cors-to-sheet-diff" data-composition-points="590,285;616,285;616,332;642,332" d="M 590 285 L 616 285 L 616 332 L 642 332" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="spreadsheet-engine" data-edge-to="report-exporter" data-edge-label="Redline + Formula Deltas" data-edge-key="9" data-edge-id="engines-to-exporter" data-composition-points="763,384;763,408" d="M 763 384 L 763 408" class="a-default" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="report-exporter" data-edge-to="box-upload-api" data-edge-label="1-Click Upload Redline_Report.pdf to Box" data-edge-key="10" data-edge-id="exporter-to-box-upload" data-composition-points="763,484;763,502;156,502;156,484" d="M 763 484 L 763 502 L 156 502 L 156 484" class="a-emphasis" data-animate="edge" style="--step:10" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="cloudrun-fastapi" data-edge-to="hmac-privacy-guard" data-edge-label="Verify Proof" data-edge-key="11" data-edge-id="cloudrun-to-hmac" data-composition-points="1129,180;1129,212" d="M 1129 180 L 1129 212" class="a-security" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="hmac-privacy-guard" data-edge-to="firestore-quotas" data-edge-label="Atomic Quota Txn" data-edge-key="12" data-edge-id="hmac-to-firestore" data-composition-points="1129,290;1129,322" d="M 1129 290 L 1129 322" class="a-dashed" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="secret-manager" data-edge-to="firestore-quotas" data-edge-label="Injected Secrets" data-edge-key="13" data-edge-id="secrets-to-cloudrun" data-composition-points="1129,428;1129,400" d="M 1129 428 L 1129 400" class="a-security" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <g id="node-box-web-ui" data-node-id="box-web-ui" data-node-label="Box Web Integration" tabindex="0" role="button" aria-label="Focus Box Web Integration, Compare with BoxDiff (Files), Box.com Enterprise Cloud (User&#x27;s Content Governance), Parent Folder Scope · #auth_code#" aria-pressed="false" data-node-kind="external" data-node-sublabel="Compare with BoxDiff (Files)" data-node-tag="Parent Folder Scope · #auth_code#" data-node-context="Box.com Enterprise Cloud (User&#x27;s Content Governance)">
+          <title>Box Web Integration · Compare with BoxDiff (Files) · Box.com Enterprise Cloud (User&#x27;s Content Governance) · Parent Folder Scope · #auth_code#</title>
+          <rect x="48" y="96" width="216" height="76" rx="6" class="c-mask"/>
+          <rect x="48" y="96" width="216" height="76" rx="6" class="c-external" data-animate="node" style="--step:0" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 102) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(226 102)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="156.0" y="133.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Box Web Integration</text>
+        <text data-detail="context" x="156.0" y="147.0" class="t-muted" font-size="8.2" text-anchor="middle">Compare with BoxDiff (Files)</text>
+        <text data-detail="fine" x="156.0" y="165" class="t-external" font-size="7.0" text-anchor="middle">Parent Folder Scope · #auth_code#</text>
+        </g>
+
+        <g id="node-box-oauth-api" data-node-id="box-oauth-api" data-node-label="Box OAuth 2.0 API" tabindex="0" role="button" aria-label="Focus Box OAuth 2.0 API, POST /oauth2/token · /users/me, Box.com Enterprise Cloud (User&#x27;s Content Governance), Numeric ID Only · Refresh Discarded" aria-pressed="false" data-node-kind="external" data-node-sublabel="POST /oauth2/token · /users/me" data-node-tag="Numeric ID Only · Refresh Discarded" data-node-context="Box.com Enterprise Cloud (User&#x27;s Content Governance)">
+          <title>Box OAuth 2.0 API · POST /oauth2/token · /users/me · Box.com Enterprise Cloud (User&#x27;s Content Governance) · Numeric ID Only · Refresh Discarded</title>
+          <rect x="48" y="200" width="216" height="76" rx="6" class="c-mask"/>
+          <rect x="48" y="200" width="216" height="76" rx="6" class="c-external" data-animate="node" style="--step:1" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 206) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(226 206)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="156.0" y="237.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Box OAuth 2.0 API</text>
+        <text data-detail="context" x="156.0" y="251.0" class="t-muted" font-size="8.2" text-anchor="middle">POST /oauth2/token · /users/me</text>
+        <text data-detail="fine" x="156.0" y="269" class="t-external" font-size="7.0" text-anchor="middle">Numeric ID Only · Refresh Discarded</text>
+        </g>
+
+        <g id="node-box-versions-api" data-node-id="box-versions-api" data-node-label="Box Versions &amp; Content API" tabindex="0" role="button" aria-label="Focus Box Versions &amp; Content API, GET /files/:id/versions &amp; /content, Box.com Enterprise Cloud (User&#x27;s Content Governance), ?version= Simple GET · 302 Stream" aria-pressed="false" data-node-kind="external" data-node-sublabel="GET /files/:id/versions &amp; /content" data-node-tag="?version= Simple GET · 302 Stream" data-node-context="Box.com Enterprise Cloud (User&#x27;s Content Governance)">
+          <title>Box Versions &amp; Content API · GET /files/:id/versions &amp; /content · Box.com Enterprise Cloud (User&#x27;s Content Governance) · ?version= Simple GET · 302 Stream</title>
+          <rect x="48" y="304" width="216" height="76" rx="6" class="c-mask"/>
+          <rect x="48" y="304" width="216" height="76" rx="6" class="c-external" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 310) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(226 310)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="156.0" y="341.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Box Versions &amp; Content API</text>
+        <text data-detail="context" x="156.0" y="355.0" class="t-muted" font-size="8.2" text-anchor="middle">GET /files/:id/versions &amp; /content</text>
+        <text data-detail="fine" x="156.0" y="373" class="t-external" font-size="7.0" text-anchor="middle">?version= Simple GET · 302 Stream</text>
+        </g>
+
+        <g id="node-box-upload-api" data-node-id="box-upload-api" data-node-label="Box Upload &amp; Links API" tabindex="0" role="button" aria-label="Focus Box Upload &amp; Links API, POST upload.box.com/files/content, Box.com Enterprise Cloud (User&#x27;s Content Governance), Redline_Report.pdf + Shared Link" aria-pressed="false" data-node-kind="external" data-node-sublabel="POST upload.box.com/files/content" data-node-tag="Redline_Report.pdf + Shared Link" data-node-context="Box.com Enterprise Cloud (User&#x27;s Content Governance)">
+          <title>Box Upload &amp; Links API · POST upload.box.com/files/content · Box.com Enterprise Cloud (User&#x27;s Content Governance) · Redline_Report.pdf + Shared Link</title>
+          <rect x="48" y="408" width="216" height="76" rx="6" class="c-mask"/>
+          <rect x="48" y="408" width="216" height="76" rx="6" class="c-external" data-animate="node" style="--step:3" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 414) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(226 414)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="156.0" y="445.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Box Upload &amp; Links API</text>
+        <text data-detail="context" x="156.0" y="459.0" class="t-muted" font-size="8.2" text-anchor="middle">POST upload.box.com/files/content</text>
+        <text data-detail="fine" x="156.0" y="477" class="t-external" font-size="7.0" text-anchor="middle">Redline_Report.pdf + Shared Link</text>
+        </g>
+
+        <g id="node-spa-orchestrator" data-node-id="spa-orchestrator" data-node-label="BoxDiff SPA Orchestrator" tabindex="0" role="button" aria-label="Focus BoxDiff SPA Orchestrator, v(N-1)-&gt;vN Auto-Pair + Sibling Picker, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), Volatile RAM State · Zero Storage" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="v(N-1)-&gt;vN Auto-Pair + Sibling Picker" data-node-tag="Volatile RAM State · Zero Storage" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>BoxDiff SPA Orchestrator · v(N-1)-&gt;vN Auto-Pair + Sibling Picker · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · Volatile RAM State · Zero Storage</title>
+          <rect x="352" y="96" width="238" height="86" rx="6" class="c-mask"/>
+          <rect x="352" y="96" width="238" height="86" rx="6" class="c-frontend" data-animate="node" style="--step:4" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(358 102) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="javascript" data-brand-title="JavaScript" data-brand-status="preset" class="brand-mark" transform="translate(568 102)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" transform="translate(3 3) scale(0.4167)" fill="#F7DF1E"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(532 102)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="471.0" y="138.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">BoxDiff SPA Orchestrator</text>
+        <text data-detail="context" x="471.0" y="152.0" class="t-muted" font-size="8.2" text-anchor="middle">v(N-1)-&gt;vN Auto-Pair + Sibling Picker</text>
+        <text data-detail="fine" x="471.0" y="175" class="t-frontend" font-size="7.0" text-anchor="middle">Volatile RAM State · Zero Storage</text>
+        </g>
+
+        <g id="node-cors-box-client" data-node-id="cors-box-client" data-node-label="BoxBrowserClient (CORS)" tabindex="0" role="button" aria-label="Focus BoxBrowserClient (CORS), Direct Browser &lt;-&gt; Box HTTPS, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), LRU Uint8Array Cache · 409 Retry" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Direct Browser &lt;-&gt; Box HTTPS" data-node-tag="LRU Uint8Array Cache · 409 Retry" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>BoxBrowserClient (CORS) · Direct Browser &lt;-&gt; Box HTTPS · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · LRU Uint8Array Cache · 409 Retry</title>
+          <rect x="352" y="224" width="238" height="86" rx="6" class="c-mask"/>
+          <rect x="352" y="224" width="238" height="86" rx="6" class="c-frontend" data-animate="node" style="--step:5" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(358 230) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="javascript" data-brand-title="JavaScript" data-brand-status="preset" class="brand-mark" transform="translate(568 230)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" transform="translate(3 3) scale(0.4167)" fill="#F7DF1E"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(532 230)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="471.0" y="266.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">BoxBrowserClient (CORS)</text>
+        <text data-detail="context" x="471.0" y="280.0" class="t-muted" font-size="8.2" text-anchor="middle">Direct Browser &lt;-&gt; Box HTTPS</text>
+        <text data-detail="fine" x="471.0" y="303" class="t-frontend" font-size="7.0" text-anchor="middle">LRU Uint8Array Cache · 409 Retry</text>
+        </g>
+
+        <g id="node-vendored-wasm" data-node-id="vendored-wasm" data-node-label="Self-Hosted Client Bundles" tabindex="0" role="button" aria-label="Focus Self-Hosted Client Bundles, pdf.js 3.11 · pdf-lib 1.17 · JSZip 3.10, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), MIT/Apache-2.0 · Zero 3rd-Party CDN" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="pdf.js 3.11 · pdf-lib 1.17 · JSZip 3.10" data-node-tag="MIT/Apache-2.0 · Zero 3rd-Party CDN" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)">
+          <title>Self-Hosted Client Bundles · pdf.js 3.11 · pdf-lib 1.17 · JSZip 3.10 · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · MIT/Apache-2.0 · Zero 3rd-Party CDN</title>
+          <rect x="352" y="362" width="238" height="86" rx="6" class="c-mask"/>
+          <rect x="352" y="362" width="238" height="86" rx="6" class="c-messagebus" data-animate="node" style="--step:6" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(358 368) scale(0.6875)">
+            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+            <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
+            <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
+            <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(552 368)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="471.0" y="404.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Self-Hosted Client Bundles</text>
+        <text data-detail="context" x="471.0" y="418.0" class="t-muted" font-size="8.2" text-anchor="middle">pdf.js 3.11 · pdf-lib 1.17 · JSZip 3.10</text>
+        <text data-detail="fine" x="471.0" y="441" class="t-messagebus" font-size="7.0" text-anchor="middle">MIT/Apache-2.0 · Zero 3rd-Party CDN</text>
+        </g>
+
+        <g id="node-text-redline-engine" data-node-id="text-redline-engine" data-node-label="Text &amp; Clause Redline Engine" tabindex="0" role="button" aria-label="Focus Text &amp; Clause Redline Engine, Patience LCS + Word-Token Diff, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), $ Amount · % Rate · Date · Legal" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Patience LCS + Word-Token Diff" data-node-tag="$ Amount · % Rate · Date · Legal" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>Text &amp; Clause Redline Engine · Patience LCS + Word-Token Diff · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · $ Amount · % Rate · Date · Legal</title>
+          <rect x="642" y="96" width="242" height="80" rx="6" class="c-mask"/>
+          <rect x="642" y="96" width="242" height="80" rx="6" class="c-frontend" data-animate="node" style="--step:7" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(648 102) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="javascript" data-brand-title="JavaScript" data-brand-status="preset" class="brand-mark" transform="translate(862 102)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" transform="translate(3 3) scale(0.4167)" fill="#F7DF1E"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(826 102)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="763.0" y="135.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Text &amp; Clause Redline Engine</text>
+        <text data-detail="context" x="763.0" y="149.0" class="t-muted" font-size="8.2" text-anchor="middle">Patience LCS + Word-Token Diff</text>
+        <text data-detail="fine" x="763.0" y="169" class="t-frontend" font-size="7.0" text-anchor="middle">$ Amount · % Rate · Date · Legal</text>
+        </g>
+
+        <g id="node-visual-diff-engine" data-node-id="visual-diff-engine" data-node-label="Visual Curtain &amp; Pixel Diff" tabindex="0" role="button" aria-label="Focus Visual Curtain &amp; Pixel Diff, Split Curtain Slider + Crimson Δ, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), Multi-Page PDF &amp; Image Comparator" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Split Curtain Slider + Crimson Δ" data-node-tag="Multi-Page PDF &amp; Image Comparator" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)">
+          <title>Visual Curtain &amp; Pixel Diff · Split Curtain Slider + Crimson Δ · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · Multi-Page PDF &amp; Image Comparator</title>
+          <rect x="642" y="200" width="242" height="80" rx="6" class="c-mask"/>
+          <rect x="642" y="200" width="242" height="80" rx="6" class="c-frontend" data-animate="node" style="--step:8" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(648 206) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(846 206)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="763.0" y="239.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Visual Curtain &amp; Pixel Diff</text>
+        <text data-detail="context" x="763.0" y="253.0" class="t-muted" font-size="8.2" text-anchor="middle">Split Curtain Slider + Crimson Δ</text>
+        <text data-detail="fine" x="763.0" y="273" class="t-frontend" font-size="7.0" text-anchor="middle">Multi-Page PDF &amp; Image Comparator</text>
+        </g>
+
+        <g id="node-spreadsheet-engine" data-node-id="spreadsheet-engine" data-node-label="Spreadsheet &amp; Formula Audit" tabindex="0" role="button" aria-label="Focus Spreadsheet &amp; Formula Audit, OpenXML .xlsx &lt;f&gt;/&lt;v&gt; + CSV Parser, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), Flags Hardcoded Formula Overrides" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="OpenXML .xlsx &lt;f&gt;/&lt;v&gt; + CSV Parser" data-node-tag="Flags Hardcoded Formula Overrides" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>Spreadsheet &amp; Formula Audit · OpenXML .xlsx &lt;f&gt;/&lt;v&gt; + CSV Parser · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · Flags Hardcoded Formula Overrides</title>
+          <rect x="642" y="304" width="242" height="80" rx="6" class="c-mask"/>
+          <rect x="642" y="304" width="242" height="80" rx="6" class="c-frontend" data-animate="node" style="--step:9" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(648 310) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="javascript" data-brand-title="JavaScript" data-brand-status="preset" class="brand-mark" transform="translate(862 310)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" transform="translate(3 3) scale(0.4167)" fill="#F7DF1E"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(826 310)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="763.0" y="343.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Spreadsheet &amp; Formula Audit</text>
+        <text data-detail="context" x="763.0" y="357.0" class="t-muted" font-size="8.2" text-anchor="middle">OpenXML .xlsx &lt;f&gt;/&lt;v&gt; + CSV Parser</text>
+        <text data-detail="fine" x="763.0" y="377" class="t-frontend" font-size="7.0" text-anchor="middle">Flags Hardcoded Formula Overrides</text>
+        </g>
+
+        <g id="node-report-exporter" data-node-id="report-exporter" data-node-label="Redline_Report.pdf Builder" tabindex="0" role="button" aria-label="Focus Redline_Report.pdf Builder, WinAnsi-Safe Multi-Page Audit PDF, User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP), Zero Author PII · Snapshot Embed" aria-pressed="false" data-node-kind="security" data-node-sublabel="WinAnsi-Safe Multi-Page Audit PDF" data-node-tag="Zero Author PII · Snapshot Embed" data-node-context="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>Redline_Report.pdf Builder · WinAnsi-Safe Multi-Page Audit PDF · User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP) · Zero Author PII · Snapshot Embed</title>
+          <rect x="642" y="408" width="242" height="76" rx="6" class="c-mask"/>
+          <rect x="642" y="408" width="242" height="76" rx="6" class="c-security" data-animate="node" style="--step:10" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(648 414) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="javascript" data-brand-title="JavaScript" data-brand-status="preset" class="brand-mark" transform="translate(862 414)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" transform="translate(3 3) scale(0.4167)" fill="#F7DF1E"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(826 414)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="763.0" y="445.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Redline_Report.pdf Builder</text>
+        <text data-detail="context" x="763.0" y="459.0" class="t-muted" font-size="8.2" text-anchor="middle">WinAnsi-Safe Multi-Page Audit PDF</text>
+        <text data-detail="fine" x="763.0" y="477" class="t-security" font-size="7.0" text-anchor="middle">Zero Author PII · Snapshot Embed</text>
+        </g>
+
+        <g id="node-cloudrun-fastapi" data-node-id="cloudrun-fastapi" data-node-label="Cloud Run: boxdiff" tabindex="0" role="button" aria-label="Focus Cloud Run: boxdiff, FastAPI Stateless Broker (No Logs), GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane, --no-access-log · Strict CSP" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="FastAPI Stateless Broker (No Logs)" data-node-tag="--no-access-log · Strict CSP" data-node-context="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane" data-node-brand="Google Cloud" data-node-brand-id="google-cloud" data-node-brand-status="preset" data-node-brand-source="https://cloud.google.com">
+          <title>Cloud Run: boxdiff · FastAPI Stateless Broker (No Logs) · GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane · --no-access-log · Strict CSP</title>
+          <rect x="980" y="96" width="298" height="84" rx="6" class="c-mask"/>
+          <rect x="980" y="96" width="298" height="84" rx="6" class="c-cloud" data-animate="node" style="--step:11" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(986 102) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="google-cloud" data-brand-title="Google Cloud" data-brand-status="preset" class="brand-mark" transform="translate(1256 102)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M12.19 2.38a9.344 9.344 0 0 0-9.234 6.893c.053-.02-.055.013 0 0-3.875 2.551-3.922 8.11-.247 10.941l.006-.007-.007.03a6.717 6.717 0 0 0 4.077 1.356h5.173l.03.03h5.192c6.687.053 9.376-8.605 3.835-12.35a9.365 9.365 0 0 0-2.821-4.552l-.043.043.006-.05A9.344 9.344 0 0 0 12.19 2.38zm-.358 4.146c1.244-.04 2.518.368 3.486 1.15a5.186 5.186 0 0 1 1.862 4.078v.518c3.53-.07 3.53 5.262 0 5.193h-5.193l-.008.009v-.04H6.785a2.59 2.59 0 0 1-1.067-.23h.001a2.597 2.597 0 1 1 3.437-3.437l3.013-3.012A6.747 6.747 0 0 0 8.11 8.24c.018-.01.04-.026.054-.023a5.186 5.186 0 0 1 3.67-1.69z" transform="translate(3 3) scale(0.4167)" fill="#4285F4"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(1220 102)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1129.0" y="137.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Cloud Run: boxdiff</text>
+        <text data-detail="context" x="1129.0" y="151.0" class="t-muted" font-size="8.2" text-anchor="middle">FastAPI Stateless Broker (No Logs)</text>
+        <text data-detail="fine" x="1129.0" y="173" class="t-cloud" font-size="7.0" text-anchor="middle">--no-access-log · Strict CSP</text>
+        </g>
+
+        <g id="node-hmac-privacy-guard" data-node-id="hmac-privacy-guard" data-node-label="Domain-Separated HMAC Proof" tabindex="0" role="button" aria-label="Focus Domain-Separated HMAC Proof, HMAC_SHA256(pepper, boxdiff:v1:id), GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane, 1h Signed session_proof · No DB Token" aria-pressed="false" data-node-kind="security" data-node-sublabel="HMAC_SHA256(pepper, boxdiff:v1:id)" data-node-tag="1h Signed session_proof · No DB Token" data-node-context="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane" data-node-brand="Python" data-node-brand-id="python" data-node-brand-status="preset" data-node-brand-source="https://www.python.org/community/logos/">
+          <title>Domain-Separated HMAC Proof · HMAC_SHA256(pepper, boxdiff:v1:id) · GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane · 1h Signed session_proof · No DB Token</title>
+          <rect x="980" y="212" width="298" height="78" rx="6" class="c-mask"/>
+          <rect x="980" y="212" width="298" height="78" rx="6" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(986 218) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="python" data-brand-title="Python" data-brand-status="preset" class="brand-mark" transform="translate(1256 218)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z" transform="translate(3 3) scale(0.4167)" fill="#3776AB"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(1220 218)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1129.0" y="250.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Domain-Separated HMAC Proof</text>
+        <text data-detail="context" x="1129.0" y="264.0" class="t-muted" font-size="8.2" text-anchor="middle">HMAC_SHA256(pepper, boxdiff:v1:id)</text>
+        <text data-detail="fine" x="1129.0" y="283" class="t-security" font-size="7.0" text-anchor="middle">1h Signed session_proof · No DB Token</text>
+        </g>
+
+        <g id="node-firestore-quotas" data-node-id="firestore-quotas" data-node-label="Firestore: boxdiff_entitlements" tabindex="0" role="button" aria-label="Focus Firestore: boxdiff_entitlements, { plan, period, diffs_used }, GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane, 5 Free Diffs/Mo · Transactional" aria-pressed="false" data-node-kind="database" data-node-sublabel="{ plan, period, diffs_used }" data-node-tag="5 Free Diffs/Mo · Transactional" data-node-context="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane" data-node-brand="Firebase" data-node-brand-id="firebase" data-node-brand-status="preset" data-node-brand-source="https://firebase.google.com/brand-guidelines">
+          <title>Firestore: boxdiff_entitlements · { plan, period, diffs_used } · GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane · 5 Free Diffs/Mo · Transactional</title>
+          <rect x="980" y="322" width="298" height="78" rx="6" class="c-mask"/>
+          <rect x="980" y="322" width="298" height="78" rx="6" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(986 328) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="firebase" data-brand-title="Firebase" data-brand-status="preset" class="brand-mark" transform="translate(1256 328)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M19.455 8.369c-.538-.748-1.778-2.285-3.681-4.569-.826-.991-1.535-1.832-1.884-2.245a146 146 0 0 0-.488-.576l-.207-.245-.113-.133-.022-.032-.01-.005L12.57 0l-.609.488c-1.555 1.246-2.828 2.851-3.681 4.64-.523 1.064-.864 2.105-1.043 3.176-.047.241-.088.489-.121.738-.209-.017-.421-.028-.632-.033-.018-.001-.035-.002-.059-.003a7.46 7.46 0 0 0-2.28.274l-.317.089-.163.286c-.765 1.342-1.198 2.869-1.252 4.416-.07 2.01.477 3.954 1.583 5.625 1.082 1.633 2.61 2.882 4.42 3.611l.236.095.071.025.003-.001a9.59 9.59 0 0 0 2.941.568q.171.006.342.006c1.273 0 2.513-.249 3.69-.742l.008.004.313-.145a9.63 9.63 0 0 0 3.927-3.335c1.01-1.49 1.577-3.234 1.641-5.042.075-2.161-.643-4.304-2.133-6.371m-7.083 6.695c.328 1.244.264 2.44-.191 3.558-1.135-1.12-1.967-2.352-2.475-3.665-.543-1.404-.87-2.74-.974-3.975.48.157.922.366 1.315.622 1.132.737 1.914 1.902 2.325 3.461zm.207 6.022c.482.368.99.712 1.513 1.028-.771.21-1.565.302-2.369.273a8 8 0 0 1-.373-.022c.458-.394.869-.823 1.228-1.279zm1.347-6.431c-.516-1.957-1.527-3.437-3.002-4.398-.647-.421-1.385-.741-2.194-.95.011-.134.026-.268.043-.4.014-.113.03-.216.046-.313.133-.689.332-1.37.589-2.025.099-.25.206-.499.321-.74l.004-.008c.177-.358.376-.719.61-1.105l.092-.152-.003-.001c.544-.851 1.197-1.627 1.942-2.311l.288.341c.672.796 1.304 1.548 1.878 2.237 1.291 1.549 2.966 3.583 3.612 4.48 1.277 1.771 1.893 3.579 1.83 5.375-.049 1.395-.461 2.755-1.195 3.933-.694 1.116-1.661 2.05-2.8 2.708-.636-.318-1.559-.839-2.539-1.599.79-1.575.952-3.28.479-5.072zm-2.575 5.397c-.725.939-1.587 1.55-2.09 1.856-.081-.029-.163-.06-.243-.093l-.065-.026c-1.49-.616-2.747-1.656-3.635-3.01-.907-1.384-1.356-2.993-1.298-4.653.041-1.19.338-2.327.882-3.379.316-.07.638-.114.96-.131l.084-.002c.162-.003.324-.003.478 0 .227.011.454.035.677.07.073 1.513.445 3.145 1.105 4.852.637 1.644 1.694 3.162 3.144 4.515z" transform="translate(3 3) scale(0.4167)" fill="#DD2C00"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(1220 328)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">1 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1129.0" y="360.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Firestore: boxdiff_entitlements</text>
+        <text data-detail="context" x="1129.0" y="374.0" class="t-muted" font-size="8.2" text-anchor="middle">{ plan, period, diffs_used }</text>
+        <text data-detail="fine" x="1129.0" y="393" class="t-database" font-size="7.0" text-anchor="middle">5 Free Diffs/Mo · Transactional</text>
+        </g>
+
+        <g id="node-secret-manager" data-node-id="secret-manager" data-node-label="Secret Manager &amp; CI Archify" tabindex="0" role="button" aria-label="Focus Secret Manager &amp; CI Archify, BOXDIFF_CLIENT_ID/SECRET · PEPPER, GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane, Owner Deploy Gate · Cloud Archify" aria-pressed="false" data-node-kind="security" data-node-sublabel="BOXDIFF_CLIENT_ID/SECRET · PEPPER" data-node-tag="Owner Deploy Gate · Cloud Archify" data-node-context="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane" data-node-brand="Google Cloud" data-node-brand-id="google-cloud" data-node-brand-status="preset" data-node-brand-source="https://cloud.google.com">
+          <title>Secret Manager &amp; CI Archify · BOXDIFF_CLIENT_ID/SECRET · PEPPER · GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane · Owner Deploy Gate · Cloud Archify</title>
+          <rect x="980" y="428" width="298" height="66" rx="6" class="c-mask"/>
+          <rect x="980" y="428" width="298" height="66" rx="6" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(986 434) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="google-cloud" data-brand-title="Google Cloud" data-brand-status="preset" class="brand-mark" transform="translate(1256 434)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M12.19 2.38a9.344 9.344 0 0 0-9.234 6.893c.053-.02-.055.013 0 0-3.875 2.551-3.922 8.11-.247 10.941l.006-.007-.007.03a6.717 6.717 0 0 0 4.077 1.356h5.173l.03.03h5.192c6.687.053 9.376-8.605 3.835-12.35a9.365 9.365 0 0 0-2.821-4.552l-.043.043.006-.05A9.344 9.344 0 0 0 12.19 2.38zm-.358 4.146c1.244-.04 2.518.368 3.486 1.15a5.186 5.186 0 0 1 1.862 4.078v.518c3.53-.07 3.53 5.262 0 5.193h-5.193l-.008.009v-.04H6.785a2.59 2.59 0 0 1-1.067-.23h.001a2.597 2.597 0 1 1 3.437-3.437l3.013-3.012A6.747 6.747 0 0 0 8.11 8.24c.018-.01.04-.026.054-.023a5.186 5.186 0 0 1 3.67-1.69z" transform="translate(3 3) scale(0.4167)" fill="#4285F4"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <g class="source-evidence-beacon" transform="translate(1220 434)">
+            <rect width="32" height="14" rx="3"/>
+            <text x="16" y="9.5">2 SRC</text>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1129.0" y="460.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Secret Manager &amp; CI Archify</text>
+        <text data-detail="context" x="1129.0" y="474.0" class="t-muted" font-size="8.2" text-anchor="middle">BOXDIFF_CLIENT_ID/SECRET · PEPPER</text>
+        <text data-detail="fine" x="1129.0" y="487" class="t-security" font-size="7.0" text-anchor="middle">Owner Deploy Gate · Cloud Archify</text>
+        </g>
+        <g data-detail="context" data-edge-from="box-web-ui" data-edge-to="spa-orchestrator" data-edge-label="GET /launch (?auth_code, file_id)" data-edge-key="0" data-edge-id="box-launch-to-spa">
+          <rect x="202.4" y="118.0" width="167.1" height="14" rx="3" class="c-mask"/>
+          <text x="286.0" y="128.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">GET /launch (?auth_code, file_id)</text>
+        </g>
+        <g data-detail="context" data-edge-from="spa-orchestrator" data-edge-to="cloudrun-fastapi" data-edge-label="POST /api/oauth/exchange &amp; /entitlement/consume (Zero File Bytes)" data-edge-key="1" data-edge-id="spa-to-cloudrun-exchange">
+          <rect x="641.2" y="46.0" width="317.5" height="14" rx="3" class="c-mask"/>
+          <text x="800.0" y="56.0" class="t-edge-security" font-size="7.8" text-anchor="middle">POST /api/oauth/exchange &amp; /entitlement/consume (Zero File Bytes)</text>
+        </g>
+        <g data-detail="context" data-edge-from="cloudrun-fastapi" data-edge-to="box-oauth-api" data-edge-label="Stateless Code -&gt; Token + Numeric Box ID" data-edge-key="2" data-edge-id="cloudrun-to-box-oauth">
+          <rect x="454.0" y="172.0" width="200.0" height="14" rx="3" class="c-mask"/>
+          <text x="554.0" y="182.0" class="t-edge-dashed" font-size="7.8" text-anchor="middle">Stateless Code -&gt; Token + Numeric Box ID</text>
+        </g>
+        <g data-detail="context" data-edge-from="spa-orchestrator" data-edge-to="cors-box-client" data-edge-label="Timeline + Pair" data-edge-key="3" data-edge-id="spa-to-cors-client">
+          <rect x="429.8" y="196.0" width="82.5" height="14" rx="3" class="c-mask"/>
+          <text x="471.0" y="206.0" class="t-edge-default" font-size="7.8" text-anchor="middle">Timeline + Pair</text>
+        </g>
+        <g data-detail="context" data-edge-from="cors-box-client" data-edge-to="box-versions-api" data-edge-label="CORS 302 Stream (v1..vN)" data-edge-key="4" data-edge-id="cors-to-box-versions">
+          <rect x="267.6" y="251.0" width="124.8" height="14" rx="3" class="c-mask"/>
+          <text x="330.0" y="261.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">CORS 302 Stream (v1..vN)</text>
+        </g>
+        <g data-detail="context" data-edge-from="vendored-wasm" data-edge-to="spreadsheet-engine" data-edge-label="pdf.js / JSZip / pdf-lib" data-edge-key="5" data-edge-id="wasm-to-engines">
+          <rect x="540.6" y="389.0" width="124.8" height="14" rx="3" class="c-mask"/>
+          <text x="603.0" y="399.0" class="t-edge-dashed" font-size="7.8" text-anchor="middle">pdf.js / JSZip / pdf-lib</text>
+        </g>
+        <g data-detail="context" data-edge-from="spa-orchestrator" data-edge-to="text-redline-engine" data-edge-label=".pdf / .docx / .txt" data-edge-key="6" data-edge-id="spa-to-text-diff">
+          <rect x="552.4" y="123.0" width="101.3" height="14" rx="3" class="c-mask"/>
+          <text x="603.0" y="133.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">.pdf / .docx / .txt</text>
+        </g>
+        <g data-detail="context" data-edge-from="cors-box-client" data-edge-to="visual-diff-engine" data-edge-label="PDF / Image Uint8Array" data-edge-key="7" data-edge-id="cors-to-visual-diff">
+          <rect x="545.3" y="237.0" width="115.4" height="14" rx="3" class="c-mask"/>
+          <text x="603.0" y="247.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">PDF / Image Uint8Array</text>
+        </g>
+        <g data-detail="context" data-edge-from="cors-box-client" data-edge-to="spreadsheet-engine" data-edge-label=".xlsx / .csv Bytes" data-edge-key="8" data-edge-id="cors-to-sheet-diff">
+          <rect x="554.7" y="269.0" width="96.6" height="14" rx="3" class="c-mask"/>
+          <text x="603.0" y="279.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">.xlsx / .csv Bytes</text>
+        </g>
+        <g data-detail="context" data-edge-from="spreadsheet-engine" data-edge-to="report-exporter" data-edge-label="Redline + Formula Deltas" data-edge-key="9" data-edge-id="engines-to-exporter">
+          <rect x="700.6" y="389.0" width="124.8" height="14" rx="3" class="c-mask"/>
+          <text x="763.0" y="399.0" class="t-edge-default" font-size="7.8" text-anchor="middle">Redline + Formula Deltas</text>
+        </g>
+        <g data-detail="context" data-edge-from="report-exporter" data-edge-to="box-upload-api" data-edge-label="1-Click Upload Redline_Report.pdf to Box" data-edge-key="10" data-edge-id="exporter-to-box-upload">
+          <rect x="359.5" y="486.0" width="200.0" height="14" rx="3" class="c-mask"/>
+          <text x="459.5" y="496.0" class="t-edge-emphasis" font-size="7.8" text-anchor="middle">1-Click Upload Redline_Report.pdf to Box</text>
+        </g>
+        <g data-detail="context" data-edge-from="cloudrun-fastapi" data-edge-to="hmac-privacy-guard" data-edge-label="Verify Proof" data-edge-key="11" data-edge-id="cloudrun-to-hmac">
+          <rect x="1094.8" y="189.0" width="68.4" height="14" rx="3" class="c-mask"/>
+          <text x="1129.0" y="199.0" class="t-edge-security" font-size="7.8" text-anchor="middle">Verify Proof</text>
+        </g>
+        <g data-detail="context" data-edge-from="hmac-privacy-guard" data-edge-to="firestore-quotas" data-edge-label="Atomic Quota Txn" data-edge-key="12" data-edge-id="hmac-to-firestore">
+          <rect x="1085.4" y="299.0" width="87.2" height="14" rx="3" class="c-mask"/>
+          <text x="1129.0" y="309.0" class="t-edge-dashed" font-size="7.8" text-anchor="middle">Atomic Quota Txn</text>
+        </g>
+        <g data-detail="context" data-edge-from="secret-manager" data-edge-to="firestore-quotas" data-edge-label="Injected Secrets" data-edge-key="13" data-edge-id="secrets-to-cloudrun">
+          <rect x="1085.4" y="407.0" width="87.2" height="14" rx="3" class="c-mask"/>
+          <text x="1129.0" y="417.0" class="t-edge-security" font-size="7.8" text-anchor="middle">Injected Secrets</text>
+        </g>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Box.com Enterprise Cloud (User&#x27;s Content Governance)">
+          <rect data-graph-role="structural-frame-label-mask" x="38" y="77" width="236.0" height="15" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="42" y="88" class="t-cloud" font-size="8.5" font-weight="600">Box.com Enterprise Cloud (User&#x27;s Content Governance)</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="security-group" data-composition-frame-label="User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)">
+          <rect data-graph-role="structural-frame-label-mask" x="342" y="77" width="404.2" height="15" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="346" y="88" class="t-security" font-size="8.5" font-weight="600">User Browser — 100% In-RAM Diff &amp; Wasm Sandbox (Zero File Bytes Sent to GCP)</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane">
+          <rect data-graph-role="structural-frame-label-mask" x="970" y="77" width="318.0" height="15" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="974" y="88" class="t-cloud" font-size="8.5" font-weight="600">GCP safeshare-box (us-central1) — Stateless OAuth &amp; Zero-PII Quota Plane</text>
+        </g>
+        <g data-legend="" data-legend-bridge="">
+          <text x="36" y="562" class="t-primary" font-size="11.5" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Browser Diff Engine" data-legend-x="36" data-legend-baseline="582" data-legend-width="157">
+            <rect x="36" y="573" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
+            <text x="60" y="582" class="t-muted" font-size="9.5" font-weight="500">Browser Diff Engine</text>
+          </g>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Vault / Quotas" data-legend-x="215" data-legend-baseline="582" data-legend-width="126">
+            <rect x="215" y="573" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="239" y="582" class="t-muted" font-size="9.5" font-weight="500">Vault / Quotas</text>
+          </g>
+          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud Run" data-legend-x="363" data-legend-baseline="582" data-legend-width="95">
+            <rect x="363" y="573" width="16" height="10" rx="2.5" class="c-cloud" stroke-width="1"/>
+            <text x="387" y="582" class="t-muted" font-size="9.5" font-weight="500">Cloud Run</text>
+          </g>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Zero-PII / Security" data-legend-x="480" data-legend-baseline="582" data-legend-width="157">
+            <rect x="480" y="573" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="504" y="582" class="t-muted" font-size="9.5" font-weight="500">Zero-PII / Security</text>
+          </g>
+          <g data-legend-semantic-kind="messagebus" data-legend-kind="messagebus" data-legend-label="CI / Vendored Wasm" data-legend-x="659" data-legend-baseline="582" data-legend-width="151">
+            <rect x="659" y="573" width="16" height="10" rx="2.5" class="c-messagebus" stroke-width="1"/>
+            <text x="683" y="582" class="t-muted" font-size="9.5" font-weight="500">CI / Vendored Wasm</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="Box Platform" data-legend-x="832" data-legend-baseline="582" data-legend-width="114">
+            <rect x="832" y="573" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="856" y="582" class="t-muted" font-size="9.5" font-weight="500">Box Platform</text>
+          </g>
+        </g>
+      </svg>
