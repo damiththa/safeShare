@@ -1,8 +1,8 @@
-# SafeShare for Box — Archify System & Process Architecture
+# BoxDiff for Box — Archify System & Process Architecture
 
-This document renders the live, repository-backed **Archify v3.0 Process & System Architecture Diagram** for **SafeShare for Box** (`https://github.com/damiththa/safeShare`).
+This document renders the live, repository-backed **Archify v3.0 Process & System Architecture Diagram** for **BoxDiff for Box** (`boxdiff` branch of `https://github.com/damiththa/safeShare`).
 
-[![SafeShare Archify Process & System Architecture](./architecture/safeshare-architecture.svg)](./architecture/safeshare-architecture.html)
+[![BoxDiff Archify Process & System Architecture](./architecture/boxdiff-architecture.svg)](./architecture/boxdiff-architecture.html)
 
 ---
 
@@ -10,35 +10,34 @@ This document renders the live, repository-backed **Archify v3.0 Process & Syste
 
 | Artifact | Purpose |
 | :--- | :--- |
-| **[`docs/architecture/safeshare.architecture.json`](./architecture/safeshare.architecture.json)** | Authoritative **Archify v3.0** specification (`schema_version: 1`, `quality_profile: "showcase"`, `visual_preset: "blueprint"`) with 4 guided process views, 3 trust boundaries, and verified repository file & line-range citations. |
-| **[`docs/architecture/safeshare-architecture.svg`](./architecture/safeshare-architecture.svg)** | Standalone SVG rendered in the Archify `blueprint` showcase theme so **GitHub Markdown renders it natively inline** above and in [`README.md`](../README.md). |
-| **[`docs/architecture/safeshare-architecture.html`](./architecture/safeshare-architecture.html)** | Interactive **Archify v3.0 HTML Viewer** (compiled automatically in GitHub Actions via [`tt-a1i/archify`](https://github.com/tt-a1i/archify) with pan/zoom, guided process traces, and clickable GitHub line beacons). |
-| **[`.github/workflows/archify.yml`](../.github/workflows/archify.yml)** | Cloud GitHub Actions workflow (`ubuntu-latest`, Node.js 20 + Python 3.12) that verifies source line citations, compiles both `.html` and `.svg`, and keeps repository diagrams synchronized with zero local compute. |
+| **[`docs/architecture/boxdiff.architecture.json`](./architecture/boxdiff.architecture.json)** | Authoritative **Archify v3.0** specification (`schema_version: 1`, `quality_profile: "showcase"`, `visual_preset: "blueprint"`) with 3 trust boundaries, 15 components, and verified repository file & line-range citations. |
+| **[`docs/architecture/boxdiff-architecture.svg`](./architecture/boxdiff-architecture.svg)** | Standalone SVG rendered in the Archify `blueprint` showcase theme so **GitHub Markdown renders it natively inline** above and in [`README.md`](../README.md). |
+| **[`docs/architecture/boxdiff-architecture.html`](./architecture/boxdiff-architecture.html)** | Interactive **Archify v3.0 HTML Viewer** (compiled automatically in GitHub Actions via [`tt-a1i/archify`](https://github.com/tt-a1i/archify) with pan/zoom, component focus, and clickable GitHub line beacons). |
+| **[`.github/workflows/archify.yml`](../.github/workflows/archify.yml)** | Cloud GitHub Actions workflow (`ubuntu-latest`, Node.js 20 + Python 3.12) that verifies source line citations, compiles both `.html` and `.svg`, and commits updated diagrams automatically. |
 
 ---
 
-## ⚙️ End-to-End Process Walkthroughs
+## ⚙️ End-to-End Process Walkthrough
 
-### Process 1: File Integration — `Scrub & Redact with SafeShare`
-1. **Context Launch (`GET /launch`):** User right-clicks `.pdf`, `.jpg`, `.jpeg`, `.png`, `.webp`, or `.docx` in Box Web (**Integrations → Scrub & Redact with SafeShare**). Box invokes `https://safeshare-902354967061.us-central1.run.app/launch` with `#auth_code#` and `#file_id#` scoped to the **parent folder** of the selected file.
-2. **Stateless Token Exchange (`POST /api/oauth/exchange`):** Browser immediately scrubs `auth_code` from the URL bar (`history.replaceState`) and exchanges it via Cloud Run. Cloud Run calls `POST https://api.box.com/oauth2/token`, queries strictly `GET /2.0/users/me?fields=id` (numeric ID only—never name or email), discards `refresh_token`, computes `user_hash = HMAC_SHA256(HMAC_PEPPER, box_user_id)`, issues a signed 1-hour stateless `session_proof`, and returns the short-lived `access_token` exclusively to volatile browser RAM.
-3. **CORS 302 Stream into Browser RAM:** [`BoxBrowserClient.downloadFileBytes`](../static/js/box_client.js) calls `GET https://api.box.com/2.0/files/:id/content?access_token=...` with zero custom headers (simple CORS GET), cleanly following Box's `302 Found` redirect to `dl.boxcloud.com` (with `202 Retry-After` polling) directly into a browser `Uint8Array`.
-4. **Privacy X-Ray & Deterministic Auto-PII Scan:**
-   - [`runMetadataXray`](../static/js/metadata_xray.js) inspects magic bytes and flags EXIF GPS coordinates, camera/lens serial numbers, hidden EXIF preview thumbnails, PDF `/Info` + Adobe XMP packets, and `.docx` `core.xml` / `app.xml` / `comments.xml` / Tracked Changes.
-   - [`detectPiiInTextItems`](../static/js/pii_detector.js) extracts PDF text spans with normalized coordinates and validates SSNs, Luhn credit cards, US ABA routing numbers (3-7-1 checksum), emails, and phone numbers—while [`inspectFilenameForPii`](../static/js/pii_detector.js) warns if the filename itself leaks PII and offers a 1-click anonymizer.
-5. **True Byte-Destructive Export (`_SafeCopy` as `v1`):**
-   - [`RedactorWorkspace.exportSanitizedBytes`](../static/js/redactor_engine.js) rasterizes redacted PDF pages at **250 DPI** onto an offscreen `<canvas>`, burns `#000000` directly into the pixel bitmap, embeds clean JPEGs into a brand-new zero-metadata `PDFLib.PDFDocument` (stripping `/Annots` on unredacted pages), re-encodes images from raw RGBA pixels, or scrubs `.docx` XML archives via `JSZip`.
-   - [`uploadNewSafeCopy`](../static/js/box_client.js) uploads the output (`attributes` JSON part strictly before `file` binary part in `FormData`, with automatic `(2)`..`(12)` suffixing on `409 Conflict`) as a **brand-new `v1` file** so collaborators can never recover unredacted `v1` history.
-
-### Process 2: Folder Integration — `Audit Links & Guests (SafeShare)` (`ShareRadar`)
-1. **Zero-Byte Recursive Folder Crawl:** [`ShareRadarScanner.scanFolderTree`](../static/js/shareradar_engine.js) traverses up to 60 folders via `GET /2.0/folders/:id/items` without downloading a single user document.
-2. **9 Sharing & Collaborator Telemetry Metrics:**
-   - `preview_count` (**Total Opens**), `download_count` (**Total Downloads**), `can_download` / `can_edit` exfiltration flags, `effective_access` scope, `is_password_enabled`, `unshared_at` countdown vs `Never Expires`, file dormancy days, external-domain collaborator role + tenure days (`GET /:type/:id/collaborations`), plus **`+Δ` new opens/downloads** and **tracked open duration** diffed against `_safeshare_radar_snapshot.json` stored inside **the user's own Box folder** (zero GCP storage).
-3. **1-Click Bulk Remediation & Audit CSV:** Executes `PUT /2.0/files|folders/:id` (`shared_link: null`, `can_download: false`, or 30-day `unshared_at`) and `DELETE /2.0/collaborations/:id`, and exports `ShareRadar_Audit_YYYY-MM-DD.csv` + updated snapshot JSON directly into Box.
+1. **Box Context Launch (`GET /launch`):**
+   - User right-clicks `.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.md`, `.json`, `.png`, `.jpg`, `.jpeg`, or `.webp` inside Box Web (**Integrations → Compare with BoxDiff**).
+   - Box opens `https://boxdiff-902354967061.us-central1.run.app/launch` with `?auth_code=#auth_code#&file_id=#file_id#` scoped to the **parent folder** of the selected file.
+2. **Stateless OAuth Exchange & Domain-Separated Quota Proof (`POST /api/oauth/exchange`):**
+   - Browser immediately scrubs `auth_code` from the URL bar (`history.replaceState`) and exchanges it via Cloud Run (`boxdiff`).
+   - Cloud Run exchanges `auth_code` at `POST https://api.box.com/oauth2/token`, fetches strictly numeric `id` from `GET /2.0/users/me?fields=id`, discards `refresh_token`, computes `HMAC_SHA256(HMAC_PEPPER, "boxdiff:v1:box_user:" + id)`, checks `boxdiff_entitlements/{user_hash}` in Firestore (`5` free comparisons/month), and returns the short-lived `access_token` + stateless 1-hour `session_proof` exclusively to volatile browser RAM.
+3. **Version Timeline Discovery + Sibling File Fallback (`BoxBrowserClient`):**
+   - Browser queries `GET /2.0/files/:id` (active `vN`) and `GET /2.0/files/:id/versions` (prior `v1..v(N-1)`), building an ordered chronological timeline, and simultaneously inspects `GET /2.0/folders/:parentId/items` for compatible sibling files.
+   - If `>= 2` versions exist, `BoxDiff` auto-pairs **`v(N-1)` (Baseline)** vs **`vN` (Target)** and runs the comparison immediately. If only `v1` exists, `BoxDiff` pre-selects a compatible sibling file in the folder as Baseline so `v1`-only drafts can be redlined immediately without wasting monthly quota prematurely.
+4. **100% In-Browser Multi-Modal Diff Execution:**
+   - **Text & Clause Redline (`static/js/text_diff.js`):** Extracts reading-order lines from `.pdf` (`pdf.js`), `.docx` (`JSZip` `word/document.xml` paragraphs + tables), or text/JSON, runs Patience-anchored LCS + word-token diffing, and surfaces clickable **`$ Amount`**, **`% Rate`**, **`Date / Term`**, and **`Legal Clause`** shift cards (including cross-format `.docx` vs `.pdf` redlining).
+   - **Visual Curtain & Pixel Diff (`static/js/visual_diff.js`):** Rasterizes PDF pages or images onto normalized canvases, computes perceptual crimson pixel-delta overlays + multi-page `% Δ` strip, and drives a smooth 60fps draggable **Split Curtain Slider**.
+   - **Zero-CVE Spreadsheet & Formula Audit (`static/js/spreadsheet_diff.js`):** Parses `.xlsx` OpenXML archives (`workbook.xml`, `sharedStrings.xml`, `sheet*.xml`) and RFC-4180 `.csv` files directly in browser RAM, auditing both `<f>` formulas and `<v>` values and alerting when an Excel `=FORMULA` is overwritten with a hardcoded literal.
+5. **1-Click `Redline_Report.pdf` Export Back to Box (`static/js/report_exporter.js`):**
+   - Builds a WinAnsi-safe, zero-author-metadata multi-page verification PDF via `pdf-lib` (embedding redline hunks, formula changes, and visual pixel-diff snapshots) and uploads it directly to `POST https://upload.box.com/api/2.0/files/content` with optional 1-click Box Shared Link copy.
 
 ---
 
-## 🔄 Mandatory Architectural & Deployment Rules
+## 🔄 Mandatory Operational Rules
 
-> 1. **Explicit Deployment Gate:** Always check with the repository owner and get confirmation **before** running `gcloud run deploy`.
-> 2. **Archify Sync Rule:** Whenever routes, browser engines, storage schemas, or Box integration flows change, update [`docs/architecture/safeshare.architecture.json`](./architecture/safeshare.architecture.json) so the GitHub Actions workflow ([`.github/workflows/archify.yml`](../.github/workflows/archify.yml)) re-verifies line ranges and regenerates `.svg` and `.html`.
+> 1. **Explicit Deployment Gate:** Always check with the repository owner and obtain confirmation **before** running `gcloud run deploy`.
+> 2. **Archify Sync Rule:** Whenever routes, browser engines, storage schemas, or Box integration flows change, update [`docs/architecture/boxdiff.architecture.json`](./architecture/boxdiff.architecture.json) so GitHub Actions ([`.github/workflows/archify.yml`](../.github/workflows/archify.yml)) re-verifies line citations and recompiles `.svg` and `.html`.

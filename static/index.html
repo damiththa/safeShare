@@ -3,233 +3,319 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeShare for Box — Scrub, Redact &amp; ShareRadar</title>
+  <title>BoxDiff — Zero-PII Document, Visual &amp; Spreadsheet Diff for Box</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
-  <script src="/static/vendor/pdf-lib.min.js"></script>
-  <script src="/static/vendor/pdf.min.js"></script>
-  <script src="/static/vendor/exifr.full.umd.js"></script>
-  <script src="/static/vendor/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Top Modal Bar -->
   <header class="topbar">
-    <div class="brand-row">
-      <div class="brand-icon">🛡️</div>
+    <div class="brand-cluster">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+          <rect x="2" y="4" width="13" height="24" rx="3" fill="#0ea5e9" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.8"/>
+          <rect x="17" y="4" width="13" height="24" rx="3" fill="#10b981" fill-opacity="0.22" stroke="#34d399" stroke-width="1.8"/>
+          <path d="M16 2v28" stroke="#f43f5e" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 11h5M6 16h5M21 11h5M21 21h5" stroke="#f8fafc" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div>
-        <div class="brand-title">
-          <span>SafeShare for Box</span>
-          <span class="badge badge-safe">100% Browser Wasm • 0 Bytes Sent to GCP</span>
+        <div class="brand-title-row">
+          <span class="brand-name">BoxDiff</span>
+          <span class="badge badge-safe">100% Browser-Only · Zero-PII</span>
         </div>
-        <div class="brand-sub" id="active-context-label">Zero-PII Metadata Scrubber, Byte-Destructive Redactor &amp; ShareRadar</div>
+        <div class="brand-sub">Version History &amp; Sibling File Redlines for Box</div>
       </div>
     </div>
 
-    <div class="nav-tabs hidden" id="main-tabs">
-      <button class="tab-btn active" id="btn-tab-scrub">📄 File: Scrub &amp; Redact</button>
-      <button class="tab-btn" id="btn-tab-radar">📡 Folder: ShareRadar Audit</button>
-      <button class="tab-btn" id="btn-tab-picker">📁 Browse Box</button>
-    </div>
+    <nav id="workspaceTabs" class="nav-tabs hidden" aria-label="Workspace Views">
+      <button id="tabCompare" type="button" class="nav-tab active">Compare &amp; Redline</button>
+      <button id="tabBrowse" type="button" class="nav-tab">Browse Box Folder</button>
+    </nav>
 
-    <div class="header-actions">
-      <span class="badge badge-neutral hidden" id="quota-badge">Free Tier</span>
-      <button class="btn btn-secondary hidden" id="btn-return-box">✕ Close &amp; Refresh Box</button>
+    <div class="topbar-right">
+      <span id="quotaBadge" class="pill pill-quota hidden">Free: 5/5 diffs left</span>
+      <span id="userBadge" class="pill pill-user hidden">Box Connected</span>
+      <a id="btnReturnBox" href="#" class="btn btn-ghost btn-sm hidden">Return to Box</a>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Toast Banner -->
-    <div id="toast-banner" class="toast toast-info hidden">
-      <span id="toast-text"></span>
-      <button class="btn btn-secondary" id="btn-toast-close">Dismiss</button>
+  <main class="app-shell">
+    <div id="statusBanner" class="status-banner hidden" role="status">
+      <span id="statusBannerText"></span>
+      <button id="statusBannerClose" type="button" class="banner-close" aria-label="Dismiss">&times;</button>
     </div>
 
-    <!-- ================================================================= -->
-    <!-- SCREEN 0: AUTHENTICATING / STANDALONE CONNECT                     -->
-    <!-- ================================================================= -->
-    <section id="screen-connect" class="card hero-connect">
-      <div style="font-size: 36px;">🛡️</div>
-      <h2 id="connect-heading">Connect SafeShare to Your Box Account</h2>
-      <p class="muted" id="connect-subtext">
-        Inspect &amp; strip hidden EXIF/GPS/Author leaks, burn permanent byte-level redactions into clean
-        <code>_SafeCopy</code> files, and audit exposed Shared Links &amp; external guests across your folders—all
-        100% inside your browser memory.
+    <!-- Standalone OAuth Connect View -->
+    <section id="connectScreen" class="hero-card">
+      <div class="hero-badge">Zero-Server-Storage Box Integration</div>
+      <h1>Instant Redlines, Visual Curtain Diffs &amp; Formula Audits</h1>
+      <p class="hero-lead">
+        Compare <strong>Box Version History (<code>v1..vN</code>)</strong> or <strong>any two files</strong> across
+        <code>.pdf</code>, <code>.docx</code>, <code>.xlsx</code>, <code>.csv</code>, <code>.txt</code>, <code>.md</code>,
+        <code>.json</code>, and images—100% inside your browser RAM with zero bytes ever sent to external servers.
       </p>
-      <div style="margin-top: 18px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-primary" id="btn-oauth-connect">Authorize with Box OAuth 2.0</button>
-        <a href="/privacy" target="_blank" rel="noopener" class="btn btn-secondary">Zero-PII Privacy Policy</a>
+      <div class="feature-grid">
+        <div class="feature-tile">
+          <h3>Contract &amp; Text Redline</h3>
+          <p>Word-level additions &amp; deletions plus automatic <strong>$ Amount</strong>, <strong>% Rate</strong>, <strong>Date</strong>, and <strong>Legal Clause</strong> callouts—even across <code>.docx</code> vs <code>.pdf</code>.</p>
+        </div>
+        <div class="feature-tile">
+          <h3>Visual Curtain &amp; Pixel Diff</h3>
+          <p>Interactive split-screen curtain slider and crimson pixel-delta overlay for scanned PDFs, engineering drawings, and design assets.</p>
+        </div>
+        <div class="feature-tile">
+          <h3>Excel Formula &amp; Cell Audit</h3>
+          <p>Multi-sheet OpenXML <code>.xlsx</code> and <code>.csv</code> inspection that catches altered <code>=SUM()</code> formulas and hardcoded overrides.</p>
+        </div>
       </div>
+      <div class="hero-actions">
+        <button id="btnConnectBox" type="button" class="btn btn-primary btn-lg">Connect with Box</button>
+      </div>
+      <p class="legal-links">
+        <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> &middot;
+        <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
+      </p>
     </section>
 
-    <!-- ================================================================= -->
-    <!-- SCREEN 1: FILE SCRUB & REDACT                                     -->
-    <!-- ================================================================= -->
-    <section id="screen-scrub" class="hidden">
-      <div id="scrub-empty-prompt" class="card hero-connect hidden">
-        <h2>Select a File from Box to Scrub or Redact</h2>
-        <p class="muted">Right-click any PDF, Image, or Word file inside Box Web, or choose a file using Browse Box.</p>
-        <button class="btn btn-primary" id="btn-open-picker-from-scrub" style="margin-top: 12px;">📁 Browse Box Files</button>
-      </div>
-
-      <div id="scrub-workspace" class="scrub-grid hidden">
-        <!-- Left Sidebar: Privacy X-Ray + Auto-PII Checkboxes -->
-        <div class="panel-stack">
-          <div class="xray-box" id="xray-card">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <strong id="xray-title">Scanning File Headers...</strong>
-              <span class="badge badge-safe">Auto-Stripped on Save</span>
-            </div>
-            <ul class="xray-list" id="xray-list"></ul>
-          </div>
-
-          <div class="card">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <strong>Auto-Detected Sensitive PII</strong>
-              <span class="badge badge-neutral" id="pii-count-badge">0 found</span>
-            </div>
-            <p class="muted" style="margin: 4px 0 0; font-size: 12px;">
-              Toggle items below, or <strong>click &amp; drag directly on the document preview</strong> to draw custom black-out boxes over faces, names, or signatures.
-            </p>
-            <div class="pii-list" id="pii-checklist"></div>
-          </div>
-
-          <div class="card">
-            <strong>Output Hardening Options</strong>
-            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
-              <input type="checkbox" id="chk-flatten-all" />
-              <span>Maximum Paranoia: Flatten <em>every</em> PDF page to pixels (even pages without redactions)</span>
-            </label>
-          </div>
+    <!-- Main Comparison Workspace -->
+    <section id="compareWorkspace" class="workspace-section hidden">
+      <div class="source-selector-card">
+        <div class="selector-col selector-left">
+          <label for="leftSelect" class="selector-label">
+            <span class="dot dot-left"></span> Baseline (Left — Prior Version or Reference File)
+          </label>
+          <select id="leftSelect" class="source-select"></select>
+          <div id="leftMetaInfo" class="selector-meta">Select baseline version or file</div>
         </div>
 
-        <!-- Right Stage: Live Document Redaction Canvas + Save Bar -->
-        <div class="card">
-          <div class="canvas-toolbar">
-            <div>
-              <strong id="scrub-file-label">Document Preview</strong>
-              <span class="badge badge-safe" style="margin-left: 6px;">Metadata Clean ✓</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <button class="btn btn-secondary" id="btn-prev-page">◀ Prev</button>
-              <span id="page-indicator" style="font-weight: 600; padding: 0 6px;">Page 1 / 1</span>
-              <button class="btn btn-secondary" id="btn-next-page">Next ▶</button>
-              <button class="btn btn-secondary" id="btn-undo-box">Undo Box</button>
-              <button class="btn btn-secondary" id="btn-clear-boxes">Clear Boxes</button>
-            </div>
+        <div class="selector-swap">
+          <button id="btnSwapSides" type="button" class="btn btn-ghost btn-icon" title="Swap Baseline and Target">
+            &#8646;
+          </button>
+        </div>
+
+        <div class="selector-col selector-right">
+          <label for="rightSelect" class="selector-label">
+            <span class="dot dot-right"></span> Target (Right — Current Version or Revised File)
+          </label>
+          <select id="rightSelect" class="source-select"></select>
+          <div id="rightMetaInfo" class="selector-meta">Select target version or file</div>
+        </div>
+
+        <div class="selector-actions">
+          <button id="btnRunDiff" type="button" class="btn btn-primary">Run Comparison</button>
+          <div class="export-row">
+            <button id="btnExportBoxPdf" type="button" class="btn btn-secondary btn-sm" disabled>
+              Save Report PDF to Box
+            </button>
+            <button id="btnDownloadLocalPdf" type="button" class="btn btn-ghost btn-sm" disabled>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="exportSuccessStrip" class="export-strip hidden">
+        <span id="exportSuccessText">Saved Redline_Report.pdf to Box!</span>
+        <button id="btnCopyReportLink" type="button" class="btn btn-ghost btn-sm">
+          Create &amp; Copy Shared Link
+        </button>
+      </div>
+
+      <div id="identicalNotice" class="identical-banner hidden">
+        <strong>Cryptographic Match (Identical SHA-1):</strong> Baseline and Target contain identical raw bytes.
+      </div>
+
+      <div id="emptyPromptCard" class="empty-prompt-card hidden">
+        <h3 id="emptyPromptTitle">Ready to Compare</h3>
+        <p id="emptyPromptBody">
+          Choose your <strong>Baseline (Left)</strong> and <strong>Target (Right)</strong> versions or sibling files above, then click <strong>Run Comparison</strong>.
+        </p>
+      </div>
+
+      <!-- Diff Mode Switcher + KPI Strip -->
+      <div id="diffToolbar" class="diff-toolbar hidden">
+        <div class="mode-pills" role="tablist">
+          <button id="modeBtnText" type="button" class="mode-pill active">Text &amp; Clause Redline</button>
+          <button id="modeBtnVisual" type="button" class="mode-pill">Visual Curtain &amp; Pixel Diff</button>
+          <button id="modeBtnSheet" type="button" class="mode-pill">Spreadsheet &amp; Formula Audit</button>
+        </div>
+        <div id="kpiSummaryStrip" class="kpi-strip"></div>
+      </div>
+
+      <!-- PANE 1: Text & Clause Redline -->
+      <div id="paneTextDiff" class="diff-pane hidden">
+        <div id="scannedPdfHint" class="hint-banner hidden">
+          No selectable text layer was found on one or more PDF pages. Switch to <strong>Visual Curtain &amp; Pixel Diff</strong> above to inspect scanned signatures, stamps, or image changes.
+        </div>
+
+        <div id="smartHighlightsBox" class="highlights-card hidden">
+          <div class="highlights-header">
+            <strong>Smart Financial, Rate, Date &amp; Legal Clause Highlights</strong>
+            <span id="highlightsCountBadge" class="pill pill-warn">0 key shifts</span>
+          </div>
+          <div id="smartHighlightsList" class="highlights-grid"></div>
+        </div>
+
+        <div class="subtoolbar">
+          <div class="btn-group">
+            <button id="btnTextUnified" type="button" class="sub-btn active">Unified Redline</button>
+            <button id="btnTextSplit" type="button" class="sub-btn">Side-by-Side</button>
+          </div>
+          <label class="checkbox-inline">
+            <input type="checkbox" id="chkChangesOnly" checked />
+            <span>Show changed sections only (&plusmn;3 context lines)</span>
+          </label>
+        </div>
+
+        <div id="textDiffContainer" class="redline-viewport"></div>
+      </div>
+
+      <!-- PANE 2: Visual Curtain & Pixel Diff -->
+      <div id="paneVisualDiff" class="diff-pane hidden">
+        <div class="subtoolbar visual-subtoolbar">
+          <div class="btn-group">
+            <button id="visModeCurtain" type="button" class="sub-btn active">Split Curtain Slider</button>
+            <button id="visModePixel" type="button" class="sub-btn">Crimson Pixel Delta</button>
+            <button id="visModeSide" type="button" class="sub-btn">Side-by-Side</button>
           </div>
 
-          <div class="canvas-stage">
-            <div class="canvas-wrapper">
-              <canvas id="redactor-canvas"></canvas>
-            </div>
+          <div class="page-nav-group">
+            <button id="btnPrevPage" type="button" class="btn btn-ghost btn-sm">&larr; Prev</button>
+            <span id="pageIndicator" class="page-indicator">Page 1 / 1</span>
+            <button id="btnNextPage" type="button" class="btn btn-ghost btn-sm">Next &rarr;</button>
           </div>
 
-          <div class="save-footer">
-            <div class="filename-bar">
-              <span class="muted" style="font-weight: 600;">Save New Clean v1 File As:</span>
-              <input type="text" id="inp-output-stem" class="text-input" placeholder="Document_SafeCopy" />
-              <span id="lbl-output-ext" style="font-family: monospace; font-weight: 700;">.pdf</span>
-              <button class="btn btn-warn hidden" id="btn-anonymize-name">⚠️ PII in Filename → Anonymize</button>
-            </div>
+          <div class="sensitivity-group">
+            <label for="pixelThresholdRange">Threshold:</label>
+            <input id="pixelThresholdRange" type="range" min="8" max="64" value="24" />
+            <span id="pixelThresholdLabel" class="mono-sm">24</span>
+          </div>
 
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
-              <span class="muted">Original file in Box stays untouched. Creates a fresh file with zero unredacted Version History.</span>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-secondary" id="btn-save-only">Save _SafeCopy to Box</button>
-                <button class="btn btn-primary" id="btn-save-and-link">Save &amp; Copy Clean Box Link</button>
+          <span id="visualPageDeltaBadge" class="pill pill-delta">0.00% pixels changed</span>
+        </div>
+
+        <div id="pageDeltaStrip" class="page-delta-strip hidden"></div>
+
+        <div id="visualStage" class="visual-stage">
+          <!-- Mode 1: Interactive Split Curtain -->
+          <div id="curtainStage" class="curtain-wrapper">
+            <div class="curtain-slider-bar">
+              <span class="tag-left">Baseline (Left)</span>
+              <input id="curtainSlider" type="range" min="0" max="100" value="50" aria-label="Curtain split position" />
+              <span class="tag-right">Target (Right)</span>
+            </div>
+            <div id="curtainViewport" class="curtain-viewport">
+              <canvas id="curtainRightCanvas" class="vis-canvas"></canvas>
+              <div id="curtainLeftClip" class="curtain-left-clip">
+                <canvas id="curtainLeftCanvas" class="vis-canvas"></canvas>
+              </div>
+              <div id="curtainDivider" class="curtain-divider">
+                <div class="curtain-knob">&harr;</div>
               </div>
             </div>
           </div>
+
+          <!-- Mode 2: Crimson Pixel Overlay -->
+          <div id="pixelStage" class="pixel-wrapper hidden">
+            <canvas id="pixelDiffCanvas" class="vis-canvas"></canvas>
+          </div>
+
+          <!-- Mode 3: Side-by-Side -->
+          <div id="sideStage" class="side-wrapper hidden">
+            <div class="side-card">
+              <div class="side-caption tag-left">Baseline (Left)</div>
+              <canvas id="sideLeftCanvas" class="vis-canvas"></canvas>
+            </div>
+            <div class="side-card">
+              <div class="side-caption tag-right">Target (Right)</div>
+              <canvas id="sideRightCanvas" class="vis-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANE 3: Spreadsheet Multi-Sheet Cell & Formula Audit -->
+      <div id="paneSheetDiff" class="diff-pane hidden">
+        <div id="formulaOverrideAlert" class="override-alert hidden"></div>
+
+        <div id="sheetTabsBar" class="sheet-tabs-bar"></div>
+
+        <div class="subtoolbar">
+          <div class="btn-group">
+            <button id="sheetFilterAll" type="button" class="sub-btn active">All Changes</button>
+            <button id="sheetFilterFormulas" type="button" class="sub-btn">Formula Edits</button>
+            <button id="sheetFilterOverrides" type="button" class="sub-btn">Hardcoded Overrides</button>
+            <button id="sheetFilterValues" type="button" class="sub-btn">Value Changes</button>
+          </div>
+          <input
+            id="sheetSearchInput"
+            type="search"
+            class="search-input"
+            placeholder="Filter cell (e.g. B14, SUM, Revenue)..."
+          />
+        </div>
+
+        <div class="table-scroll">
+          <table class="sheet-diff-table">
+            <thead>
+              <tr>
+                <th>Cell</th>
+                <th>Change Type</th>
+                <th>Baseline (Left)</th>
+                <th>Target (Right)</th>
+                <th>Numeric &Delta;</th>
+              </tr>
+            </thead>
+            <tbody id="sheetDiffTableBody"></tbody>
+          </table>
         </div>
       </div>
     </section>
 
-    <!-- ================================================================= -->
-    <!-- SCREEN 2: SHARERADAR FOLDER TELEMETRY & BULK REMEDIATION          -->
-    <!-- ================================================================= -->
-    <section id="screen-radar" class="hidden">
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">🔴 Open "Anyone with Link"</div>
-          <div class="kpi-value" id="kpi-open-links">—</div>
-          <div class="muted" id="kpi-open-sub">Public internet URLs</div>
+    <!-- Box Folder Browser Workspace -->
+    <section id="browseWorkspace" class="workspace-section hidden">
+      <div class="browser-header-card">
+        <div>
+          <h2 id="folderTitle" class="folder-title">All Files</h2>
+          <p class="muted-sm">
+            Pick any file's <strong>Version History</strong>, or assign <strong>Set Baseline (Left)</strong> and <strong>Set Target (Right)</strong> across two files.
+          </p>
         </div>
-        <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">👁️ Shared-Link Opens (Views)</div>
-          <div class="kpi-value" id="kpi-total-opens">—</div>
-          <div class="muted" id="kpi-delta-opens">Live Box preview_count</div>
-        </div>
-        <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">⬇️ Shared-Link Downloads</div>
-          <div class="kpi-value" id="kpi-total-downloads">—</div>
-          <div class="muted" id="kpi-delta-downloads">Live Box download_count</div>
-        </div>
-        <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">🟡 External Guests &amp; Scope</div>
-          <div class="kpi-value" id="kpi-external-guests">—</div>
-          <div class="muted" id="kpi-scan-progress">Ready to scan</div>
+        <div class="browser-nav-btns">
+          <button id="btnUpFolder" type="button" class="btn btn-ghost btn-sm">&uarr; Parent Folder</button>
+          <button id="btnRootFolder" type="button" class="btn btn-ghost btn-sm">Root (All Files)</button>
         </div>
       </div>
 
-      <div class="radar-toolbar">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-secondary" id="btn-rescan-radar">↻ Scan Folder Tree</button>
-          <select id="sel-radar-filter" class="text-input" style="min-width: 170px;">
-            <option value="all">Show All Exposures</option>
-            <option value="open_links">Open Public Links Only</option>
-            <option value="high_traffic">Links With Views / Downloads</option>
-            <option value="guests">External Guests Only</option>
-          </select>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-danger" id="btn-bulk-revoke">Revoke Selected</button>
-          <button class="btn btn-secondary" id="btn-bulk-viewonly">Force View-Only</button>
-          <button class="btn btn-primary" id="btn-bulk-expire30">Stamp 30-Day Expiry</button>
-          <button class="btn btn-secondary" id="btn-save-radar-csv">Save Snapshot &amp; CSV to Box</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table class="radar-table">
+      <div class="table-scroll">
+        <table class="folder-table">
           <thead>
             <tr>
-              <th style="width: 34px;"><input type="checkbox" id="chk-radar-all" /></th>
-              <th>Item &amp; Box Path</th>
-              <th>Exposure / Guest Role</th>
-              <th>Opens &amp; Downloads Telemetry</th>
-              <th>Duration Open / Dormancy</th>
-              <th>Status</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Size</th>
+              <th>Modified</th>
+              <th>Compare Actions</th>
             </tr>
           </thead>
-          <tbody id="radar-tbody">
-            <tr>
-              <td colspan="6" class="muted" style="text-align: center; padding: 24px;">
-                Click "Scan Folder Tree" to audit Shared Links and external collaborators.
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="folderTableBody"></tbody>
         </table>
       </div>
     </section>
-
-    <!-- ================================================================= -->
-    <!-- SCREEN 3: BUILT-IN BOX FILE & FOLDER BROWSER                      -->
-    <!-- ================================================================= -->
-    <section id="screen-picker" class="card hidden">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-        <div>
-          <strong id="picker-folder-title">All Files (Root)</strong>
-          <div class="muted">Choose any file to Scrub &amp; Redact, or audit any folder in ShareRadar.</div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" id="btn-picker-up">↑ Parent Folder</button>
-          <button class="btn btn-primary" id="btn-audit-current-folder">📡 Audit This Folder in ShareRadar</button>
-        </div>
-      </div>
-      <div class="picker-list" id="picker-list"></div>
-    </section>
   </main>
 
+  <footer class="app-footer">
+    <span>BoxDiff v1 &middot; 100% In-Browser WebAssembly/Canvas Execution &middot; Zero File Bytes Sent to Cloud</span>
+    <span>
+      <a href="/privacy" target="_blank" rel="noopener">Privacy</a> &middot;
+      <a href="/terms" target="_blank" rel="noopener">Terms</a>
+    </span>
+  </footer>
+
+  <!-- Vendored Permissive Client Bundles (Zero External Runtime CDNs) -->
+  <script src="/static/vendor/pdf-lib.min.js"></script>
+  <script src="/static/vendor/pdf.min.js"></script>
+  <script src="/static/vendor/jszip.min.js"></script>
   <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

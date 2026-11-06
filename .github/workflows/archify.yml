@@ -3,10 +3,11 @@ name: Render & Verify Archify Architecture
 on:
   push:
     branches:
+      - boxdiff
       - main
       - dev
     paths:
-      - "docs/architecture/safeshare.architecture.json"
+      - "docs/architecture/boxdiff.architecture.json"
       - "scripts/render_archify.py"
       - ".github/workflows/archify.yml"
   workflow_dispatch:
@@ -16,7 +17,7 @@ permissions:
 
 jobs:
   archify-render:
-    name: Validate & Render SafeShare Archify v3.0 Diagram
+    name: Validate & Render BoxDiff Archify v3.0 Diagram
     runs-on: ubuntu-latest
     steps:
       - name: Checkout safeShare Repository (Full History for Source Evidence)
@@ -46,17 +47,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/architecture/safeshare-architecture.svg docs/architecture/safeshare-architecture.html
+          git add docs/architecture/boxdiff-architecture.svg docs/architecture/boxdiff-architecture.html
           if ! git diff --cached --quiet; then
-            git commit -m "docs(archify): compile verified Archify v3.0 SVG & interactive HTML [skip ci]"
+            git commit -m "docs(archify): compile verified BoxDiff Archify v3.0 SVG & interactive HTML [skip ci]"
             git push
           fi
 
       - name: Upload Archify Architecture Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: safeshare-archify-architecture
+          name: boxdiff-archify-architecture
           path: |
-            docs/architecture/safeshare.architecture.json
-            docs/architecture/safeshare-architecture.html
-            docs/architecture/safeshare-architecture.svg
+            docs/architecture/boxdiff.architecture.json
+            docs/architecture/boxdiff-architecture.html
+            docs/architecture/boxdiff-architecture.svg

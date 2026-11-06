@@ -17,37 +17,36 @@ class Settings:
     gcp_project_id: str
     use_firestore: bool
     firestore_collection: str
-    free_scrub_limit_per_month: int
-    free_radar_fix_limit_per_month: int
+    free_diff_limit_per_month: int
     session_ttl_seconds: int = 3600
 
 
 def load_settings() -> Settings:
+    client_id = (os.getenv("BOXDIFF_CLIENT_ID") or os.getenv("BOX_CLIENT_ID") or "").strip()
+    client_secret = (os.getenv("BOXDIFF_CLIENT_SECRET") or os.getenv("BOX_CLIENT_SECRET") or "").strip()
     return Settings(
-        app_public_name=os.getenv("APP_PUBLIC_NAME", "SafeShare for Box").strip(),
-        # Left blank by default per owner preference; rendered on /privacy & /terms only if non-empty.
+        app_public_name=os.getenv("APP_PUBLIC_NAME", "BoxDiff for Box").strip(),
         support_email=os.getenv("SUPPORT_EMAIL", "").strip(),
-        box_client_id=os.getenv("BOX_CLIENT_ID", "").strip(),
-        box_client_secret=os.getenv("BOX_CLIENT_SECRET", "").strip(),
+        box_client_id=client_id,
+        box_client_secret=client_secret,
         hmac_pepper=os.getenv("HMAC_PEPPER", "").strip(),
         gcp_project_id=os.getenv("GCP_PROJECT_ID", "safeshare-box").strip(),
         use_firestore=os.getenv("USE_FIRESTORE", "true").strip().lower() in ("1", "true", "yes"),
-        firestore_collection=os.getenv("FIRESTORE_COLLECTION", "safeshare_entitlements").strip(),
-        free_scrub_limit_per_month=int(os.getenv("FREE_SCRUB_LIMIT", "3")),
-        free_radar_fix_limit_per_month=int(os.getenv("FREE_RADAR_FIX_LIMIT", "5")),
+        firestore_collection=os.getenv("FIRESTORE_COLLECTION", "boxdiff_entitlements").strip(),
+        free_diff_limit_per_month=int(os.getenv("FREE_DIFF_LIMIT", "5")),
     )
 
 
 def compute_user_hash(box_user_id: str, pepper: str) -> str:
-    """Irreversibly hashes numeric Box user ID so zero raw user identifiers touch Firestore."""
+    """Domain-separated irreversible HMAC-SHA256 hash of numeric Box user ID."""
     if not pepper:
         raise ValueError("HMAC_PEPPER is not configured.")
-    msg = f"safeshare:v1:box_user:{box_user_id}".encode("utf-8")
+    msg = f"boxdiff:v1:box_user:{box_user_id}".encode("utf-8")
     return hmac.new(pepper.encode("utf-8"), msg, hashlib.sha256).hexdigest()
 
 
 def issue_session_proof(user_hash: str, pepper: str, ttl_seconds: int = 3600) -> str:
-    """Creates a stateless HMAC proof so quota checks never require sending Box tokens back to Cloud Run."""
+    """Stateless HMAC proof so quota checks never send Box OAuth tokens back to Cloud Run."""
     exp = int(time.time()) + ttl_seconds
     payload = f"{user_hash}.{exp}"
     sig = hmac.new(pepper.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
@@ -55,7 +54,6 @@ def issue_session_proof(user_hash: str, pepper: str, ttl_seconds: int = 3600) ->
 
 
 def verify_session_proof(proof: str, pepper: str) -> str | None:
-    """Validates a stateless session proof and returns user_hash if authentic and unexpired."""
     if not proof or not pepper:
         return None
     parts = proof.split(".")

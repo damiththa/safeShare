@@ -1,8 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
-  <rect width="512" height="512" rx="112" fill="#0061D5"/>
-  <path d="M256 84L396 138V246C396 341.5 336.4 426.2 256 452C175.6 426.2 116 341.5 116 246V138L256 84Z" fill="#FFFFFF"/>
-  <path d="M256 124L360 164V244C360 318.8 315.4 385.4 256 408C196.6 385.4 152 318.8 152 244V164L256 124Z" fill="#067647"/>
-  <rect x="202" y="242" width="108" height="86" rx="16" fill="#FFFFFF"/>
-  <path d="M224 242V214C224 196.3 238.3 182 256 182C273.7 182 288 196.3 288 214V242" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round"/>
-  <circle cx="256" cy="282" r="12" fill="#067647"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1528"/>
+      <stop offset="100%" stop-color="#060b16"/>
+    </linearGradient>
+    <linearGradient id="leftDoc" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#0369a1" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="rightDoc" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#047857" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)"/>
+  <rect x="20" y="20" width="472" height="472" rx="92" fill="none" stroke="#1e293b" stroke-width="4"/>
+
+  <!-- Left Baseline Document -->
+  <rect x="64" y="92" width="166" height="328" rx="22" fill="url(#leftDoc)" stroke="#38bdf8" stroke-width="6"/>
+  <line x1="96" y1="152" x2="196" y2="152" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+  <line x1="96" y1="196" x2="176" y2="196" stroke="#fda4af" stroke-width="10" stroke-linecap="round"/>
+  <line x1="96" y1="240" x2="196" y2="240" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+  <line x1="96" y1="284" x2="160" y2="284" stroke="#fda4af" stroke-width="10" stroke-linecap="round"/>
+  <line x1="96" y1="328" x2="190" y2="328" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Right Target Document -->
+  <rect x="282" y="92" width="166" height="328" rx="22" fill="url(#rightDoc)" stroke="#34d399" stroke-width="6"/>
+  <line x1="314" y1="152" x2="414" y2="152" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+  <line x1="314" y1="196" x2="408" y2="196" stroke="#6ee7b7" stroke-width="10" stroke-linecap="round"/>
+  <line x1="314" y1="240" x2="414" y2="240" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+  <line x1="314" y1="284" x2="394" y2="284" stroke="#6ee7b7" stroke-width="10" stroke-linecap="round"/>
+  <line x1="314" y1="328" x2="408" y2="328" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Center Split Curtain Divider + Handle -->
+  <line x1="256" y1="62" x2="256" y2="450" stroke="#f43f5e" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="34" fill="#f43f5e" stroke="#0b1528" stroke-width="6"/>
+  <path d="M242 256h28M249 247l-9 9 9 9M263 247l9 9-9 9" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

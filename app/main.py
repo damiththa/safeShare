@@ -25,7 +25,7 @@ settings = load_settings()
 entitlements = EntitlementStore(settings)
 
 app = FastAPI(
-    title="SafeShare for Box",
+    title="BoxDiff for Box",
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
@@ -35,7 +35,6 @@ app = FastAPI(
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     response = await call_next(request)
-    # Allow Box Web App popup modal (`<iframe>`) embedding while blocking third-party clickjacking.
     csp = (
         "default-src 'self'; "
         "script-src 'self' 'wasm-unsafe-eval'; "
@@ -65,13 +64,12 @@ class QuotaStatusRequest(BaseModel):
 
 class QuotaConsumeRequest(BaseModel):
     session_proof: str = Field(..., min_length=16, max_length=512)
-    action: str = Field(..., pattern="^(scrub|radar_fix)$")
-    units: int = Field(default=1, ge=1, le=500)
+    units: int = Field(default=1, ge=1, le=100)
 
 
-@app.get("/healthz")
+@app.api_route("/healthz", methods=["GET", "HEAD"])
 async def healthz():
-    return {"status": "ok", "zero_pii": True}
+    return {"status": "ok", "service": "boxdiff", "zero_pii": True}
 
 
 @app.get("/api/public-config")
@@ -126,13 +124,13 @@ async def api_entitlement_consume(body: QuotaConsumeRequest):
     user_hash = verify_session_proof(body.session_proof, settings.hmac_pepper)
     if not user_hash:
         raise HTTPException(status_code=401, detail="Session proof expired or invalid.")
-    allowed, status = await entitlements.consume_quota(user_hash, body.action, body.units)
+    allowed, status = await entitlements.consume_quota(user_hash, body.units)
     if not allowed:
         return JSONResponse(
             status_code=402,
             content={
                 "allowed": False,
-                "message": "Monthly Free tier limit reached. Upgrade to SafeShare Pro for unlimited access.",
+                "message": "Monthly Free tier comparison limit reached (5/month). Upgrade to BoxDiff Pro for unlimited diffs.",
                 "entitlement": status,
             },
         )
@@ -141,7 +139,6 @@ async def api_entitlement_consume(body: QuotaConsumeRequest):
 
 @app.get("/callback")
 async def oauth_redirect_callback(code: str = "", state: str = ""):
-    """Handles standalone OAuth 2.0 redirect flow (e.g., from Box App Center 'Add' button)."""
     fragment = urlencode({"auth_code": code, "state": state, "from_callback": "1"})
     return RedirectResponse(url=f"/#{fragment}", status_code=302)
 
@@ -151,17 +148,14 @@ async def box_post_launch(
     auth_code: str = Form(default=""),
     file_id: str = Form(default=""),
     folder_id: str = Form(default=""),
-    mode: str = Form(default=""),
     redirect_to_box_url: str = Form(default=""),
 ):
-    """Supports POST callback mode from Box Web App Integrations in addition to GET mode."""
     params = {
         k: v
         for k, v in {
             "auth_code": auth_code,
             "file_id": file_id,
             "folder_id": folder_id,
-            "mode": mode,
             "return_url": redirect_to_box_url,
         }.items()
         if v

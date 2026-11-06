@@ -1,74 +1,41 @@
-# SafeShare for Box (`https://github.com/damiththa/safeShare.git`)
+# BoxDiff for Box (`boxdiff` Branch)
 
-**SafeShare for Box** is a 2-in-1 **Zero-PII Box Web App Integration** that runs file metadata scrubbing, byte-destructive PDF/image redaction, and recursive folder Shared Link / external-guest auditing **100% inside the user's browser memory**—backed by a stateless **Google Cloud Run** + **Firestore Native** quota service in `us-central1`.
+**100% Browser-Only Version History Redlines, Visual Curtain/Pixel Diffs & Excel Formula Audits for Box.com**
 
-- 🏛️ **[Process & System Architecture — Archify v3.0 Diagram (`docs/ARCHITECTURE.md`)](./docs/ARCHITECTURE.md)**
-- 📌 **[Parked Roadmap, Feature Enhancements & Guardrails (`docs/PARKED_ROADMAP_AND_REMINDERS.md`)](./docs/PARKED_ROADMAP_AND_REMINDERS.md)**
-- 📦 **[Box App Center Configuration & Listing Copy (`marketplace/listing_copy.md`)](./marketplace/listing_copy.md)**
+[![BoxDiff Archify System & Process Architecture](./docs/architecture/boxdiff-architecture.svg)](./docs/architecture/boxdiff-architecture.html)
 
----
-
-## Process & System Architecture (Rendered via Archify v3.0)
-
-[![SafeShare Archify Process & System Architecture](./docs/architecture/safeshare-architecture.svg)](./docs/ARCHITECTURE.md)
-
-> **Interactive Archify Viewer:** Open [`docs/architecture/safeshare-architecture.html`](./docs/architecture/safeshare-architecture.html) (compiled automatically in GitHub Actions via [`tt-a1i/archify`](https://github.com/tt-a1i/archify)) for interactive pan/zoom, guided process traces, and clickable GitHub file/line citations.
+> **Repository Branch Layout (`damiththa/safeShare`):**
+> - **`main` branch:** `SafeShare for Box` (`Scrub & Redact` + `ShareRadar` Folder Link & Collaborator Auditor) — Live at `https://safeshare-902354967061.us-central1.run.app`
+> - **`boxdiff` branch (this branch):** `BoxDiff for Box` (`Compare with BoxDiff` File Version & Sibling Comparator) — Target service `https://boxdiff-902354967061.us-central1.run.app`
 
 ---
 
-## Core Capabilities (`v1`)
+## ✨ What `BoxDiff v1` Does (100% Client-Side RAM)
 
-1. **File Integration — `Scrub & Redact with SafeShare` (`.pdf`, `.jpg`, `.jpeg`, `.png`, `.webp`, `.docx`):**
-   - **Privacy X-Ray:** Detects hidden EXIF GPS coordinates, camera/lens serial numbers, embedded EXIF preview thumbnails, PDF `/Info` + Adobe XMP packets, and Word `core.xml` / `app.xml` / reviewer comments / Tracked Changes.
-   - **Deterministic Auto-PII & Filename Guard:** Scans selectable text for SSNs, Luhn-valid payment cards, US ABA routing numbers, emails, and phone numbers—plus warns when the filename itself leaks PII with a 1-click anonymizer.
-   - **Byte-Destructive Export (`_SafeCopy` as `v1`):** Rasterizes redacted PDF pages at **250 DPI** onto an offscreen bitmap canvas with `#000000` pixel burns inside a brand-new `PDFLib.PDFDocument` (and saves as a brand-new `v1` Box file so collaborators cannot download unredacted `v1` history).
-2. **Folder Integration — `Audit Links & Guests (SafeShare)` (`ShareRadar`):**
-   - **9 Sharing & Collaborator Telemetry Metrics (0 File Bytes Downloaded):** Surfaces `preview_count` (**Opens**), `download_count` (**Downloads**), `can_download`/`can_edit` flags, `effective_access`, `is_password_enabled`, `unshared_at` countdown vs `Never Expires`, dormancy age, external guest tenure in days, and **`+Δ` new opens/downloads** diffed against `_safeshare_radar_snapshot.json` stored inside the **user's own Box folder**.
-   - **1-Click Bulk Remediation:** Bulk Revoke Links, Force View-Only, Stamp 30-Day Expiration, Remove External Collaborators, and export Audit CSV directly to Box.
+1. **Contract & Text Redline (`.pdf`, `.docx`, `.txt`, `.md`, `.json`, `.csv`)**
+   - Patience-anchored LCS line diff + inline word-level `<del>` / `<ins>` token highlights in both **Unified Redline** and **Side-by-Side** layouts.
+   - **Smart Financial, Rate, Date & Legal Clause Callouts:** Automatically detects modified `$` amounts, `%` / `bps` rates, payment terms / dates, and key legal obligations (`indemnification`, `limitation of liability`, `termination`, `auto-renewal`) with 1-click scroll-to-clause.
+   - **Cross-Format Capable:** Redline a `.docx` contract draft directly against a counterparty's signed `.pdf`!
+
+2. **Visual Split Curtain Slider & Crimson Pixel Diff (`.pdf`, `.png`, `.jpg`, `.jpeg`, `.webp`)**
+   - Interactive draggable **Split Curtain Slider**, **Crimson Pixel-Delta Overlay** (with live threshold control), and **Side-by-Side** page view.
+   - Automatic multi-page quick delta strip (`P1 0%`, `P3 2.8% Δ`, ...) so reviewers jump straight to altered pages in scanned PDFs or engineering drawings.
+
+3. **Zero-CVE Multi-Sheet Spreadsheet & Formula Audit (`.xlsx`, `.csv`)**
+   - Parses OpenXML `.xlsx` archives (`xl/workbook.xml`, `xl/sharedStrings.xml`, `xl/worksheets/sheet*.xml`) via vendored `JSZip` + browser `DOMParser`—zero `xlsx@0.18.5` prototype-pollution CVEs.
+   - Audits **both** raw Excel formulas (`<f>`) and evaluated values (`<v>`), specifically alerting on **Formula $\rightarrow$ Hardcoded Value Overrides** alongside numeric `%` deltas.
+
+4. **Version History (`v1..vN`) + Sibling File Comparison + 1-Click `Redline_Report.pdf`**
+   - Auto-loads Box Version History (`GET /2.0/files/:id/versions` + active `file_version`) and auto-compares `v(N-1) -> vN`.
+   - When invoked on a `v1`-only file, automatically discovers compatible sibling files in the same Box parent folder.
+   - Generates a multi-page **`Redline_Report_<Name>.pdf`** in browser memory (`pdf-lib`) and uploads it straight back into the Box folder with 1-click Box Shared Link creation.
 
 ---
 
-## Strict Privacy & Operational Guardrails
+## 🔒 Zero-PII Security & Cloud Architecture
 
-- **Zero PII on GCP:** Zero file contents, filenames, emails, names, Shared Links, or Box OAuth tokens are ever stored or logged (`uvicorn --no-access-log`). Firestore (`safeshare_entitlements`) stores strictly `{ plan, period, scrub_used, radar_fixes_used, updated_at }` keyed by irreversible `HMAC_SHA256(HMAC_PEPPER, numeric_box_user_id)`.
-- **Zero Third-Party Runtime CDNs:** Permissive `MIT` / `Apache-2.0` browser libraries (`pdf-lib`, `pdf.js`, `exifr`, `JSZip`) are vendored at Cloud Build time into `/app/static/vendor/` (`script-src 'self' 'wasm-unsafe-eval'`).
-- **Cloud-Only Builds & Owner-Gated Deployments:** Zero local runtime execution; **explicit owner confirmation is required before running any GCP Cloud Run deployment (`gcloud run deploy`).**
+- **Zero File Bytes Touch GCP:** All Box downloads (`?version=...&access_token=...` CORS 302 stream) and report uploads (`upload.box.com`) flow strictly between the user's browser and Box.com.
+- **Stateless OAuth + Domain-Separated HMAC Quotas:** Cloud Run (`uvicorn --no-access-log`) exchanges `auth_code`, reads only numeric Box user `id`, computes `HMAC_SHA256(HMAC_PEPPER, "boxdiff:v1:box_user:" + id)`, and tracks monthly Free (`5 diffs/month`) vs Pro (`unlimited`) usage in Firestore collection `boxdiff_entitlements`.
+- **Zero External Runtime CDNs:** `pdf-lib@1.17.1`, `pdfjs-dist@3.11.174`, and `jszip@3.10.1` are vendored at Cloud Build time under strict `script-src 'self' 'wasm-unsafe-eval'` CSP.
 
----
-
-## Repository Structure
-
-```text
-safeShare/
-├── app/
-│   ├── main.py                        # Stateless FastAPI routes (/launch, /callback, /oauth, /privacy, /terms) & CSP
-│   ├── box_oauth.py                   # Memory-only Box auth_code exchange (/users/me?fields=id only)
-│   ├── entitlements.py                # Zero-PII Firestore Native monthly quota transactions (Free vs Pro)
-│   └── config.py                      # Secret Manager env loader, HMAC user hashing & stateless session proofs
-├── static/
-│   ├── index.html                     # 3-Tab Scrub & Redact, ShareRadar, and Box Folder Browser workspace
-│   ├── privacy.html                   # Zero-retention Privacy Policy template
-│   ├── terms.html                     # Terms of Service template
-│   ├── css/styles.css                 # Light/dark Box-native UI stylesheet
-│   └── js/
-│       ├── app.js                     # Launch router, parent-folder scope tracker & UI controller
-│       ├── box_client.js              # Browser CORS Box SDK (?access_token 302 stream & 409-safe v1 upload)
-│       ├── metadata_xray.js           # EXIF/GPS/Thumbnail, PDF XMP & DOCX XML metadata inspector
-│       ├── pii_detector.js            # Luhn, SSN, ABA routing, email, phone & filename PII scanner
-│       ├── redactor_engine.js         # Interactive canvas & 250-DPI byte-destructive PDF/Image/DOCX exporter
-│       └── shareradar_engine.js       # 9-metric ShareRadar auditor, +Δ snapshot diff & bulk remediation
-├── docs/
-│   ├── ARCHITECTURE.md                # Archify v3.0 System & Process Architecture walkthrough
-│   ├── PARKED_ROADMAP_AND_REMINDERS.md# Deployment gate rules, Zero-PII invariants & v1.1+ enhancements
-│   └── architecture/                  # Archify v3.0 JSON spec + compiled GitHub SVG & interactive HTML
-├── marketplace/
-│   ├── icon.svg                       # SafeShare 512x512 vector app icon
-│   └── listing_copy.md                # Exact Box Developer Console & App Center configuration copy
-├── scripts/
-│   └── render_archify.py              # Cloud-executed Archify v3.0 evidence verifier & SVG/HTML compiler
-├── .github/workflows/
-│   └── archify.yml                    # GitHub Actions CI for Archify v3.0 verification & rendering
-├── .env.example                       # Non-secret environment variable & Secret Manager reference template
-├── Dockerfile                         # GCP Cloud Build image (vendors browser Wasm/JS & runs non-root Uvicorn)
-└── requirements.txt
-```
+See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and [`docs/PARKED_ROADMAP_AND_REMINDERS.md`](./docs/PARKED_ROADMAP_AND_REMINDERS.md) for full process flows, deployment guardrails, and the `v1.1+` roadmap.

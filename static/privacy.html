@@ -12,35 +12,35 @@
     <h1>Privacy Policy — {{APP_NAME}}</h1>
     <p class="muted">Effective Date: November 2026</p>
 
-    <h2>1. Core Privacy Guarantee: Your Files Never Touch Our Servers</h2>
+    <h2>1. Core Privacy Guarantee: 100% In-Browser Comparison</h2>
     <p>
       <strong>{{APP_NAME}}</strong> is engineered around a strict client-side, zero-retention architecture.
-      When you inspect metadata, redact documents or images, or audit Shared Links across your Box folders,
-      all file reading, WebAssembly processing, redaction rendering, and folder metadata scanning execute
-      <strong>directly inside your web browser memory</strong> communicating over HTTPS with Box's official APIs
+      When you compare Box file versions or sibling documents across PDF, Word (<code>.docx</code>), Excel
+      (<code>.xlsx</code> / <code>.csv</code>), text, or image formats, all file downloads, text redlining,
+      visual pixel comparison, spreadsheet formula parsing, and PDF report generation execute
+      <strong>exclusively inside your web browser memory</strong> over direct HTTPS connections with Box's official APIs
       (<code>api.box.com</code> and <code>upload.box.com</code>).
     </p>
 
     <h2>2. Information We Do NOT Collect or Store</h2>
     <ul>
-      <li>We <strong>never</strong> download, proxy, log, or store your Box file contents on our servers.</li>
-      <li>We <strong>never</strong> store your name, email address, filenames, folder structures, or Shared Link URLs.</li>
-      <li>We <strong>never</strong> persist Box OAuth 2.0 access tokens or refresh tokens in any database; your short-lived session token lives exclusively in volatile browser memory until you close the modal.</li>
+      <li>We <strong>never</strong> download, proxy, log, or store your Box file contents or diff text on our servers.</li>
+      <li>We <strong>never</strong> store your name, email address, filenames, folder structures, or version comments.</li>
+      <li>We <strong>never</strong> persist Box OAuth 2.0 access tokens or refresh tokens in any database; your short-lived session token lives exclusively in volatile browser memory until you close the tab or modal.</li>
     </ul>
 
     <h2>3. Anonymous Quota &amp; Subscription Accounting</h2>
     <p>
-      To enforce monthly Free and Pro plan limits without storing personal data, our stateless Google Cloud Run
-      service computes a one-way cryptographic hash (<code>HMAC-SHA256</code>) of your numeric Box account identifier
-      and stores only that irreversible hash alongside an integer usage counter and plan tier (<code>free</code> or <code>pro</code>)
-      in Google Cloud Firestore.
+      To enforce monthly Free and Pro comparison limits without storing personal data, our stateless Google Cloud Run
+      service computes a one-way domain-separated cryptographic hash (<code>HMAC-SHA256</code>) of your numeric Box
+      account identifier and stores only that irreversible hash alongside an integer monthly comparison counter and plan tier
+      (<code>free</code> or <code>pro</code>) in Google Cloud Firestore.
     </p>
 
-    <h2>4. User-Owned Snapshots &amp; Outputs</h2>
+    <h2>4. User-Owned Comparison Reports</h2>
     <p>
-      Any sanitized copies (<code>_SafeCopy</code>), exported CSV audit reports, or optional ShareRadar traffic-delta
-      snapshots (<code>_safeshare_radar_snapshot.json</code>) are saved strictly inside <strong>your own Box account</strong>
-      under your organization's governance and access controls.
+      Any exported <code>Redline_Report.pdf</code> summaries you choose to save back to Box are uploaded directly from
+      your browser into <strong>your own Box folder</strong> under your organization's governance and access controls.
     </p>
 
     {{CONTACT_BLOCK}}

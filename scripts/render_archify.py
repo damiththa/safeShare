@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Compile SafeShare's Archify v3.0 architecture specification (`docs/architecture/safeshare.architecture.json`)
+Compile BoxDiff's Archify v3.0 architecture specification (`docs/architecture/boxdiff.architecture.json`)
 into:
-  1. `docs/architecture/safeshare-architecture.html` (Interactive Archify v3.0 HTML Viewer)
-  2. `docs/architecture/safeshare-architecture.svg` (Standalone GitHub-renderable SVG with embedded Archify theme)
+  1. `docs/architecture/boxdiff-architecture.html` (Interactive Archify v3.0 HTML Viewer)
+  2. `docs/architecture/boxdiff-architecture.svg` (Standalone GitHub-renderable SVG with embedded Archify theme)
 
 Executed in GitHub Actions (`ubuntu-latest`) alongside `tt-a1i/archify` so zero local compute is required.
 """
@@ -19,9 +19,9 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SPEC_PATH = REPO_ROOT / "docs" / "architecture" / "safeshare.architecture.json"
-HTML_OUT_PATH = REPO_ROOT / "docs" / "architecture" / "safeshare-architecture.html"
-SVG_OUT_PATH = REPO_ROOT / "docs" / "architecture" / "safeshare-architecture.svg"
+SPEC_PATH = REPO_ROOT / "docs" / "architecture" / "boxdiff.architecture.json"
+HTML_OUT_PATH = REPO_ROOT / "docs" / "architecture" / "boxdiff-architecture.html"
+SVG_OUT_PATH = REPO_ROOT / "docs" / "architecture" / "boxdiff-architecture.svg"
 
 ARCHIFY_BRANDS_CANDIDATES = [
     Path("/tmp/archify/archify/renderers/shared/generated-brand-marks.mjs"),
@@ -88,8 +88,8 @@ EDGE_LABEL_ACCENT = {
 }
 
 LEGEND_LABELS = {
-    "frontend": "Browser Engine",
-    "backend": "Stateless API",
+    "frontend": "Browser Diff Engine",
+    "backend": "Stateless OAuth API",
     "database": "Vault / Quotas",
     "cloud": "Cloud Run",
     "security": "Zero-PII / Security",
@@ -240,15 +240,8 @@ def compute_route(conn: dict[str, Any], comps: dict[str, dict[str, Any]]) -> lis
     to_side = conn.get("toSide", "left")
     route_mode = conn.get("route", "auto")
 
-    src_offset = 0.0
-    dst_offset = 0.0
-    cid = conn.get("id", "")
-    if cid == "spa-to-cloudrun":
-        src_offset = 42.0
-        dst_offset = -43.0
-    elif cid == "spa-to-corssdk":
-        src_offset = -38.0
-        dst_offset = -38.0
+    src_offset = float(conn.get("fromOffset", 0.0))
+    dst_offset = float(conn.get("toOffset", 0.0))
 
     p1 = port_point(src, from_side, src_offset)
     p2 = port_point(dst, to_side, dst_offset)
@@ -326,7 +319,7 @@ def build_svg(spec: dict[str, Any], brands: dict[str, dict[str, Any]], standalon
             }
         )
 
-    vw, vh = meta.get("viewBox", [1310, 575])
+    vw, vh = meta.get("viewBox", [1340, 620])
 
     boundary_frames_svg = []
     boundary_labels_svg = []

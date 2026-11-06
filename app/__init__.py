@@ -1,1 +1,1 @@
-"""SafeShare for Box — Stateless Zero-PII Cloud Run Backend."""
+"""BoxDiff for Box — Stateless Zero-PII Cloud Run Backend."""

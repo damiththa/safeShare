@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "meta": {
+    "title": "BoxDiff for Box — Zero-PII Multi-Modal Browser Diff Architecture",
+    "subtitle": "100% Client-Side Version History & Sibling File Redlines (.pdf, .docx, .xlsx, .csv, Images) · Stateless Cloud Run OAuth & Anonymous Firestore Quotas",
+    "visual_preset": "blueprint",
+    "quality_profile": "showcase",
+    "viewBox": [1340, 600],
+    "repository": {
+      "provider": "github",
+      "url": "https://github.com/damiththa/safeShare",
+      "revision": "HEAD",
+      "link_mode": "web"
+    }
+  },
+  "boundaries": [
+    {
+      "id": "box-cloud-boundary",
+      "label": "Box.com Enterprise Cloud (User's Content Governance)",
+      "kind": "region",
+      "pad": 18,
+      "wraps": [
+        "box-web-ui",
+        "box-oauth-api",
+        "box-versions-api",
+        "box-upload-api"
+      ]
+    },
+    {
+      "id": "browser-sandbox-boundary",
+      "label": "User Browser — 100% In-RAM Diff & Wasm Sandbox (Zero File Bytes Sent to GCP)",
+      "kind": "security-group",
+      "pad": 18,
+      "wraps": [
+        "spa-orchestrator",
+        "cors-box-client",
+        "vendored-wasm",
+        "text-redline-engine",
+        "visual-diff-engine",
+        "spreadsheet-engine",
+        "report-exporter"
+      ]
+    },
+    {
+      "id": "gcp-control-boundary",
+      "label": "GCP safeshare-box (us-central1) — Stateless OAuth & Zero-PII Quota Plane",
+      "kind": "region",
+      "pad": 18,
+      "wraps": [
+        "cloudrun-fastapi",
+        "hmac-privacy-guard",
+        "firestore-quotas",
+        "secret-manager"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "box-web-ui",
+      "type": "external",
+      "brand": "box",
+      "label": "Box Web Integration",
+      "sublabel": "Compare with BoxDiff (Files)",
+      "tag": "Parent Folder Scope · #auth_code#",
+      "pos": [48, 96],
+      "size": [216, 76],
+      "sources": [
+        {
+          "path": "marketplace/listing_copy.md",
+          "line": 14,
+          "end_line": 31,
+          "label": "Box Web Integration Config"
+        }
+      ]
+    },
+    {
+      "id": "box-oauth-api",
+      "type": "external",
+      "brand": "box",
+      "label": "Box OAuth 2.0 API",
+      "sublabel": "POST /oauth2/token · /users/me",
+      "tag": "Numeric ID Only · Refresh Discarded",
+      "pos": [48, 200],
+      "size": [216, 76],
+      "sources": [
+        {
+          "path": "app/box_oauth.py",
+          "line": 21,
+          "end_line": 74,
+          "label": "Stateless Code Exchange"
+        }
+      ]
+    },
+    {
+      "id": "box-versions-api",
+      "type": "external",
+      "brand": "box",
+      "label": "Box Versions & Content API",
+      "sublabel": "GET /files/:id/versions & /content",
+      "tag": "?version= Simple GET · 302 Stream",
+      "pos": [48, 304],
+      "size": [216, 76],
+      "sources": [
+        {
+          "path": "static/js/box_client.js",
+          "line": 50,
+          "end_line": 182,
+          "label": "Version Timeline & CORS Stream"
+        }
+      ]
+    },
+    {
+      "id": "box-upload-api",
+      "type": "external",
+      "brand": "box",
+      "label": "Box Upload & Links API",
+      "sublabel": "POST upload.box.com/files/content",
+      "tag": "Redline_Report.pdf + Shared Link",
+      "pos": [48, 408],
+      "size": [216, 76],
+      "sources": [
+        {
+          "path": "static/js/box_client.js",
+          "line": 187,
+          "end_line": 245,
+          "label": "Report Upload & Shared Link"
+        }
+      ]
+    },
+    {
+      "id": "spa-orchestrator",
+      "type": "frontend",
+      "brand": "javascript",
+      "label": "BoxDiff SPA Orchestrator",
+      "sublabel": "v(N-1)->vN Auto-Pair + Sibling Picker",
+      "tag": "Volatile RAM State · Zero Storage",
+      "pos": [352, 96],
+      "size": [238, 86],
+      "sources": [
+        {
+          "path": "static/index.html",
+          "line": 1,
+          "end_line": 321,
+          "label": "BoxDiff Workspace UI"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 159,
+          "end_line": 549,
+          "label": "Launch & Comparison Controller"
+        }
+      ]
+    },
+    {
+      "id": "cors-box-client",
+      "type": "frontend",
+      "brand": "javascript",
+      "label": "BoxBrowserClient (CORS)",
+      "sublabel": "Direct Browser <-> Box HTTPS",
+      "tag": "LRU Uint8Array Cache · 409 Retry",
+      "pos": [352, 224],
+      "size": [238, 86],
+      "sources": [
+        {
+          "path": "static/js/box_client.js",
+          "line": 10,
+          "end_line": 269,
+          "label": "Browser-Direct Box Client"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 409,
+          "end_line": 421,
+          "label": "In-RAM Byte Cache"
+        }
+      ]
+    },
+    {
+      "id": "vendored-wasm",
+      "type": "messagebus",
+      "brand": "webassembly",
+      "label": "Self-Hosted Client Bundles",
+      "sublabel": "pdf.js 3.11 · pdf-lib 1.17 · JSZip 3.10",
+      "tag": "MIT/Apache-2.0 · Zero 3rd-Party CDN",
+      "pos": [352, 362],
+      "size": [238, 86],
+      "sources": [
+        {
+          "path": "Dockerfile",
+          "line": 11,
+          "end_line": 18,
+          "label": "Cloud Build Vendoring"
+        },
+        {
+          "path": "static/index.html",
+          "line": 315,
+          "end_line": 318,
+          "label": "Local Script Mounts"
+        }
+      ]
+    },
+    {
+      "id": "text-redline-engine",
+      "type": "frontend",
+      "brand": "javascript",
+      "label": "Text & Clause Redline Engine",
+      "sublabel": "Patience LCS + Word-Token Diff",
+      "tag": "$ Amount · % Rate · Date · Legal",
+      "pos": [642, 96],
+      "size": [242, 80],
+      "sources": [
+        {
+          "path": "static/js/text_diff.js",
+          "line": 18,
+          "end_line": 596,
+          "label": "PDF/DOCX/Text Redline + Highlights"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 615,
+          "end_line": 810,
+          "label": "Unified & Split Redline View"
+        }
+      ]
+    },
+    {
+      "id": "visual-diff-engine",
+      "type": "frontend",
+      "brand": "html5",
+      "label": "Visual Curtain & Pixel Diff",
+      "sublabel": "Split Curtain Slider + Crimson Δ",
+      "tag": "Multi-Page PDF & Image Comparator",
+      "pos": [642, 200],
+      "size": [242, 80],
+      "sources": [
+        {
+          "path": "static/js/visual_diff.js",
+          "line": 27,
+          "end_line": 246,
+          "label": "Canvas Rasterizer & Pixel Delta"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 815,
+          "end_line": 880,
+          "label": "Interactive Curtain Pointer Sync"
+        }
+      ]
+    },
+    {
+      "id": "spreadsheet-engine",
+      "type": "frontend",
+      "brand": "javascript",
+      "label": "Spreadsheet & Formula Audit",
+      "sublabel": "OpenXML .xlsx <f>/<v> + CSV Parser",
+      "tag": "Flags Hardcoded Formula Overrides",
+      "pos": [642, 304],
+      "size": [242, 80],
+      "sources": [
+        {
+          "path": "static/js/spreadsheet_diff.js",
+          "line": 140,
+          "end_line": 526,
+          "label": "Zero-CVE OpenXML Formula Diff"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 884,
+          "end_line": 992,
+          "label": "Multi-Sheet Formula Filter UI"
+        }
+      ]
+    },
+    {
+      "id": "report-exporter",
+      "type": "security",
+      "brand": "javascript",
+      "label": "Redline_Report.pdf Builder",
+      "sublabel": "WinAnsi-Safe Multi-Page Audit PDF",
+      "tag": "Zero Author PII · Snapshot Embed",
+      "pos": [642, 408],
+      "size": [242, 76],
+      "sources": [
+        {
+          "path": "static/js/report_exporter.js",
+          "line": 55,
+          "end_line": 428,
+          "label": "In-Browser PDF Report Generator"
+        },
+        {
+          "path": "static/js/app.js",
+          "line": 1114,
+          "end_line": 1164,
+          "label": "Save to Box & Local Export"
+        }
+      ]
+    },
+    {
+      "id": "cloudrun-fastapi",
+      "type": "cloud",
+      "brand": "googlecloud",
+      "label": "Cloud Run: boxdiff",
+      "sublabel": "FastAPI Stateless Broker (No Logs)",
+      "tag": "--no-access-log · Strict CSP",
+      "pos": [980, 96],
+      "size": [298, 84],
+      "sources": [
+        {
+          "path": "app/main.py",
+          "line": 35,
+          "end_line": 201,
+          "label": "CSP Middleware & Stateless Routes"
+        },
+        {
+          "path": "Dockerfile",
+          "line": 20,
+          "end_line": 32,
+          "label": "Non-Root Uvicorn Container"
+        }
+      ]
+    },
+    {
+      "id": "hmac-privacy-guard",
+      "type": "security",
+      "brand": "python",
+      "label": "Domain-Separated HMAC Proof",
+      "sublabel": "HMAC_SHA256(pepper, boxdiff:v1:id)",
+      "tag": "1h Signed session_proof · No DB Token",
+      "pos": [980, 212],
+      "size": [298, 78],
+      "sources": [
+        {
+          "path": "app/config.py",
+          "line": 40,
+          "end_line": 73,
+          "label": "Irreversible Hash & Proof Signer"
+        }
+      ]
+    },
+    {
+      "id": "firestore-quotas",
+      "type": "database",
+      "brand": "firebase",
+      "label": "Firestore: boxdiff_entitlements",
+      "sublabel": "{ plan, period, diffs_used }",
+      "tag": "5 Free Diffs/Mo · Transactional",
+      "pos": [980, 322],
+      "size": [298, 78],
+      "sources": [
+        {
+          "path": "app/entitlements.py",
+          "line": 13,
+          "end_line": 135,
+          "label": "Zero-PII Firestore Quota Store"
+        }
+      ]
+    },
+    {
+      "id": "secret-manager",
+      "type": "security",
+      "brand": "googlecloud",
+      "label": "Secret Manager & CI Archify",
+      "sublabel": "BOXDIFF_CLIENT_ID/SECRET · PEPPER",
+      "tag": "Owner Deploy Gate · Cloud Archify",
+      "pos": [980, 428],
+      "size": [298, 66],
+      "sources": [
+        {
+          "path": "app/config.py",
+          "line": 24,
+          "end_line": 38,
+          "label": "Secret Env Binding"
+        },
+        {
+          "path": ".github/workflows/archify.yml",
+          "line": 1,
+          "end_line": 60,
+          "label": "Cloud Archify Verification CI"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "box-launch-to-spa",
+      "from": "box-web-ui",
+      "to": "spa-orchestrator",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "emphasis",
+      "label": "GET /launch (?auth_code, file_id)"
+    },
+    {
+      "id": "spa-to-cloudrun-exchange",
+      "from": "spa-orchestrator",
+      "to": "cloudrun-fastapi",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [[471, 62], [1129, 62]],
+      "labelSegment": 1,
+      "variant": "security",
+      "label": "POST /api/oauth/exchange & /entitlement/consume (Zero File Bytes)"
+    },
+    {
+      "id": "cloudrun-to-box-oauth",
+      "from": "cloudrun-fastapi",
+      "to": "box-oauth-api",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [[952, 188], [156, 188]],
+      "labelSegment": 1,
+      "variant": "dashed",
+      "label": "Stateless Code -> Token + Numeric Box ID"
+    },
+    {
+      "id": "spa-to-cors-client",
+      "from": "spa-orchestrator",
+      "to": "cors-box-client",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "default",
+      "label": "Timeline + Pair"
+    },
+    {
+      "id": "cors-to-box-versions",
+      "from": "cors-box-client",
+      "to": "box-versions-api",
+      "fromSide": "left",
+      "toSide": "right",
+      "toOffset": -16,
+      "variant": "emphasis",
+      "label": "CORS 302 Stream (v1..vN)"
+    },
+    {
+      "id": "wasm-to-engines",
+      "from": "vendored-wasm",
+      "to": "spreadsheet-engine",
+      "fromSide": "right",
+      "toSide": "left",
+      "toOffset": 18,
+      "variant": "dashed",
+      "label": "pdf.js / JSZip / pdf-lib"
+    },
+    {
+      "id": "spa-to-text-diff",
+      "from": "spa-orchestrator",
+      "to": "text-redline-engine",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "emphasis",
+      "label": ".pdf / .docx / .txt"
+    },
+    {
+      "id": "cors-to-visual-diff",
+      "from": "cors-box-client",
+      "to": "visual-diff-engine",
+      "fromSide": "right",
+      "toSide": "left",
+      "fromOffset": -14,
+      "variant": "emphasis",
+      "label": "PDF / Image Uint8Array"
+    },
+    {
+      "id": "cors-to-sheet-diff",
+      "from": "cors-box-client",
+      "to": "spreadsheet-engine",
+      "fromSide": "right",
+      "toSide": "left",
+      "fromOffset": 18,
+      "toOffset": -12,
+      "variant": "emphasis",
+      "label": ".xlsx / .csv Bytes"
+    },
+    {
+      "id": "engines-to-exporter",
+      "from": "spreadsheet-engine",
+      "to": "report-exporter",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "default",
+      "label": "Redline + Formula Deltas"
+    },
+    {
+      "id": "exporter-to-box-upload",
+      "from": "report-exporter",
+      "to": "box-upload-api",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[763, 502], [156, 502]],
+      "labelSegment": 1,
+      "variant": "emphasis",
+      "label": "1-Click Upload Redline_Report.pdf to Box"
+    },
+    {
+      "id": "cloudrun-to-hmac",
+      "from": "cloudrun-fastapi",
+      "to": "hmac-privacy-guard",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "security",
+      "label": "Verify Proof"
+    },
+    {
+      "id": "hmac-to-firestore",
+      "from": "hmac-privacy-guard",
+      "to": "firestore-quotas",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "dashed",
+      "label": "Atomic Quota Txn"
+    },
+    {
+      "id": "secrets-to-cloudrun",
+      "from": "secret-manager",
+      "to": "firestore-quotas",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "variant": "security",
+      "label": "Injected Secrets"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "100% Browser-Only Multi-Modal Diff (v1)",
+      "items": [
+        "Text & Contract Redlines (.pdf, .docx, .txt, .md, .json) with Patience LCS + $/ % / Date / Legal Clause callouts.",
+        "Visual Split Curtain Slider + Crimson Pixel-Delta Overlay across multi-page PDFs and PNG/JPEG/WebP images.",
+        "Zero-CVE OpenXML .xlsx + RFC-4180 .csv Auditor catching altered =SUM() formulas and hardcoded overrides."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Version History + Sibling File Workflows",
+      "items": [
+        "Merges GET /files/:id/versions (v1..vN-1) with active file_version (vN) and auto-diffs v(N-1) -> vN on launch.",
+        "Parent Folder Web Integration scope auto-discovers compatible sibling files when a file only has v1.",
+        "Cross-format capable: redlines .docx drafts directly against signed .pdf files and .csv against .xlsx."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Zero-PII Stateless Cloud Architecture",
+      "items": [
+        "Zero file bytes, diff hunks, filenames, emails, or Box OAuth tokens ever transit or persist on GCP.",
+        "Domain-separated HMAC-SHA256(pepper, 'boxdiff:v1:box_user:' + id) isolates quotas in boxdiff_entitlements.",
+        "Exports WinAnsi-safe Redline_Report.pdf straight from browser RAM back into the user's Box folder."
+      ]
+    }
+  ]
+}
