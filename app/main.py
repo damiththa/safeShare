@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 import html
 from pathlib import Path
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+import httpx
 from pydantic import BaseModel, Field
 
 from app.box_oauth import build_box_authorize_url, exchange_auth_code_stateless
@@ -24,12 +27,24 @@ STATIC_DIR = BASE_DIR / "static"
 settings = load_settings()
 entitlements = EntitlementStore(settings)
 
+
+@asynccontextmanager
+async def lifespan(app_instance: FastAPI):
+    entitlements.warm_up()
+    limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
+    async with httpx.AsyncClient(timeout=15.0, limits=limits) as shared_http:
+        app_instance.state.http_client = shared_http
+        yield
+
+
 app = FastAPI(
     title="SafeShare for Box",
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
+    lifespan=lifespan,
 )
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 @app.middleware("http")
@@ -51,7 +66,9 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store, max-age=0"
-    elif request.url.path.startswith("/static/vendor/"):
+    elif request.url.path.startswith("/static/vendor/") or (
+        request.url.path.startswith("/static/") and "v" in request.query_params
+    ):
         response.headers["Cache-Control"] = "public, max-age=86400"
     else:
         response.headers["Cache-Control"] = "no-cache, must-revalidate"
@@ -92,12 +109,13 @@ async def public_config(request: Request):
 
 
 @app.post("/api/oauth/exchange")
-async def api_oauth_exchange(body: OAuthExchangeRequest):
+async def api_oauth_exchange(body: OAuthExchangeRequest, request: Request):
     try:
         box_session = await exchange_auth_code_stateless(
             settings=settings,
             auth_code=body.auth_code,
             redirect_uri=body.redirect_uri,
+            http_client=getattr(request.app.state, "http_client", None),
         )
         user_hash = compute_user_hash(str(box_session["box_user_id"]), settings.hmac_pepper)
         quota_status = await entitlements.get_status(user_hash)

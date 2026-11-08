@@ -11,12 +11,15 @@
  *    with solid `█` block characters (`.docx`) so zero underlying characters survive.
  */
 
-import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=3";
-import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=3";
+import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=4";
+import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=4";
 
-if (window.pdfjsLib) {
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js";
+function ensurePdfWorkerConfigured() {
+  if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js";
+  }
 }
+ensurePdfWorkerConfigured();
 
 export class RedactorWorkspace {
   constructor(canvasEl, onStateChange) {
@@ -139,17 +142,22 @@ export class RedactorWorkspace {
     this.imageBitmap = null;
 
     if (format === "pdf") {
+      ensurePdfWorkerConfigured();
       const workerCopy = uint8.slice();
       this.pdfDocProxy = await window.pdfjsLib.getDocument({ data: workerCopy }).promise;
       this.pageCount = this.pdfDocProxy.numPages;
-      const scannedPages = await this._extractPdfTextAndDetectPii();
-      await this.renderPage(0);
+
+      // Render Page 1 AND extract Page 1 text concurrently so multi-page PDFs open instantaneously!
+      const [firstPageScan] = await Promise.all([
+        this._extractSinglePdfPageItems(0),
+        this.renderPage(0),
+      ]);
+      this.autoFindings = detectPiiInTextItems(firstPageScan.items);
+      this.redrawOverlay();
       this.onStateChange?.();
 
-      // Lazy-run Wasm OCR in background ONLY on scanned PDF pages that lacked embedded text
-      if (scannedPages.length > 0) {
-        this._runBackgroundPdfOcr(scannedPages.slice(0, 8), token);
-      }
+      // Progressively scan Pages 2..40 + run lazy OCR on any scanned pages in the background
+      this._scanRemainingPdfPagesInBackground(token, firstPageScan.isScanned);
       return;
     }
 
@@ -172,44 +180,65 @@ export class RedactorWorkspace {
     }
   }
 
-  async _extractPdfTextAndDetectPii() {
-    const extractedItems = [];
-    const scannedPageIndices = [];
+  async _extractSinglePdfPageItems(pageIdx) {
+    const page = await this.pdfDocProxy.getPage(pageIdx + 1);
+    const viewport = page.getViewport({ scale: 1.0 });
+    const textContent = await page.getTextContent();
+    const items = [];
+    let charCountOnPage = 0;
+
+    for (const item of textContent.items) {
+      if (!item.str || !item.transform) continue;
+      charCountOnPage += item.str.trim().length;
+      const tx = item.transform[4];
+      const ty = item.transform[5];
+      const fontH = Math.hypot(item.transform[2], item.transform[3]) || Math.abs(item.height) || 11;
+      const itemW = item.width || item.str.length * (fontH * 0.52);
+
+      const normX = tx / viewport.width;
+      const normY = (viewport.height - ty - fontH * 0.88) / viewport.height;
+      const normW = itemW / viewport.width;
+      const normH = (fontH * 1.18) / viewport.height;
+
+      items.push({
+        str: item.str,
+        pageIndex: pageIdx,
+        bbox: [normX, normY, normW, normH],
+      });
+    }
+
+    return { items, isScanned: charCountOnPage < 8 };
+  }
+
+  async _scanRemainingPdfPagesInBackground(token, firstPageWasScanned) {
+    const scannedPageIndices = firstPageWasScanned ? [0] : [];
     const maxScanPages = Math.min(this.pageCount, 40);
 
-    for (let p = 1; p <= maxScanPages; p++) {
-      const page = await this.pdfDocProxy.getPage(p);
-      const viewport = page.getViewport({ scale: 1.0 });
-      const textContent = await page.getTextContent();
-      let charCountOnPage = 0;
+    for (let p = 1; p < maxScanPages; p++) {
+      if (token !== this._loadToken || !this.pdfDocProxy) return;
+      const { items, isScanned } = await this._extractSinglePdfPageItems(p);
+      if (token !== this._loadToken) return;
 
-      for (const item of textContent.items) {
-        if (!item.str || !item.transform) continue;
-        charCountOnPage += item.str.trim().length;
-        const tx = item.transform[4];
-        const ty = item.transform[5];
-        const fontH = Math.hypot(item.transform[2], item.transform[3]) || Math.abs(item.height) || 11;
-        const itemW = item.width || item.str.length * (fontH * 0.52);
-
-        const normX = tx / viewport.width;
-        const normY = (viewport.height - ty - fontH * 0.88) / viewport.height;
-        const normW = itemW / viewport.width;
-        const normH = (fontH * 1.18) / viewport.height;
-
-        extractedItems.push({
-          str: item.str,
-          pageIndex: p - 1,
-          bbox: [normX, normY, normW, normH],
-        });
-      }
-
-      if (charCountOnPage < 8) {
-        scannedPageIndices.push(p - 1);
+      if (isScanned) {
+        scannedPageIndices.push(p);
+      } else if (items.length > 0) {
+        const pageFindings = detectPiiInTextItems(items).map((f, idx) => ({
+          ...f,
+          id: `pii-p${p}-${idx + 1}`,
+        }));
+        if (pageFindings.length > 0) {
+          this.autoFindings.push(...pageFindings);
+          if (this.currentPage === p) {
+            this.redrawOverlay();
+          }
+          this.onStateChange?.();
+        }
       }
     }
 
-    this.autoFindings = detectPiiInTextItems(extractedItems);
-    return scannedPageIndices;
+    if (scannedPageIndices.length > 0 && token === this._loadToken) {
+      await this._runBackgroundPdfOcr(scannedPageIndices.slice(0, 8), token);
+    }
   }
 
   async _runBackgroundImageOcr(token) {

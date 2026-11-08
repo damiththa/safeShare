@@ -33,9 +33,16 @@ class EntitlementStore:
         if not self._settings.use_firestore:
             return None
         if self._firestore_client is None:
-            from google.cloud import firestore  # Lazy import for fast startup
+            from google.cloud import firestore
             self._firestore_client = firestore.AsyncClient(project=self._settings.gcp_project_id)
         return self._firestore_client
+
+    def warm_up(self) -> None:
+        """Pre-initializes the Firestore gRPC client during container boot to avoid first-request lag."""
+        try:
+            self._get_firestore()
+        except Exception:
+            pass
 
     def _format_response(self, record: dict[str, Any]) -> dict[str, Any]:
         plan = record.get("plan", "free")

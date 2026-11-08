@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js?v=3";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=3";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=3";
-import { RedactorWorkspace } from "./redactor_engine.js?v=3";
-import { ShareRadarScanner } from "./shareradar_engine.js?v=3";
+import { BoxBrowserClient } from "./box_client.js?v=4";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=4";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=4";
+import { RedactorWorkspace } from "./redactor_engine.js?v=4";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=4";
 
 const state = {
   boxClient: null,
@@ -147,11 +147,17 @@ async function bootstrap() {
   wirePickerControls();
 
   let pubCfg = { authorize_url_template: "", redirect_uri: null };
+  const pubCfgPromise = fetch("/api/public-config")
+    .then((r) => r.json())
+    .then((cfg) => {
+      pubCfg = cfg;
+      return cfg;
+    })
+    .catch(() => ({ authorize_url_template: "", redirect_uri: null }));
+
   el("btn-oauth-connect").addEventListener("click", async () => {
     if (!pubCfg.authorize_url_template) {
-      pubCfg = await fetch("/api/public-config")
-        .then((r) => r.json())
-        .catch(() => ({}));
+      await pubCfgPromise;
     }
     if (!pubCfg.authorize_url_template) {
       showToast("Box OAuth credentials are not configured yet.", "error");
@@ -159,10 +165,6 @@ async function bootstrap() {
     }
     window.location.href = pubCfg.authorize_url_template;
   });
-
-  pubCfg = await fetch("/api/public-config")
-    .then((r) => r.json())
-    .catch(() => ({ authorize_url_template: "", redirect_uri: null }));
 
   const launch = parseLaunchParams();
   if (launch.returnUrl && /^https:\/\/([a-z0-9-]+\.)*(box\.com|app\.box\.com)\//i.test(launch.returnUrl)) {
@@ -173,17 +175,21 @@ async function bootstrap() {
     return;
   }
 
-  el("connect-heading").textContent = "Opening your Box file...";
+  el("connect-heading").textContent = launch.folderId
+    ? "Opening your Box folder..."
+    : "Opening your Box file...";
   el("connect-subtext").textContent = "Just a moment while we prepare your workspace.";
   el("btn-oauth-connect").disabled = true;
 
   try {
+    // Only standalone /callback redirects need redirect_uri; Box Web Integration launches fire immediately!
+    const redirectUri = launch.fromCallback ? (await pubCfgPromise).redirect_uri : null;
     const exchResp = await fetch("/api/oauth/exchange", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         auth_code: launch.authCode,
-        redirect_uri: launch.fromCallback ? pubCfg.redirect_uri : null,
+        redirect_uri: redirectUri,
       }),
     });
     const exchData = await exchResp.json();
@@ -244,7 +250,11 @@ async function openFileInScrubber(fileId) {
   state.lastSharedLinkUrl = null;
 
   try {
-    const meta = await state.boxClient.getFileMetadata(fileId);
+    // Fetch Box file metadata and binary stream concurrently to cut a full network round-trip
+    const [meta, bytes] = await Promise.all([
+      state.boxClient.getFileMetadata(fileId),
+      state.boxClient.downloadFileBytes(fileId),
+    ]);
     state.activeFileMeta = meta;
     if (meta.parent?.id) {
       state.pickerFolderId = String(meta.parent.id);
@@ -252,7 +262,6 @@ async function openFileInScrubber(fileId) {
     el("active-context-label").textContent = meta.name;
     el("scrub-file-label").textContent = meta.name;
 
-    const bytes = await state.boxClient.downloadFileBytes(fileId);
     const fmt = detectFileFormatFromBytes(bytes, meta.name);
     state.activeFileFormat = fmt;
 
@@ -271,8 +280,11 @@ async function openFileInScrubber(fileId) {
       fmt === "pdf" ? ".pdf" : fmt === "docx" ? ".docx" : fmt === "png" ? ".png" : ".jpg";
     checkFilenameWarning();
 
-    // Calm Metadata Check
-    const leaks = await runMetadataXray(bytes, fmt);
+    // Run header clean-up check and Page 1 rendering concurrently
+    const [leaks] = await Promise.all([
+      runMetadataXray(bytes, fmt),
+      state.redactor.loadDocument(bytes, fmt),
+    ]);
     const xrayList = el("xray-list");
     xrayList.innerHTML = "";
 
@@ -300,7 +312,6 @@ async function openFileInScrubber(fileId) {
       }
     }
 
-    await state.redactor.loadDocument(bytes, fmt);
     renderRedactorSidebarState();
   } catch (err) {
     showToast(err.message || "Unable to open this file from Box.", "error");

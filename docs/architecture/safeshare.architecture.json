@@ -115,8 +115,8 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 310, "label": "Contextual Clean, PII/PHI & Folder Sharing UI" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 901, "label": "Stateless launch, 1-click PII/PHI & popup UI" },
+        { "path": "static/index.html", "line": 1, "end_line": 310, "label": "Deferred-vendor UI shell (<100ms first paint)" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 912, "label": "Parallel Box launch, 1-click PII/PHI & popup UI" },
         { "path": "static/css/styles.css", "line": 1, "end_line": 1104, "label": "Calm daylight Box-native responsive stylesheet" }
       ]
     },
@@ -171,7 +171,7 @@
       "pos": [548, 255],
       "size": [198, 68],
       "sources": [
-        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 669, "label": "Candidate highlighter, 250-DPI & DOCX scrubber" }
+        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 698, "label": "Instant Page 1 render, bg scan & 250-DPI burn" }
       ]
     },
     {
@@ -197,7 +197,7 @@
       "pos": [824, 110],
       "size": [198, 68],
       "sources": [
-        { "path": "app/main.py", "line": 1, "end_line": 211, "label": "Stateless FastAPI routes & launch handlers" },
+        { "path": "app/main.py", "line": 1, "end_line": 229, "label": "Lifespan HTTP/gRPC warm-up, GZip & launch routes" },
         { "path": "Dockerfile", "line": 29, "end_line": 41, "label": "Non-root Uvicorn with --no-access-log" }
       ]
     },
@@ -211,7 +211,7 @@
       "pos": [824, 255],
       "size": [198, 68],
       "sources": [
-        { "path": "app/box_oauth.py", "line": 1, "end_line": 74, "label": "Memory-only code exchange & refresh discard" },
+        { "path": "app/box_oauth.py", "line": 1, "end_line": 85, "label": "Keep-alive code exchange & refresh discard" },
         { "path": "app/config.py", "line": 41, "end_line": 75, "label": "Irreversible user_hash & stateless HMAC proof" }
       ]
     },
@@ -225,7 +225,7 @@
       "pos": [824, 400],
       "size": [198, 68],
       "sources": [
-        { "path": "app/entitlements.py", "line": 1, "end_line": 164, "label": "Atomic transactional Free/Pro quota store" }
+        { "path": "app/entitlements.py", "line": 1, "end_line": 171, "label": "Pre-warmed atomic Free/Pro Firestore quota store" }
       ]
     },
     {
@@ -265,7 +265,7 @@
       "pos": [1076, 400],
       "size": [196, 68],
       "sources": [
-        { "path": "app/main.py", "line": 35, "end_line": 58, "label": "Strict CSP, Cache-Control & Box ancestor whitelist" },
+        { "path": "app/main.py", "line": 47, "end_line": 75, "label": "GZip, strict CSP, 24h asset cache & Box ancestors" },
         { "path": "static/privacy.html", "line": 1, "end_line": 49, "label": "Zero-retention privacy policy template" },
         { "path": "static/terms.html", "line": 1, "end_line": 45, "label": "Redaction verification terms template" }
       ]
