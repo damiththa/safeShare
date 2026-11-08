@@ -3,77 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BoxDiff — Zero-PII Document, Visual &amp; Spreadsheet Diff for Box</title>
-  <link rel="stylesheet" href="/static/css/styles.css" />
+  <title>BoxDiff for Box</title>
+  <link rel="stylesheet" href="/static/css/styles.css?v=2" />
+  <script defer src="/static/vendor/pdf-lib.min.js?v=2"></script>
+  <script defer src="/static/vendor/pdf.min.js?v=2"></script>
+  <script defer src="/static/vendor/jszip.min.js?v=2"></script>
+  <script type="module" src="/static/js/app.js?v=2"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand-cluster">
-      <div class="brand-logo" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
-          <rect x="2" y="4" width="13" height="24" rx="3" fill="#0ea5e9" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.8"/>
-          <rect x="17" y="4" width="13" height="24" rx="3" fill="#10b981" fill-opacity="0.22" stroke="#34d399" stroke-width="1.8"/>
-          <path d="M16 2v28" stroke="#f43f5e" stroke-width="2" stroke-linecap="round"/>
-          <path d="M6 11h5M6 16h5M21 11h5M21 21h5" stroke="#f8fafc" stroke-width="1.6" stroke-linecap="round"/>
+    <div class="brand-row">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="12" x2="12" y2="18"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
         </svg>
       </div>
-      <div>
-        <div class="brand-title-row">
+      <div class="brand-text">
+        <div class="brand-title-line">
           <span class="brand-name">BoxDiff</span>
-          <span class="badge badge-safe">100% Browser-Only · Zero-PII</span>
+          <span class="privacy-pill" title="Your files stay inside your browser and are never stored on external servers">
+            Private in browser
+          </span>
         </div>
-        <div class="brand-sub">Version History &amp; Sibling File Redlines for Box</div>
+        <div class="brand-sub" id="active-context-label">Version history &amp; sibling file redlines for Box</div>
       </div>
     </div>
 
     <nav id="workspaceTabs" class="nav-tabs hidden" aria-label="Workspace Views">
-      <button id="tabCompare" type="button" class="nav-tab active">Compare &amp; Redline</button>
-      <button id="tabBrowse" type="button" class="nav-tab">Browse Box Folder</button>
+      <button id="tabCompare" type="button" class="tab-btn active">Compare &amp; Redline</button>
+      <button id="tabBrowse" type="button" class="tab-btn">Browse Box Folder</button>
     </nav>
 
-    <div class="topbar-right">
-      <span id="quotaBadge" class="pill pill-quota hidden">Free: 5/5 diffs left</span>
-      <span id="userBadge" class="pill pill-user hidden">Box Connected</span>
-      <a id="btnReturnBox" href="#" class="btn btn-ghost btn-sm hidden">Return to Box</a>
+    <div class="header-actions">
+      <span id="quotaBadge" class="quota-pill hidden">Free: 5/5 diffs left</span>
+      <span id="userBadge" class="pill-user hidden">Box Connected</span>
+      <a id="btnReturnBox" href="#" class="btn btn-secondary btn-sm hidden">Return to Box</a>
     </div>
   </header>
 
-  <main class="app-shell">
+  <main class="container">
     <div id="statusBanner" class="status-banner hidden" role="status">
       <span id="statusBannerText"></span>
       <button id="statusBannerClose" type="button" class="banner-close" aria-label="Dismiss">&times;</button>
     </div>
 
-    <!-- Standalone OAuth Connect View -->
-    <section id="connectScreen" class="hero-card">
-      <div class="hero-badge">Zero-Server-Storage Box Integration</div>
-      <h1>Instant Redlines, Visual Curtain Diffs &amp; Formula Audits</h1>
-      <p class="hero-lead">
-        Compare <strong>Box Version History (<code>v1..vN</code>)</strong> or <strong>any two files</strong> across
-        <code>.pdf</code>, <code>.docx</code>, <code>.xlsx</code>, <code>.csv</code>, <code>.txt</code>, <code>.md</code>,
-        <code>.json</code>, and images—100% inside your browser RAM with zero bytes ever sent to external servers.
+    <!-- Standalone OAuth Connect Screen -->
+    <section id="connectScreen" class="welcome-card">
+      <div class="welcome-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+          <path d="M8 8h1M8 12h1M15 12h1M15 16h1"></path>
+        </svg>
+      </div>
+      <span class="hero-badge">100% In-Browser &middot; Zero-PII Architecture</span>
+      <h1>Compare Box files with confidence</h1>
+      <p class="welcome-lead">
+        Compare <strong>Box Version History (<code>v1..vN</code>)</strong> or <strong>any two sibling files</strong> across
+        PDF, Word (<code>.docx</code>), Excel (<code>.xlsx</code> / <code>.csv</code>), text, and images—100% inside your browser RAM with zero file bytes sent to external servers.
       </p>
       <div class="feature-grid">
         <div class="feature-tile">
           <h3>Contract &amp; Text Redline</h3>
-          <p>Word-level additions &amp; deletions plus automatic <strong>$ Amount</strong>, <strong>% Rate</strong>, <strong>Date</strong>, and <strong>Legal Clause</strong> callouts—even across <code>.docx</code> vs <code>.pdf</code>.</p>
+          <p>Word-level additions &amp; deletions plus automatic callouts for \$ Amounts, % Rates, Dates, and Legal Clauses—even across <code>.docx</code> vs <code>.pdf</code>.</p>
         </div>
         <div class="feature-tile">
           <h3>Visual Curtain &amp; Pixel Diff</h3>
-          <p>Interactive split-screen curtain slider and crimson pixel-delta overlay for scanned PDFs, engineering drawings, and design assets.</p>
+          <p>Interactive split-screen curtain slider and crimson pixel-delta overlay for scanned PDFs, signatures, and engineering drawings.</p>
         </div>
         <div class="feature-tile">
           <h3>Excel Formula &amp; Cell Audit</h3>
           <p>Multi-sheet OpenXML <code>.xlsx</code> and <code>.csv</code> inspection that catches altered <code>=SUM()</code> formulas and hardcoded overrides.</p>
         </div>
       </div>
-      <div class="hero-actions">
-        <button id="btnConnectBox" type="button" class="btn btn-primary btn-lg">Connect with Box</button>
+      <div class="welcome-actions">
+        <button id="btnConnectBox" type="button" class="btn btn-primary btn-lg">Continue with Box</button>
       </div>
-      <p class="legal-links">
+      <div class="welcome-footer">
+        Runs privately in your browser &middot;
         <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> &middot;
         <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
-      </p>
+      </div>
     </section>
 
     <!-- Main Comparison Workspace -->
@@ -81,21 +94,21 @@
       <div class="source-selector-card">
         <div class="selector-col selector-left">
           <label for="leftSelect" class="selector-label">
-            <span class="dot dot-left"></span> Baseline (Left — Prior Version or Reference File)
+            <span class="dot dot-left"></span> Baseline (Left &mdash; Prior Version or Reference File)
           </label>
           <select id="leftSelect" class="source-select"></select>
           <div id="leftMetaInfo" class="selector-meta">Select baseline version or file</div>
         </div>
 
         <div class="selector-swap">
-          <button id="btnSwapSides" type="button" class="btn btn-ghost btn-icon" title="Swap Baseline and Target">
+          <button id="btnSwapSides" type="button" class="btn-icon" title="Swap Baseline and Target">
             &#8646;
           </button>
         </div>
 
         <div class="selector-col selector-right">
           <label for="rightSelect" class="selector-label">
-            <span class="dot dot-right"></span> Target (Right — Current Version or Revised File)
+            <span class="dot dot-right"></span> Target (Right &mdash; Current Version or Revised File)
           </label>
           <select id="rightSelect" class="source-select"></select>
           <div id="rightMetaInfo" class="selector-meta">Select target version or file</div>
@@ -105,7 +118,7 @@
           <button id="btnRunDiff" type="button" class="btn btn-primary">Run Comparison</button>
           <div class="export-row">
             <button id="btnExportBoxPdf" type="button" class="btn btn-secondary btn-sm" disabled>
-              Save Report PDF to Box
+              Save Report to Box
             </button>
             <button id="btnDownloadLocalPdf" type="button" class="btn btn-ghost btn-sm" disabled>
               Download PDF
@@ -151,7 +164,7 @@
         <div id="smartHighlightsBox" class="highlights-card hidden">
           <div class="highlights-header">
             <strong>Smart Financial, Rate, Date &amp; Legal Clause Highlights</strong>
-            <span id="highlightsCountBadge" class="pill pill-warn">0 key shifts</span>
+            <span id="highlightsCountBadge" class="pill-warn">0 key shifts</span>
           </div>
           <div id="smartHighlightsList" class="highlights-grid"></div>
         </div>
@@ -191,7 +204,7 @@
             <span id="pixelThresholdLabel" class="mono-sm">24</span>
           </div>
 
-          <span id="visualPageDeltaBadge" class="pill pill-delta">0.00% pixels changed</span>
+          <span id="visualPageDeltaBadge" class="pill-delta">0.00% pixels changed</span>
         </div>
 
         <div id="pageDeltaStrip" class="page-delta-strip hidden"></div>
@@ -305,17 +318,11 @@
   </main>
 
   <footer class="app-footer">
-    <span>BoxDiff v1 &middot; 100% In-Browser WebAssembly/Canvas Execution &middot; Zero File Bytes Sent to Cloud</span>
+    <span>BoxDiff &middot; 100% In-Browser Execution &middot; Zero File Bytes Sent to Cloud</span>
     <span>
       <a href="/privacy" target="_blank" rel="noopener">Privacy</a> &middot;
       <a href="/terms" target="_blank" rel="noopener">Terms</a>
     </span>
   </footer>
-
-  <!-- Vendored Permissive Client Bundles (Zero External Runtime CDNs) -->
-  <script src="/static/vendor/pdf-lib.min.js"></script>
-  <script src="/static/vendor/pdf.min.js"></script>
-  <script src="/static/vendor/jszip.min.js"></script>
-  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

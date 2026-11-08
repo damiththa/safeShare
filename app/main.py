@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -30,6 +31,7 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 @app.middleware("http")
@@ -42,7 +44,7 @@ async def security_headers_middleware(request: Request, call_next):
         "style-src 'self' 'unsafe-inline'; "
         "font-src 'self' data:; "
         "img-src 'self' blob: data:; "
-        "connect-src 'self' https://api.box.com https://upload.box.com https://*.boxcloud.com https://*.box.com; "
+        "connect-src 'self' blob: data: https://api.box.com https://upload.box.com https://*.boxcloud.com https://*.box.com; "
         "frame-ancestors 'self' https://*.box.com https://*.app.box.com https://box.com;"
     )
     response.headers["Content-Security-Policy"] = csp
@@ -50,6 +52,12 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store, max-age=0"
+    elif request.url.path.startswith("/static/vendor/") or (
+        request.url.path.startswith("/static/") and "v" in request.query_params
+    ):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    else:
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
     return response
 
 

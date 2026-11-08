@@ -1,11 +1,11 @@
-import { BoxBrowserClient } from "./box_client.js";
-import { extractDocumentText, computeTextRedline } from "./text_diff.js";
-import { VisualComparator, supportsVisualComparison } from "./visual_diff.js";
-import { diffSpreadsheets, supportsSpreadsheetComparison } from "./spreadsheet_diff.js";
-import { generateRedlineReportPdf } from "./report_exporter.js";
+import { BoxBrowserClient } from "./box_client.js?v=2";
+import { extractDocumentText, computeTextRedline } from "./text_diff.js?v=2";
+import { VisualComparator, supportsVisualComparison } from "./visual_diff.js?v=2";
+import { diffSpreadsheets, supportsSpreadsheetComparison } from "./spreadsheet_diff.js?v=2";
+import { generateRedlineReportPdf } from "./report_exporter.js?v=2";
 
 if (window.pdfjsLib) {
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js";
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js?v=2";
 }
 
 const TEXT_EXTS = new Set(["pdf", "docx", "txt", "md", "json", "csv"]);

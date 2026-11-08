@@ -140,7 +140,7 @@
         {
           "path": "static/index.html",
           "line": 1,
-          "end_line": 321,
+          "end_line": 328,
           "label": "BoxDiff Workspace UI"
         },
         {
@@ -193,8 +193,8 @@
         },
         {
           "path": "static/index.html",
-          "line": 315,
-          "end_line": 318,
+          "line": 7,
+          "end_line": 9,
           "label": "Local Script Mounts"
         }
       ]
@@ -307,8 +307,8 @@
       "sources": [
         {
           "path": "app/main.py",
-          "line": 35,
-          "end_line": 201,
+          "line": 37,
+          "end_line": 209,
           "label": "CSP Middleware & Stateless Routes"
         },
         {
