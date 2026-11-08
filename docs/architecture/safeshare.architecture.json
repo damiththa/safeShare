@@ -115,9 +115,9 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 310, "label": "Deferred-vendor UI shell (<100ms first paint)" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 912, "label": "Parallel Box launch, 1-click PII/PHI & popup UI" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 1104, "label": "Calm daylight Box-native responsive stylesheet" }
+        { "path": "static/index.html", "line": 1, "end_line": 325, "label": "Deferred-vendor UI shell (<100ms first paint)" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 1028, "label": "Parallel Box launch, safe quota & dual save mode" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1162, "label": "Daylight UI, floating toast & inline save alerts" }
       ]
     },
     {
@@ -130,7 +130,7 @@
       "pos": [296, 255],
       "size": [194, 68],
       "sources": [
-        { "path": "static/js/box_client.js", "line": 1, "end_line": 211, "label": "302 dl.boxcloud stream & v1 multipart upload" }
+        { "path": "static/js/box_client.js", "line": 1, "end_line": 241, "label": "302 stream, _Clean v1 & file-version fallback" }
       ]
     },
     {

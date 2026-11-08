@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js?v=4";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=4";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=4";
-import { RedactorWorkspace } from "./redactor_engine.js?v=4";
-import { ShareRadarScanner } from "./shareradar_engine.js?v=4";
+import { BoxBrowserClient } from "./box_client.js?v=5";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=5";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=5";
+import { RedactorWorkspace } from "./redactor_engine.js?v=5";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=5";
 
 const state = {
   boxClient: null,
@@ -12,6 +12,7 @@ const state = {
   contextualLaunch: false,
   activeFileMeta: null,
   activeFileFormat: null,
+  saveMode: "new_copy", // "new_copy" | "overwrite"
   piiCategoryFilter: "all",
   lastSavedFileId: null,
   lastSharedLinkUrl: null,
@@ -71,6 +72,33 @@ function updateQuotaBadge() {
   }
 }
 
+async function checkQuotaAvailable(action, units = 1) {
+  const resp = await fetch("/api/entitlement/status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_proof: state.sessionProof }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    throw new Error(data.detail || "Session expired. Please reopen from Box.");
+  }
+  if (data.entitlement) {
+    state.entitlement = data.entitlement;
+    updateQuotaBadge();
+  }
+  const ent = data.entitlement || state.entitlement;
+  if (ent && ent.plan !== "pro") {
+    const remaining = action === "scrub" ? ent.scrub_remaining : ent.radar_fixes_remaining;
+    if (typeof remaining === "number" && remaining < units) {
+      return {
+        allowed: false,
+        message: "Monthly Free plan save limit reached (3/month). Upgrade to Pro for unlimited saves.",
+      };
+    }
+  }
+  return { allowed: true, message: "" };
+}
+
 async function consumeQuotaOrWarn(action, units = 1) {
   const resp = await fetch("/api/entitlement/consume", {
     method: "POST",
@@ -81,7 +109,7 @@ async function consumeQuotaOrWarn(action, units = 1) {
       units,
     }),
   });
-  const data = await resp.json();
+  const data = await resp.json().catch(() => ({}));
   if (data.entitlement) {
     state.entitlement = data.entitlement;
     updateQuotaBadge();
@@ -242,6 +270,7 @@ async function openFileInScrubber(fileId) {
   el("scrub-empty-prompt").classList.add("hidden");
   el("scrub-workspace").classList.remove("hidden");
   el("save-success-box").classList.add("hidden");
+  el("save-error-box").classList.add("hidden");
   el("xray-summary").textContent = "Checking hidden file properties...";
   el("xray-details-wrap").classList.add("hidden");
   el("xray-list").innerHTML = "";
@@ -512,6 +541,24 @@ function wireScrubControls() {
       renderRedactorSidebarState();
     });
   });
+  const applySaveModeUi = (mode) => {
+    state.saveMode = mode === "overwrite" ? "overwrite" : "new_copy";
+    const isOverwrite = state.saveMode === "overwrite";
+    el("btn-mode-new-copy").classList.toggle("active", !isOverwrite);
+    el("btn-mode-overwrite").classList.toggle("active", isOverwrite);
+    el("filename-field-wrap").classList.toggle("hidden", isOverwrite);
+    el("btn-save-only").textContent = isOverwrite
+      ? "Save Changes to Box File"
+      : "Save Clean Copy to Box";
+    el("save-mode-note").textContent = isOverwrite
+      ? "Saves redacted changes directly onto your open Box file as a new version."
+      : "Saves as a separate new file in Box. Your original file stays untouched.";
+    el("save-error-box").classList.add("hidden");
+  };
+
+  el("btn-mode-new-copy").addEventListener("click", () => applySaveModeUi("new_copy"));
+  el("btn-mode-overwrite").addEventListener("click", () => applySaveModeUi("overwrite"));
+
   el("inp-output-stem").addEventListener("input", checkFilenameWarning);
   el("btn-anonymize-name").addEventListener("click", () => {
     el("inp-output-stem").value = generateAnonymousStem();
@@ -534,34 +581,89 @@ function wireScrubControls() {
     }
   });
 
+  const showSaveError = (msg) => {
+    const errBox = el("save-error-box");
+    errBox.textContent = msg;
+    errBox.classList.remove("hidden");
+    showToast(msg, "error");
+  };
+
   const handleExport = async (createLinkAfter) => {
     if (!state.activeFileMeta || !state.redactor.rawBytes) return;
-    const allowed = await consumeQuotaOrWarn("scrub", 1);
-    if (!allowed) return;
+    const errBox = el("save-error-box");
+    errBox.classList.add("hidden");
+    el("save-success-box").classList.add("hidden");
 
     const btnA = el("btn-save-only");
     const btnB = el("btn-save-and-link");
     btnA.disabled = true;
     btnB.disabled = true;
-    el("save-success-box").classList.add("hidden");
 
     try {
-      showToast("Saving clean copy to your Box folder...", "info");
+      // 1. Pre-check quota WITHOUT decrementing so failed uploads never burn free saves!
+      const quotaCheck = await checkQuotaAvailable("scrub", 1);
+      if (!quotaCheck.allowed) {
+        showSaveError(quotaCheck.message);
+        return;
+      }
+
+      showToast("Saving redacted file to Box...", "info");
       const flattenAll = el("chk-flatten-all").checked;
       const result = await state.redactor.exportSanitizedBytes({ flattenAllPages: flattenAll });
       const parentId = state.activeFileMeta.parent?.id || "0";
       const stem = el("inp-output-stem").value.trim() || "Clean_Copy";
 
-      const uploaded = await state.boxClient.uploadNewSafeCopy(
-        parentId,
-        stem,
-        result.extension,
-        result.mimeType,
-        result.bytes
-      );
+      let uploaded = null;
+      let usedSingleFileFallback = false;
+
+      if (state.saveMode === "overwrite") {
+        uploaded = await state.boxClient.uploadNewFileVersion(
+          state.activeFileMeta.id,
+          state.activeFileMeta.name,
+          result.mimeType,
+          result.bytes
+        );
+      } else {
+        try {
+          uploaded = await state.boxClient.uploadNewSafeCopy(
+            parentId,
+            stem,
+            result.extension,
+            result.mimeType,
+            result.bytes
+          );
+        } catch (uploadErr) {
+          // If Box Web Integration is configured with single-file scope instead of parent-folder scope,
+          // POST /files/content returns 403; automatically fall back to saving a new version on {file_id}!
+          if (uploadErr && uploadErr.status === 403) {
+            uploaded = await state.boxClient.uploadNewFileVersion(
+              state.activeFileMeta.id,
+              state.activeFileMeta.name,
+              result.mimeType,
+              result.bytes
+            );
+            usedSingleFileFallback = true;
+          } else {
+            throw uploadErr;
+          }
+        }
+      }
+
+      // 2. Consume quota ONLY AFTER Box confirms the file was saved!
+      await consumeQuotaOrWarn("scrub", 1);
 
       state.lastSavedFileId = uploaded.id;
       state.lastSharedLinkUrl = null;
+
+      const subEl = el("save-success-sub");
+      if (usedSingleFileFallback) {
+        subEl.textContent =
+          "Saved directly onto your existing Box file as a new version (enable Parent Folder scope in Box Integration settings if you prefer separate _Clean copies).";
+        subEl.classList.remove("hidden");
+      } else {
+        subEl.textContent = "";
+        subEl.classList.add("hidden");
+      }
 
       if (createLinkAfter) {
         const sl = await state.boxClient.createSharedLinkForFile(uploaded.id, "open", true);
@@ -573,13 +675,16 @@ function wireScrubControls() {
         el("save-success-title").textContent = `Saved "${uploaded.name}" & copied share link!`;
       } else {
         hideToast();
-        el("save-success-title").textContent = `Saved "${uploaded.name}" to your Box folder!`;
+        el("save-success-title").textContent =
+          state.saveMode === "overwrite" || usedSingleFileFallback
+            ? `Updated "${uploaded.name}" in Box!`
+            : `Saved "${uploaded.name}" to your Box folder!`;
       }
 
       el("btn-copy-saved-link").classList.remove("hidden");
       el("save-success-box").classList.remove("hidden");
     } catch (err) {
-      showToast(err.message || "Could not save clean copy to Box.", "error");
+      showSaveError(err.message || "Could not save redacted file to Box.");
     } finally {
       btnA.disabled = false;
       btnB.disabled = false;
@@ -788,8 +893,16 @@ function wireRadarControls() {
     );
     if (targets.length === 0) return;
 
-    const allowed = await consumeQuotaOrWarn("radar_fix", targets.length);
-    if (!allowed) return;
+    try {
+      const quotaCheck = await checkQuotaAvailable("radar_fix", targets.length);
+      if (!quotaCheck.allowed) {
+        showToast(quotaCheck.message, "error");
+        return;
+      }
+    } catch (err) {
+      showToast(err.message || "Could not verify session quota.", "error");
+      return;
+    }
 
     let completed = 0;
     for (const item of targets) {
@@ -799,6 +912,9 @@ function wireRadarControls() {
       } catch {
         // Continue remaining items if one lacks permission
       }
+    }
+    if (completed > 0) {
+      await consumeQuotaOrWarn("radar_fix", completed);
     }
     refreshRadarUi();
     showToast(`Updated ${completed} item${completed === 1 ? "" : "s"} in Box.`, "success");

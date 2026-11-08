@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafeShare for Box</title>
-  <link rel="stylesheet" href="/static/css/styles.css?v=4" />
-  <script defer src="/static/vendor/pdf-lib.min.js?v=4"></script>
-  <script defer src="/static/vendor/pdf.min.js?v=4"></script>
-  <script defer src="/static/vendor/exifr.full.umd.js?v=4"></script>
-  <script defer src="/static/vendor/jszip.min.js?v=4"></script>
+  <link rel="stylesheet" href="/static/css/styles.css?v=5" />
+  <script defer src="/static/vendor/pdf-lib.min.js?v=5"></script>
+  <script defer src="/static/vendor/pdf.min.js?v=5"></script>
+  <script defer src="/static/vendor/exifr.full.umd.js?v=5"></script>
+  <script defer src="/static/vendor/jszip.min.js?v=5"></script>
 </head>
 <body>
   <header class="topbar">
@@ -169,15 +169,26 @@
 
           <!-- Step 3: Save Clean Copy -->
           <div class="side-card save-card">
-            <label class="field-label" for="inp-output-stem">Save clean copy as</label>
-            <div class="filename-group">
-              <input type="text" id="inp-output-stem" class="filename-input" placeholder="Document_Clean" />
-              <span id="lbl-output-ext" class="filename-ext">.pdf</span>
+            <div class="save-mode-toggle" role="radiogroup" aria-label="How to save to Box">
+              <button class="save-mode-btn active" id="btn-mode-new-copy" data-mode="new_copy" type="button">
+                New <code>_Clean</code> copy
+              </button>
+              <button class="save-mode-btn" id="btn-mode-overwrite" data-mode="overwrite" type="button">
+                Update original file
+              </button>
             </div>
 
-            <button class="name-suggestion hidden" id="btn-anonymize-name" type="button">
-              File name contains personal info &mdash; click to use a generic name
-            </button>
+            <div id="filename-field-wrap">
+              <label class="field-label" for="inp-output-stem">Save clean copy as</label>
+              <div class="filename-group">
+                <input type="text" id="inp-output-stem" class="filename-input" placeholder="Document_Clean" />
+                <span id="lbl-output-ext" class="filename-ext">.pdf</span>
+              </div>
+
+              <button class="name-suggestion hidden" id="btn-anonymize-name" type="button">
+                File name contains personal info &mdash; click to use a generic name
+              </button>
+            </div>
 
             <div class="cta-stack">
               <button class="btn btn-primary btn-block" id="btn-save-only" type="button">
@@ -188,9 +199,12 @@
               </button>
             </div>
 
-            <p class="reassure-note">
+            <p class="reassure-note" id="save-mode-note">
               Saves as a separate new file in Box. Your original file stays untouched.
             </p>
+
+            <!-- Inline Error / Quota Feedback right next to the Save button -->
+            <div id="save-error-box" class="error-box hidden" role="alert"></div>
 
             <details class="quiet-details" id="advanced-pdf-options">
               <summary>More options</summary>
@@ -203,6 +217,7 @@
             <!-- Celebratory Inline Confirmation after Save -->
             <div id="save-success-box" class="success-box hidden">
               <div class="success-title" id="save-success-title">Saved to your Box folder!</div>
+              <p class="success-sub hidden" id="save-success-sub"></p>
               <div class="success-actions">
                 <button class="btn btn-secondary btn-sm hidden" id="btn-copy-saved-link" type="button">Copy Share Link</button>
                 <button class="btn btn-primary btn-sm" id="btn-done-after-save" type="button">Done</button>
@@ -305,6 +320,6 @@
     </section>
   </main>
 
-  <script type="module" src="/static/js/app.js?v=4"></script>
+  <script type="module" src="/static/js/app.js?v=5"></script>
 </body>
 </html>

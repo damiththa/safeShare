@@ -11,8 +11,8 @@
  *    with solid `█` block characters (`.docx`) so zero underlying characters survive.
  */
 
-import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=4";
-import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=4";
+import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=5";
+import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=5";
 
 function ensurePdfWorkerConfigured() {
   if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {

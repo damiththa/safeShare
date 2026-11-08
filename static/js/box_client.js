@@ -117,13 +117,43 @@ export class BoxBrowserClient {
       const data = await resp.json().catch(() => null);
       if (!resp.ok) {
         const msg = (data && data.message) || `Upload to Box failed (HTTP ${resp.status})`;
-        throw new Error(msg);
+        const err = new Error(msg);
+        err.status = resp.status;
+        throw err;
       }
       const uploadedEntry = data && data.entries && data.entries[0];
       if (!uploadedEntry) throw new Error("Upload succeeded but Box returned no file entry.");
       return uploadedEntry;
     }
     throw new Error("Too many files with the same name in this folder; please choose a new name.");
+  }
+
+  /**
+   * Uploads a sanitized/redacted new version directly onto an existing Box `fileId`.
+   * Works even when a Box Web Integration is configured with single-file scope rather than parent-folder scope.
+   */
+  async uploadNewFileVersion(fileId, originalFileName, mimeType, uint8Bytes) {
+    const cleanName = (originalFileName || "Clean_Document").replace(/[\\/:*?"<>|]/g, "_").trim();
+    const form = new FormData();
+    form.append("attributes", JSON.stringify({ name: cleanName }));
+    form.append("file", new Blob([uint8Bytes], { type: mimeType }), cleanName);
+
+    const resp = await fetch(`${BOX_UPLOAD_API}/files/${encodeURIComponent(fileId)}/content`, {
+      method: "POST",
+      headers: this._authHeaders(),
+      body: form,
+    });
+
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      const msg = (data && data.message) || `Saving version to Box failed (HTTP ${resp.status})`;
+      const err = new Error(msg);
+      err.status = resp.status;
+      throw err;
+    }
+    const uploadedEntry = data && data.entries && data.entries[0];
+    if (!uploadedEntry) throw new Error("Version upload succeeded but Box returned no file entry.");
+    return uploadedEntry;
   }
 
   /**
