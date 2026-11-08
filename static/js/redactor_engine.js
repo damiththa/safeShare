@@ -11,7 +11,7 @@
  *  - DOCX: Strips `docProps/core.xml`, `docProps/app.xml`, and `word/comments.xml`.
  */
 
-import { detectPiiInTextItems } from "./pii_detector.js";
+import { detectPiiInTextItems } from "./pii_detector.js?v=2";
 
 if (window.pdfjsLib) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js";

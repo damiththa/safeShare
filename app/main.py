@@ -51,6 +51,10 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store, max-age=0"
+    elif request.url.path.startswith("/static/vendor/"):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    else:
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
     return response
 
 

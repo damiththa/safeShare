@@ -116,7 +116,7 @@
       "size": [194, 68],
       "sources": [
         { "path": "static/index.html", "line": 1, "end_line": 288, "label": "Contextual popup-ready Clean & Folder Sharing UI" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 791, "label": "Stateless contextual launch & popup orchestrator" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 800, "label": "Stateless contextual launch & popup orchestrator" },
         { "path": "static/css/styles.css", "line": 1, "end_line": 1005, "label": "Calm daylight Box-native responsive stylesheet" }
       ]
     },
@@ -196,7 +196,7 @@
       "pos": [824, 110],
       "size": [198, 68],
       "sources": [
-        { "path": "app/main.py", "line": 1, "end_line": 207, "label": "Stateless FastAPI routes & launch handlers" },
+        { "path": "app/main.py", "line": 1, "end_line": 211, "label": "Stateless FastAPI routes & launch handlers" },
         { "path": "Dockerfile", "line": 21, "end_line": 33, "label": "Non-root Uvicorn with --no-access-log" }
       ]
     },
@@ -264,7 +264,7 @@
       "pos": [1076, 400],
       "size": [196, 68],
       "sources": [
-        { "path": "app/main.py", "line": 35, "end_line": 54, "label": "Strict CSP & Box iframe ancestor whitelist" },
+        { "path": "app/main.py", "line": 35, "end_line": 58, "label": "Strict CSP, Cache-Control & Box ancestor whitelist" },
         { "path": "static/privacy.html", "line": 1, "end_line": 49, "label": "Zero-retention privacy policy template" },
         { "path": "static/terms.html", "line": 1, "end_line": 45, "label": "Redaction verification terms template" }
       ]

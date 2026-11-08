@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js";
-import { RedactorWorkspace } from "./redactor_engine.js";
-import { ShareRadarScanner } from "./shareradar_engine.js";
+import { BoxBrowserClient } from "./box_client.js?v=2";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=2";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=2";
+import { RedactorWorkspace } from "./redactor_engine.js?v=2";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=2";
 
 const state = {
   boxClient: null,
@@ -145,14 +145,23 @@ async function bootstrap() {
   wireRadarControls();
   wirePickerControls();
 
-  const pubCfg = await fetch("/api/public-config").then((r) => r.json());
-  el("btn-oauth-connect").addEventListener("click", () => {
+  let pubCfg = { authorize_url_template: "", redirect_uri: null };
+  el("btn-oauth-connect").addEventListener("click", async () => {
+    if (!pubCfg.authorize_url_template) {
+      pubCfg = await fetch("/api/public-config")
+        .then((r) => r.json())
+        .catch(() => ({}));
+    }
     if (!pubCfg.authorize_url_template) {
       showToast("Box OAuth credentials are not configured yet.", "error");
       return;
     }
     window.location.href = pubCfg.authorize_url_template;
   });
+
+  pubCfg = await fetch("/api/public-config")
+    .then((r) => r.json())
+    .catch(() => ({ authorize_url_template: "", redirect_uri: null }));
 
   const launch = parseLaunchParams();
   if (launch.returnUrl && /^https:\/\/([a-z0-9-]+\.)*(box\.com|app\.box\.com)\//i.test(launch.returnUrl)) {
