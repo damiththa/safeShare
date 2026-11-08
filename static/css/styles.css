@@ -561,6 +561,18 @@ body {
   margin-top: 1px;
 }
 
+.check-circle.is-amber {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.check-circle.is-neutral {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
 .side-title {
   font-weight: 600;
   font-size: 14px;
@@ -908,6 +920,7 @@ body {
 
 .success-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

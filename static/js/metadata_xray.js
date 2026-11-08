@@ -130,12 +130,12 @@ export async function runMetadataXray(uint8, format) {
     try {
       const { PDFDocument } = window.PDFLib;
       const pdfDoc = await PDFDocument.load(uint8, { ignoreEncryption: true, updateMetadata: false });
-      const author = pdfDoc.getAuthor();
-      const creator = pdfDoc.getCreator();
-      const producer = pdfDoc.getProducer();
-      const title = pdfDoc.getTitle();
-      const subject = pdfDoc.getSubject();
-      const keywords = pdfDoc.getKeywords();
+      const author = (pdfDoc.getAuthor() || "").trim();
+      const creator = (pdfDoc.getCreator() || "").trim();
+      const producer = (pdfDoc.getProducer() || "").trim();
+      const title = (pdfDoc.getTitle() || "").trim();
+      const subject = (pdfDoc.getSubject() || "").trim();
+      const keywords = (pdfDoc.getKeywords() || "").trim();
       const created = pdfDoc.getCreationDate();
 
       if (author) {
@@ -181,9 +181,9 @@ export async function runMetadataXray(uint8, format) {
       if (zip.file("docProps/core.xml")) {
         const xmlText = await zip.file("docProps/core.xml").async("string");
         const doc = parser.parseFromString(xmlText, "application/xml");
-        const creator = doc.getElementsByTagName("dc:creator")[0]?.textContent;
-        const lastModBy = doc.getElementsByTagName("cp:lastModifiedBy")[0]?.textContent;
-        const revision = doc.getElementsByTagName("cp:revision")[0]?.textContent;
+        const creator = (doc.getElementsByTagName("dc:creator")[0]?.textContent || "").trim();
+        const lastModBy = (doc.getElementsByTagName("cp:lastModifiedBy")[0]?.textContent || "").trim();
+        const revision = (doc.getElementsByTagName("cp:revision")[0]?.textContent || "").trim();
         if (creator || lastModBy) {
           items.push({
             severity: "high",
@@ -196,7 +196,7 @@ export async function runMetadataXray(uint8, format) {
               .join(" · "),
           });
         }
-        if (revision) {
+        if (revision && parseInt(revision, 10) > 1) {
           items.push({
             severity: "low",
             title: "Revision count",
@@ -208,8 +208,8 @@ export async function runMetadataXray(uint8, format) {
       if (zip.file("docProps/app.xml")) {
         const appXml = await zip.file("docProps/app.xml").async("string");
         const doc = parser.parseFromString(appXml, "application/xml");
-        const company = doc.getElementsByTagName("Company")[0]?.textContent;
-        const manager = doc.getElementsByTagName("Manager")[0]?.textContent;
+        const company = (doc.getElementsByTagName("Company")[0]?.textContent || "").trim();
+        const manager = (doc.getElementsByTagName("Manager")[0]?.textContent || "").trim();
         if (company || manager) {
           items.push({
             severity: "medium",

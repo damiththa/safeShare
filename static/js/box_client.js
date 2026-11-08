@@ -23,6 +23,7 @@ export class BoxBrowserClient {
 
   async _jsonFetch(url, options = {}) {
     const resp = await fetch(url, {
+      cache: "no-store",
       ...options,
       headers: this._authHeaders(options.headers || {}),
     });
@@ -67,7 +68,7 @@ export class BoxBrowserClient {
   async downloadFileBytes(fileId) {
     const url = `${BOX_API}/files/${encodeURIComponent(fileId)}/content?access_token=${encodeURIComponent(this._token)}`;
     for (let attempt = 0; attempt < 4; attempt++) {
-      const resp = await fetch(url, { method: "GET", redirect: "follow" });
+      const resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store" });
       if (resp.status === 202) {
         const retrySec = parseInt(resp.headers.get("Retry-After") || "2", 10);
         await new Promise((r) => setTimeout(r, Math.min(retrySec, 5) * 1000));

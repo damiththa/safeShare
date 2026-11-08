@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js?v=5";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=5";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=5";
-import { RedactorWorkspace } from "./redactor_engine.js?v=5";
-import { ShareRadarScanner } from "./shareradar_engine.js?v=5";
+import { BoxBrowserClient } from "./box_client.js?v=6";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=6";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=6";
+import { RedactorWorkspace } from "./redactor_engine.js?v=6";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=6";
 
 const state = {
   boxClient: null,
@@ -89,10 +89,11 @@ async function checkQuotaAvailable(action, units = 1) {
   const ent = data.entitlement || state.entitlement;
   if (ent && ent.plan !== "pro") {
     const remaining = action === "scrub" ? ent.scrub_remaining : ent.radar_fixes_remaining;
+    const limitVal = action === "scrub" ? ent.scrub_limit : ent.radar_fixes_limit;
     if (typeof remaining === "number" && remaining < units) {
       return {
         allowed: false,
-        message: "Monthly Free plan save limit reached (3/month). Upgrade to Pro for unlimited saves.",
+        message: `Monthly Free limit reached (${limitVal || 25}/month). Upgrade to Pro for unlimited access.`,
       };
     }
   }
@@ -271,7 +272,11 @@ async function openFileInScrubber(fileId) {
   el("scrub-workspace").classList.remove("hidden");
   el("save-success-box").classList.add("hidden");
   el("save-error-box").classList.add("hidden");
-  el("xray-summary").textContent = "Checking hidden file properties...";
+  const xrayIcon = el("xray-badge-icon");
+  xrayIcon.className = "check-circle is-neutral";
+  xrayIcon.textContent = "•";
+  el("xray-title").textContent = "File properties";
+  el("xray-summary").textContent = "Checking file header...";
   el("xray-details-wrap").classList.add("hidden");
   el("xray-list").innerHTML = "";
   el("pii-checklist").innerHTML = "";
@@ -304,7 +309,7 @@ async function openFileInScrubber(fileId) {
 
     // Clean, friendly default output filename (`_Clean`)
     const rawStem = meta.name.replace(/\.[^.]+$/, "");
-    el("inp-output-stem").value = `${rawStem}_Clean`;
+    el("inp-output-stem").value = /_Clean(\s*\(\d+\))?$/i.test(rawStem) ? rawStem : `${rawStem}_Clean`;
     el("lbl-output-ext").textContent =
       fmt === "pdf" ? ".pdf" : fmt === "docx" ? ".docx" : fmt === "png" ? ".png" : ".jpg";
     checkFilenameWarning();
@@ -318,16 +323,18 @@ async function openFileInScrubber(fileId) {
     xrayList.innerHTML = "";
 
     if (leaks.length === 0) {
-      el("xray-summary").textContent = "No hidden personal details found in file headers.";
+      xrayIcon.className = "check-circle";
+      xrayIcon.textContent = "✓";
+      el("xray-title").textContent = "File properties clean";
+      el("xray-summary").textContent = "No hidden author, GPS, or device data.";
       el("xray-details-wrap").classList.add("hidden");
     } else {
-      const topNames = leaks
-        .slice(0, 2)
-        .map((l) => l.title.toLowerCase())
-        .join(", ");
-      el("xray-summary").textContent = `${leaks.length} hidden item${
-        leaks.length === 1 ? "" : "s"
-      } (${topNames}) will be removed automatically.`;
+      xrayIcon.className = "check-circle is-amber";
+      xrayIcon.textContent = "!";
+      el("xray-title").textContent =
+        leaks.length === 1 ? "1 hidden file property" : `${leaks.length} hidden file properties`;
+      el("xray-summary").textContent = "Removed automatically on save.";
+      el("xray-details-summary").textContent = `Show hidden properties (${leaks.length})`;
       el("xray-details-wrap").classList.remove("hidden");
 
       for (const lk of leaks) {
@@ -548,11 +555,14 @@ function wireScrubControls() {
     el("btn-mode-overwrite").classList.toggle("active", isOverwrite);
     el("filename-field-wrap").classList.toggle("hidden", isOverwrite);
     el("btn-save-only").textContent = isOverwrite
-      ? "Save Changes to Box File"
-      : "Save Clean Copy to Box";
+      ? "Replace Original in Box"
+      : "Save New Copy to Box";
+    el("btn-save-and-link").textContent = isOverwrite
+      ? "Replace & Copy Link"
+      : "Save Copy & Copy Link";
     el("save-mode-note").textContent = isOverwrite
-      ? "Saves redacted changes directly onto your open Box file as a new version."
-      : "Saves as a separate new file in Box. Your original file stays untouched.";
+      ? "Replaces this file in Box with the cleaned version."
+      : "Saves a new clean file. Original stays untouched.";
     el("save-error-box").classList.add("hidden");
   };
 
@@ -563,6 +573,11 @@ function wireScrubControls() {
   el("btn-anonymize-name").addEventListener("click", () => {
     el("inp-output-stem").value = generateAnonymousStem();
     checkFilenameWarning();
+  });
+
+  el("btn-open-saved-file").addEventListener("click", () => {
+    if (!state.lastSavedFileId) return;
+    openFileInScrubber(state.lastSavedFileId);
   });
 
   el("btn-copy-saved-link").addEventListener("click", async () => {
@@ -657,12 +672,20 @@ function wireScrubControls() {
 
       const subEl = el("save-success-sub");
       if (usedSingleFileFallback) {
-        subEl.textContent =
-          "Saved directly onto your existing Box file as a new version (enable Parent Folder scope in Box Integration settings if you prefer separate _Clean copies).";
+        subEl.textContent = "Replaced original file in Box (single-file Box scope active).";
         subEl.classList.remove("hidden");
       } else {
         subEl.textContent = "";
         subEl.classList.add("hidden");
+      }
+
+      if (state.saveMode === "overwrite" || usedSingleFileFallback) {
+        const xIcon = el("xray-badge-icon");
+        xIcon.className = "check-circle";
+        xIcon.textContent = "✓";
+        el("xray-title").textContent = "File properties cleaned";
+        el("xray-summary").textContent = "Hidden header data removed.";
+        el("xray-details-wrap").classList.add("hidden");
       }
 
       if (createLinkAfter) {
@@ -672,13 +695,13 @@ function wireScrubControls() {
           await navigator.clipboard.writeText(state.lastSharedLinkUrl).catch(() => {});
         }
         hideToast();
-        el("save-success-title").textContent = `Saved "${uploaded.name}" & copied share link!`;
+        el("save-success-title").textContent = `Saved "${uploaded.name}" & copied link`;
       } else {
         hideToast();
         el("save-success-title").textContent =
           state.saveMode === "overwrite" || usedSingleFileFallback
-            ? `Updated "${uploaded.name}" in Box!`
-            : `Saved "${uploaded.name}" to your Box folder!`;
+            ? `Replaced "${uploaded.name}" in Box`
+            : `Saved "${uploaded.name}" to Box`;
       }
 
       el("btn-copy-saved-link").classList.remove("hidden");

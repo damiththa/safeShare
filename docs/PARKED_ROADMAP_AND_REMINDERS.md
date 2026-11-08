@@ -34,7 +34,7 @@
 - [x] **Enhancement 3: Pre-Identified PII & HIPAA PHI Highlighter + Lazy-Loaded Wasm OCR (`Tesseract.js`)**
   - Shipped combined Tier 1 (line-stitched PDF + `.docx` `<w:t>` block scrub + 17 PII/HIPAA PHI detectors starting as see-through highlights with 1-click **`Black Out All`** and click-on-canvas toggle) + Tier 2 (`ocr_engine.js` lazy-loading `Tesseract.js` v5 *only* on images and scanned PDF pages so normal digital PDFs download 0 OCR bytes). *Note: Monitor real-world load feel on Tier 2 OCR; modularized in `ocr_engine.js` so it can be tuned or gated cleanly.*
 - [ ] **Enhancement 4: Freemium-to-Paid (`Pro`) Tier Expansion & Monetization Packaging**
-  - Connect Stripe / LemonSqueezy checkout + webhook keyed strictly by anonymous `client_reference_id = user_hash` to upgrade `safeshare_entitlements/{user_hash}.plan` from `"free"` to `"pro"` without storing customer emails in Firestore.
+  - Connect Stripe / LemonSqueezy checkout + webhook keyed strictly by anonymous `client_reference_id = user_hash` to upgrade `safeshare_entitlements/{user_hash}.plan` from `"free"` to `"pro"` without storing customer emails in Firestore (and tune `FREE_SCRUB_LIMIT=3`, `FREE_RADAR_FIX_LIMIT=5` down from beta testing defaults of `25`).
   - **High-Value Paid (`Pro`) Feature Candidates:**
     1. **Automated HIPAA PHI & Financial Pack + `Black Out All` / Scanned Image OCR** (gating 1-click bulk PHI/OCR auto-redaction or unlimited monthly saves behind `Pro`, while keeping basic metadata clean + manual blackout in `Free`).
     2. **Tier 3 In-Browser AI Deep Name & Clinical Entity Scan (`ONNX NER`):** Opt-in quantized browser NER model to catch unlabeled person/hospital names in free-flowing paragraphs.

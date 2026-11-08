@@ -11,8 +11,8 @@
  *    with solid `█` block characters (`.docx`) so zero underlying characters survive.
  */
 
-import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=5";
-import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=5";
+import { detectPiiInPlainText, detectPiiInTextItems } from "./pii_detector.js?v=6";
+import { extractOcrTextItemsFromCanvas } from "./ocr_engine.js?v=6";
 
 function ensurePdfWorkerConfigured() {
   if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
@@ -581,14 +581,9 @@ export class RedactorWorkspace {
     }
 
     if (this.format === "pdf") {
-      const { PDFDocument } = window.PDFLib;
-      const outPdf = await PDFDocument.create();
-      outPdf.setTitle("");
-      outPdf.setAuthor("");
-      outPdf.setSubject("");
-      outPdf.setKeywords([]);
-      outPdf.setProducer("");
-      outPdf.setCreator("");
+      const { PDFDocument, PDFName } = window.PDFLib;
+      // updateMetadata: false prevents pdf-lib from injecting Producer/Creator/CreationDate into /Info
+      const outPdf = await PDFDocument.create({ updateMetadata: false });
 
       let srcPdfLibDoc = null;
 
@@ -638,9 +633,18 @@ export class RedactorWorkspace {
             });
           }
           const [copiedPage] = await outPdf.copyPages(srcPdfLibDoc, [p]);
-          copiedPage.node.delete(window.PDFLib.PDFName.of("Annots"));
+          copiedPage.node.delete(PDFName.of("Annots"));
+          copiedPage.node.delete(PDFName.of("Metadata"));
+          copiedPage.node.delete(PDFName.of("PieceInfo"));
           outPdf.addPage(copiedPage);
         }
+      }
+
+      // Physically delete document-level XMP /Metadata, /PieceInfo, and trailer /Info dictionary
+      outPdf.catalog.delete(PDFName.of("Metadata"));
+      outPdf.catalog.delete(PDFName.of("PieceInfo"));
+      if (outPdf.context?.trailerInfo) {
+        delete outPdf.context.trailerInfo.Info;
       }
 
       const finalPdfBytes = await outPdf.save({ useObjectStreams: true });
@@ -657,7 +661,7 @@ export class RedactorWorkspace {
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ' +
         'xmlns:dc="http://purl.org/dc/elements/1.1/">' +
-        "<dc:title></dc:title><dc:creator></dc:creator><cp:lastModifiedBy></cp:lastModifiedBy><cp:revision>1</cp:revision>" +
+        "<dc:title></dc:title><dc:creator></dc:creator><cp:lastModifiedBy></cp:lastModifiedBy>" +
         "</cp:coreProperties>";
       const cleanAppXml =
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -666,6 +670,9 @@ export class RedactorWorkspace {
 
       zip.file("docProps/core.xml", cleanCoreXml);
       zip.file("docProps/app.xml", cleanAppXml);
+      zip.remove("docProps/custom.xml");
+      zip.remove("docProps/thumbnail.jpeg");
+      zip.remove("docProps/thumbnail.emf");
       zip.remove("word/comments.xml");
 
       // Scrub enabled PII & PHI strings in Word body/headers/footers with permanent block characters (`█`)

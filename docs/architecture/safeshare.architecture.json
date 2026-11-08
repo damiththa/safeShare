@@ -115,9 +115,9 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 325, "label": "Deferred-vendor UI shell (<100ms first paint)" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 1028, "label": "Parallel Box launch, safe quota & dual save mode" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 1162, "label": "Daylight UI, floating toast & inline save alerts" }
+        { "path": "static/index.html", "line": 1, "end_line": 326, "label": "Deferred-vendor UI shell (<100ms first paint)" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 1051, "label": "Parallel Box launch, safe quota & 1-click verify" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1175, "label": "Daylight UI, floating toast & inline save alerts" }
       ]
     },
     {
@@ -130,7 +130,7 @@
       "pos": [296, 255],
       "size": [194, 68],
       "sources": [
-        { "path": "static/js/box_client.js", "line": 1, "end_line": 241, "label": "302 stream, _Clean v1 & file-version fallback" }
+        { "path": "static/js/box_client.js", "line": 1, "end_line": 242, "label": "No-store 302 stream, _Clean v1 & version replace" }
       ]
     },
     {
@@ -171,7 +171,7 @@
       "pos": [548, 255],
       "size": [198, 68],
       "sources": [
-        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 698, "label": "Instant Page 1 render, bg scan & 250-DPI burn" }
+        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 705, "label": "Full /Info+XMP wipe, Page 1 render & 250-DPI burn" }
       ]
     },
     {

@@ -33,8 +33,8 @@ def load_settings() -> Settings:
         gcp_project_id=os.getenv("GCP_PROJECT_ID", "safeshare-box").strip(),
         use_firestore=os.getenv("USE_FIRESTORE", "true").strip().lower() in ("1", "true", "yes"),
         firestore_collection=os.getenv("FIRESTORE_COLLECTION", "safeshare_entitlements").strip(),
-        free_scrub_limit_per_month=int(os.getenv("FREE_SCRUB_LIMIT", "3")),
-        free_radar_fix_limit_per_month=int(os.getenv("FREE_RADAR_FIX_LIMIT", "5")),
+        free_scrub_limit_per_month=int(os.getenv("FREE_SCRUB_LIMIT", "25")),
+        free_radar_fix_limit_per_month=int(os.getenv("FREE_RADAR_FIX_LIMIT", "25")),
     )
 
 

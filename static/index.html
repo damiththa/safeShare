@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafeShare for Box</title>
-  <link rel="stylesheet" href="/static/css/styles.css?v=5" />
-  <script defer src="/static/vendor/pdf-lib.min.js?v=5"></script>
-  <script defer src="/static/vendor/pdf.min.js?v=5"></script>
-  <script defer src="/static/vendor/exifr.full.umd.js?v=5"></script>
-  <script defer src="/static/vendor/jszip.min.js?v=5"></script>
+  <link rel="stylesheet" href="/static/css/styles.css?v=6" />
+  <script defer src="/static/vendor/pdf-lib.min.js?v=6"></script>
+  <script defer src="/static/vendor/pdf.min.js?v=6"></script>
+  <script defer src="/static/vendor/exifr.full.umd.js?v=6"></script>
+  <script defer src="/static/vendor/jszip.min.js?v=6"></script>
 </head>
 <body>
   <header class="topbar">
@@ -121,17 +121,17 @@
 
         <!-- Calm, Guided Right Sidebar -->
         <aside class="inspector-column">
-          <!-- Step 1: Automatic Hidden Details Clean-Up -->
+          <!-- Step 1: File Header Properties -->
           <div class="side-card">
             <div class="step-row">
-              <span class="check-circle" aria-hidden="true">&#10003;</span>
+              <span class="check-circle is-neutral" id="xray-badge-icon" aria-hidden="true">&bull;</span>
               <div>
-                <div class="side-title">Hidden details cleaned</div>
-                <div class="side-sub" id="xray-summary">Checking file properties...</div>
+                <div class="side-title" id="xray-title">File properties</div>
+                <div class="side-sub" id="xray-summary">Checking file header...</div>
               </div>
             </div>
             <details class="quiet-details hidden" id="xray-details-wrap">
-              <summary>View items to be removed</summary>
+              <summary id="xray-details-summary">Show hidden properties</summary>
               <ul class="detail-list" id="xray-list"></ul>
             </details>
           </div>
@@ -167,40 +167,40 @@
             <div class="pii-list" id="pii-checklist"></div>
           </div>
 
-          <!-- Step 3: Save Clean Copy -->
+          <!-- Step 3: Save to Box -->
           <div class="side-card save-card">
             <div class="save-mode-toggle" role="radiogroup" aria-label="How to save to Box">
               <button class="save-mode-btn active" id="btn-mode-new-copy" data-mode="new_copy" type="button">
-                New <code>_Clean</code> copy
+                Save as new copy
               </button>
               <button class="save-mode-btn" id="btn-mode-overwrite" data-mode="overwrite" type="button">
-                Update original file
+                Replace original
               </button>
             </div>
 
             <div id="filename-field-wrap">
-              <label class="field-label" for="inp-output-stem">Save clean copy as</label>
+              <label class="field-label" for="inp-output-stem">New file name</label>
               <div class="filename-group">
                 <input type="text" id="inp-output-stem" class="filename-input" placeholder="Document_Clean" />
                 <span id="lbl-output-ext" class="filename-ext">.pdf</span>
               </div>
 
               <button class="name-suggestion hidden" id="btn-anonymize-name" type="button">
-                File name contains personal info &mdash; click to use a generic name
+                File name has personal info &mdash; click for generic name
               </button>
             </div>
 
             <div class="cta-stack">
               <button class="btn btn-primary btn-block" id="btn-save-only" type="button">
-                Save Clean Copy to Box
+                Save New Copy to Box
               </button>
               <button class="btn btn-secondary btn-block" id="btn-save-and-link" type="button">
-                Save &amp; Copy Share Link
+                Save Copy &amp; Copy Link
               </button>
             </div>
 
             <p class="reassure-note" id="save-mode-note">
-              Saves as a separate new file in Box. Your original file stays untouched.
+              Saves a new clean file. Original stays untouched.
             </p>
 
             <!-- Inline Error / Quota Feedback right next to the Save button -->
@@ -216,10 +216,11 @@
 
             <!-- Celebratory Inline Confirmation after Save -->
             <div id="save-success-box" class="success-box hidden">
-              <div class="success-title" id="save-success-title">Saved to your Box folder!</div>
+              <div class="success-title" id="save-success-title">Saved to Box!</div>
               <p class="success-sub hidden" id="save-success-sub"></p>
               <div class="success-actions">
-                <button class="btn btn-secondary btn-sm hidden" id="btn-copy-saved-link" type="button">Copy Share Link</button>
+                <button class="btn btn-secondary btn-sm" id="btn-open-saved-file" type="button">View Saved File</button>
+                <button class="btn btn-secondary btn-sm hidden" id="btn-copy-saved-link" type="button">Copy Link</button>
                 <button class="btn btn-primary btn-sm" id="btn-done-after-save" type="button">Done</button>
               </div>
             </div>
@@ -320,6 +321,6 @@
     </section>
   </main>
 
-  <script type="module" src="/static/js/app.js?v=5"></script>
+  <script type="module" src="/static/js/app.js?v=6"></script>
 </body>
 </html>
