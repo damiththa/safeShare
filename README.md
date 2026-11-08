@@ -5,8 +5,8 @@
 [![BoxDiff Archify System & Process Architecture](./docs/architecture/boxdiff-architecture.svg)](./docs/architecture/boxdiff-architecture.html)
 
 > **Repository Branch Layout (`damiththa/safeShare`):**
-> - **`main` branch:** `SafeShare for Box` (`Scrub & Redact` + `ShareRadar` Folder Link & Collaborator Auditor) — Live at `https://safeshare-902354967061.us-central1.run.app`
-> - **`boxdiff` branch (this branch):** `BoxDiff for Box` (`Compare with BoxDiff` File Version & Sibling Comparator) — Target service `https://boxdiff-902354967061.us-central1.run.app`
+> - **`main` branch:** `SafeShare for Box` (`Scrub & Redact` + `ShareRadar` Folder Link & Collaborator Auditor) — Live at `https://safeshare-902354967061.us-central1.run.app` (revision `safeshare-00007-lgj`)
+> - **`boxdiff` branch (this branch):** `BoxDiff for Box` (`Compare with BoxDiff` File Version & Sibling Comparator) — Live at `https://boxdiff-902354967061.us-central1.run.app` (revision `boxdiff-00002-985`, calm daylight Box-native aesthetic)
 
 ---
 
