@@ -250,8 +250,8 @@
         <text data-detail="fine" x="393.0" y="461" class="t-frontend" font-size="7.0" text-anchor="middle">Revoke / View-Only / 30d</text>
         </g>
 
-        <g id="node-xray_pii_engine" data-node-id="xray_pii_engine" data-node-label="Metadata Clean &amp; Auto-PII" tabindex="0" role="button" aria-label="Focus Metadata Clean &amp; Auto-PII, EXIF/GPS, XMP, Luhn/SSN/ABA, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), Filename PII Anonymizer" aria-pressed="false" data-node-kind="security" data-node-sublabel="EXIF/GPS, XMP, Luhn/SSN/ABA" data-node-tag="Filename PII Anonymizer" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
-          <title>Metadata Clean &amp; Auto-PII · EXIF/GPS, XMP, Luhn/SSN/ABA · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · Filename PII Anonymizer</title>
+        <g id="node-xray_pii_engine" data-node-id="xray_pii_engine" data-node-label="PII, PHI &amp; Lazy Wasm OCR" tabindex="0" role="button" aria-label="Focus PII, PHI &amp; Lazy Wasm OCR, HIPAA PHI, Checksums &amp; OCR, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), 1-Click &amp; Page Highlights" aria-pressed="false" data-node-kind="security" data-node-sublabel="HIPAA PHI, Checksums &amp; OCR" data-node-tag="1-Click &amp; Page Highlights" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
+          <title>PII, PHI &amp; Lazy Wasm OCR · HIPAA PHI, Checksums &amp; OCR · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · 1-Click &amp; Page Highlights</title>
           <rect x="548" y="110" width="198" height="68" rx="6" class="c-mask"/>
           <rect x="548" y="110" width="198" height="68" rx="6" class="c-security" data-animate="node" style="--step:6" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(554 116) scale(0.6875)">
@@ -260,15 +260,15 @@
           </g>
           <g class="source-evidence-beacon" transform="translate(708 116)">
             <rect width="32" height="14" rx="3"/>
-            <text x="16" y="9.5">2 SRC</text>
+            <text x="16" y="9.5">3 SRC</text>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="647.0" y="143.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Metadata Clean &amp; Auto-PII</text>
-        <text data-detail="context" x="647.0" y="157.0" class="t-muted" font-size="8.2" text-anchor="middle">EXIF/GPS, XMP, Luhn/SSN/ABA</text>
-        <text data-detail="fine" x="647.0" y="171" class="t-security" font-size="7.0" text-anchor="middle">Filename PII Anonymizer</text>
+          <text data-node-label="" data-detail-anchor="" x="647.0" y="143.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">PII, PHI &amp; Lazy Wasm OCR</text>
+        <text data-detail="context" x="647.0" y="157.0" class="t-muted" font-size="8.2" text-anchor="middle">HIPAA PHI, Checksums &amp; OCR</text>
+        <text data-detail="fine" x="647.0" y="171" class="t-security" font-size="7.0" text-anchor="middle">1-Click &amp; Page Highlights</text>
         </g>
 
-        <g id="node-redactor_canvas" data-node-id="redactor_canvas" data-node-label="Byte-Destructive Redactor" tabindex="0" role="button" aria-label="Focus Byte-Destructive Redactor, 250-DPI Pixel Burn &amp; XML Scrub, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), Zero Surviving Glyphs" aria-pressed="false" data-node-kind="security" data-node-sublabel="250-DPI Pixel Burn &amp; XML Scrub" data-node-tag="Zero Surviving Glyphs" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
-          <title>Byte-Destructive Redactor · 250-DPI Pixel Burn &amp; XML Scrub · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · Zero Surviving Glyphs</title>
+        <g id="node-redactor_canvas" data-node-id="redactor_canvas" data-node-label="Byte-Destructive Redactor" tabindex="0" role="button" aria-label="Focus Byte-Destructive Redactor, 250-DPI Pixel Burn &amp; XML Scrub, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), Click Toggle + Drag Custom" aria-pressed="false" data-node-kind="security" data-node-sublabel="250-DPI Pixel Burn &amp; XML Scrub" data-node-tag="Click Toggle + Drag Custom" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
+          <title>Byte-Destructive Redactor · 250-DPI Pixel Burn &amp; XML Scrub · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · Click Toggle + Drag Custom</title>
           <rect x="548" y="255" width="198" height="68" rx="6" class="c-mask"/>
           <rect x="548" y="255" width="198" height="68" rx="6" class="c-security" data-animate="node" style="--step:7" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(554 261) scale(0.6875)">
@@ -281,11 +281,11 @@
           </g>
           <text data-node-label="" data-detail-anchor="" x="647.0" y="288.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Byte-Destructive Redactor</text>
         <text data-detail="context" x="647.0" y="302.0" class="t-muted" font-size="8.2" text-anchor="middle">250-DPI Pixel Burn &amp; XML Scrub</text>
-        <text data-detail="fine" x="647.0" y="316" class="t-security" font-size="7.0" text-anchor="middle">Zero Surviving Glyphs</text>
+        <text data-detail="fine" x="647.0" y="316" class="t-security" font-size="7.0" text-anchor="middle">Click Toggle + Drag Custom</text>
         </g>
 
-        <g id="node-vendored_bundles" data-node-id="vendored_bundles" data-node-label="Self-Hosted Wasm/JS Libs" tabindex="0" role="button" aria-label="Focus Self-Hosted Wasm/JS Libs, pdf-lib, pdf.js, exifr, JSZip, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), MIT/Apache-2.0 • 0 CDNs" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="pdf-lib, pdf.js, exifr, JSZip" data-node-tag="MIT/Apache-2.0 • 0 CDNs" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)" data-node-brand="Docker" data-node-brand-id="docker" data-node-brand-status="preset" data-node-brand-source="https://www.docker.com/company/newsroom/media-resources">
-          <title>Self-Hosted Wasm/JS Libs · pdf-lib, pdf.js, exifr, JSZip · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · MIT/Apache-2.0 • 0 CDNs</title>
+        <g id="node-vendored_bundles" data-node-id="vendored_bundles" data-node-label="Self-Hosted Wasm/JS Libs" tabindex="0" role="button" aria-label="Focus Self-Hosted Wasm/JS Libs, pdf-lib, pdf.js, Tesseract, JSZip, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), MIT/Apache-2.0 • 0 CDNs" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="pdf-lib, pdf.js, Tesseract, JSZip" data-node-tag="MIT/Apache-2.0 • 0 CDNs" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)" data-node-brand="Docker" data-node-brand-id="docker" data-node-brand-status="preset" data-node-brand-source="https://www.docker.com/company/newsroom/media-resources">
+          <title>Self-Hosted Wasm/JS Libs · pdf-lib, pdf.js, Tesseract, JSZip · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · MIT/Apache-2.0 • 0 CDNs</title>
           <rect x="548" y="400" width="198" height="68" rx="6" class="c-mask"/>
           <rect x="548" y="400" width="198" height="68" rx="6" class="c-messagebus" data-animate="node" style="--step:8" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(554 406) scale(0.6875)">
@@ -304,7 +304,7 @@
             <text x="16" y="9.5">1 SRC</text>
           </g>
           <text data-node-label="" data-detail-anchor="" x="647.0" y="433.0" class="t-primary" font-size="9.8" font-weight="600" text-anchor="middle">Self-Hosted Wasm/JS Libs</text>
-        <text data-detail="context" x="647.0" y="447.0" class="t-muted" font-size="8.2" text-anchor="middle">pdf-lib, pdf.js, exifr, JSZip</text>
+        <text data-detail="context" x="647.0" y="447.0" class="t-muted" font-size="8.2" text-anchor="middle">pdf-lib, pdf.js, Tesseract, JSZip</text>
         <text data-detail="fine" x="647.0" y="461" class="t-messagebus" font-size="7.0" text-anchor="middle">MIT/Apache-2.0 • 0 CDNs</text>
         </g>
 
