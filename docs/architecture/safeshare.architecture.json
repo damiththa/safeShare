@@ -115,9 +115,9 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 288, "label": "Contextual popup-ready Clean & Folder Sharing UI" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 800, "label": "Stateless contextual launch & popup orchestrator" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 1005, "label": "Calm daylight Box-native responsive stylesheet" }
+        { "path": "static/index.html", "line": 1, "end_line": 310, "label": "Contextual Clean, PII/PHI & Folder Sharing UI" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 901, "label": "Stateless launch, 1-click PII/PHI & popup UI" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1104, "label": "Calm daylight Box-native responsive stylesheet" }
       ]
     },
     {
@@ -149,15 +149,16 @@
     {
       "id": "xray_pii_engine",
       "type": "security",
-      "label": "Metadata Clean & Auto-PII",
-      "sublabel": "EXIF/GPS, XMP, Luhn/SSN/ABA",
+      "label": "PII, PHI & Lazy Wasm OCR",
+      "sublabel": "HIPAA PHI, Checksums & OCR",
       "brand": "webassembly",
-      "tag": "Filename PII Anonymizer",
+      "tag": "1-Click & Page Highlights",
       "pos": [548, 110],
       "size": [198, 68],
       "sources": [
         { "path": "static/js/metadata_xray.js", "line": 1, "end_line": 246, "label": "Plain-English EXIF/GPS/Thumb, PDF & DOCX check" },
-        { "path": "static/js/pii_detector.js", "line": 1, "end_line": 164, "label": "Luhn, SSN, ABA routing & filename PII scanner" }
+        { "path": "static/js/pii_detector.js", "line": 1, "end_line": 606, "label": "Line-stitched PII & HIPAA PHI detector engine" },
+        { "path": "static/js/ocr_engine.js", "line": 1, "end_line": 111, "label": "Lazy-loaded Tesseract.js Wasm OCR worker" }
       ]
     },
     {
@@ -166,24 +167,24 @@
       "label": "Byte-Destructive Redactor",
       "sublabel": "250-DPI Pixel Burn & XML Scrub",
       "brand": "html5",
-      "tag": "Zero Surviving Glyphs",
+      "tag": "Click Toggle + Drag Custom",
       "pos": [548, 255],
       "size": [198, 68],
       "sources": [
-        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 383, "label": "Unified pointer canvas & 250-DPI PDFLib exporter" }
+        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 669, "label": "Candidate highlighter, 250-DPI & DOCX scrubber" }
       ]
     },
     {
       "id": "vendored_bundles",
       "type": "messagebus",
       "label": "Self-Hosted Wasm/JS Libs",
-      "sublabel": "pdf-lib, pdf.js, exifr, JSZip",
+      "sublabel": "pdf-lib, pdf.js, Tesseract, JSZip",
       "brand": "docker",
       "tag": "MIT/Apache-2.0 • 0 CDNs",
       "pos": [548, 400],
       "size": [198, 68],
       "sources": [
-        { "path": "Dockerfile", "line": 9, "end_line": 20, "label": "Build-time vendoring of permissive browser libs" }
+        { "path": "Dockerfile", "line": 9, "end_line": 28, "label": "Build-time vendoring incl. lazy Tesseract Wasm" }
       ]
     },
     {
@@ -197,7 +198,7 @@
       "size": [198, 68],
       "sources": [
         { "path": "app/main.py", "line": 1, "end_line": 211, "label": "Stateless FastAPI routes & launch handlers" },
-        { "path": "Dockerfile", "line": 21, "end_line": 33, "label": "Non-root Uvicorn with --no-access-log" }
+        { "path": "Dockerfile", "line": 29, "end_line": 41, "label": "Non-root Uvicorn with --no-access-log" }
       ]
     },
     {
@@ -238,7 +239,7 @@
       "size": [196, 68],
       "sources": [
         { "path": ".github/workflows/archify.yml", "line": 1, "end_line": 62, "label": "Cloud Archify v3.0 validation & render CI" },
-        { "path": "docs/PARKED_ROADMAP_AND_REMINDERS.md", "line": 1, "end_line": 41, "label": "Owner deploy gate & v1.1+ feature roadmap" }
+        { "path": "docs/PARKED_ROADMAP_AND_REMINDERS.md", "line": 1, "end_line": 46, "label": "Owner deploy gate, Pro tier & feature roadmap" }
       ]
     },
     {

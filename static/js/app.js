@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js?v=2";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=2";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=2";
-import { RedactorWorkspace } from "./redactor_engine.js?v=2";
-import { ShareRadarScanner } from "./shareradar_engine.js?v=2";
+import { BoxBrowserClient } from "./box_client.js?v=3";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=3";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=3";
+import { RedactorWorkspace } from "./redactor_engine.js?v=3";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=3";
 
 const state = {
   boxClient: null,
@@ -12,6 +12,7 @@ const state = {
   contextualLaunch: false,
   activeFileMeta: null,
   activeFileFormat: null,
+  piiCategoryFilter: "all",
   lastSavedFileId: null,
   lastSharedLinkUrl: null,
   pickerFolderId: "0",
@@ -256,10 +257,11 @@ async function openFileInScrubber(fileId) {
     state.activeFileFormat = fmt;
 
     const isDocx = fmt === "docx";
+    state.piiCategoryFilter = "all";
     el("canvas-wrapper").classList.toggle("hidden", isDocx);
     el("docx-friendly-card").classList.toggle("hidden", !isDocx);
     el("draw-helper-tip").classList.toggle("hidden", isDocx);
-    el("pii-section-card").classList.toggle("hidden", isDocx);
+    el("pii-section-card").classList.remove("hidden");
     el("advanced-pdf-options").classList.toggle("hidden", fmt !== "pdf");
 
     // Clean, friendly default output filename (`_Clean`)
@@ -327,45 +329,132 @@ function renderRedactorSidebarState() {
   // Only show Undo/Clear buttons when user has actually drawn custom blackout boxes
   el("manual-box-controls").classList.toggle("hidden", r.manualBoxes.length === 0);
 
-  if (r.format === "docx") return;
+  // Background OCR indicator for images & scanned PDFs
+  el("ocr-progress-row").classList.toggle("hidden", !r.isOcrScanning);
+  if (r.isOcrScanning) {
+    el("ocr-progress-text").textContent = r.ocrStatusText || "Scanning image text for PII & PHI...";
+  }
 
+  const totalFound = r.autoFindings.length;
   const activeAuto = r.autoFindings.filter((f) => f.enabled).length;
   const totalActive = activeAuto + r.manualBoxes.length;
-  el("pii-count-badge").textContent =
-    totalActive === 0 ? "None selected" : `${totalActive} covered`;
+
+  if (totalFound === 0 && r.manualBoxes.length === 0) {
+    el("pii-count-badge").textContent = r.isOcrScanning ? "Scanning..." : "None found";
+  } else if (totalActive === 0) {
+    el("pii-count-badge").textContent = `${totalFound} highlighted`;
+  } else {
+    el("pii-count-badge").textContent = `${totalActive} blacked out`;
+  }
+
+  // Category filter pills (only display categories that actually have matches)
+  const catCounts = {
+    all: totalFound,
+    phi: r.autoFindings.filter((f) => f.category === "phi").length,
+    pii: r.autoFindings.filter((f) => f.category === "pii").length,
+    financial: r.autoFindings.filter((f) => f.category === "financial").length,
+  };
+  if (state.piiCategoryFilter !== "all" && !catCounts[state.piiCategoryFilter]) {
+    state.piiCategoryFilter = "all";
+  }
+
+  const nonZeroCats = ["phi", "pii", "financial"].filter((c) => catCounts[c] > 0);
+  const pillsWrap = el("pii-category-pills");
+  pillsWrap.classList.toggle("hidden", nonZeroCats.length < 2);
+  if (nonZeroCats.length >= 2) {
+    const labels = {
+      all: `All (${catCounts.all})`,
+      phi: `PHI (${catCounts.phi})`,
+      pii: `Personal (${catCounts.pii})`,
+      financial: `Financial (${catCounts.financial})`,
+    };
+    pillsWrap.querySelectorAll(".cat-pill").forEach((btn) => {
+      const cat = btn.dataset.cat;
+      const count = catCounts[cat] || 0;
+      btn.classList.toggle("hidden", cat !== "all" && count === 0);
+      btn.classList.toggle("active", state.piiCategoryFilter === cat);
+      btn.textContent = labels[cat] || cat;
+    });
+  }
+
+  const visibleFindings = r.autoFindings.filter(
+    (f) => state.piiCategoryFilter === "all" || f.category === state.piiCategoryFilter
+  );
+
+  // 1-Click Bulk Action Bar ("Black Out All" + "Reset")
+  const bulkBar = el("pii-bulk-bar");
+  bulkBar.classList.toggle("hidden", totalFound === 0);
+  if (totalFound > 0) {
+    const uncheckedVisible = visibleFindings.filter((f) => !f.enabled).length;
+    const btnBlackoutAll = el("btn-blackout-all");
+    btnBlackoutAll.disabled = uncheckedVisible === 0;
+    if (uncheckedVisible === 0) {
+      btnBlackoutAll.textContent = "All Selected Blacked Out";
+    } else if (state.piiCategoryFilter === "all") {
+      btnBlackoutAll.textContent = `Black Out All (${totalFound})`;
+    } else {
+      btnBlackoutAll.textContent = `Black Out ${visibleFindings.length} Shown`;
+    }
+    el("btn-unselect-all").disabled = activeAuto === 0;
+  }
 
   const list = el("pii-checklist");
   list.innerHTML = "";
 
-  if (r.autoFindings.length === 0 && r.manualBoxes.length === 0) {
+  if (totalFound === 0 && r.manualBoxes.length === 0) {
     const empty = document.createElement("div");
     empty.className = "pii-empty";
-    empty.textContent =
-      "No SSNs, card numbers, emails, or phone numbers detected. Drag anywhere on the document preview to black out extra text or signatures.";
+    empty.textContent = r.isOcrScanning
+      ? "Reading image text privately in your browser to highlight PII & PHI..."
+      : r.format === "docx"
+      ? "No structured PII or PHI patterns found in document body."
+      : "No SSNs, PHI IDs, dates, cards, emails, or phones detected. Drag anywhere on the page to black out custom areas.";
     list.appendChild(empty);
     return;
   }
 
-  for (const f of r.autoFindings) {
+  const catShortTag = { phi: "PHI", pii: "PII", financial: "FIN" };
+
+  for (const f of visibleFindings) {
     const row = document.createElement("label");
-    row.className = "pii-item";
+    row.className = `pii-item ${f.enabled ? "is-covered" : ""}`;
+
+    row.addEventListener("mouseenter", () => r.setHoveredFinding(f.id));
+    row.addEventListener("mouseleave", () => r.setHoveredFinding(null));
 
     const infoDiv = document.createElement("div");
-    const titleDiv = document.createElement("div");
-    titleDiv.style.fontWeight = "600";
-    titleDiv.textContent = `${f.label} (${f.masked})`;
-    const pageDiv = document.createElement("div");
-    pageDiv.className = "pii-item-meta";
-    pageDiv.textContent = r.pageCount > 1 ? `Page ${f.pageIndex + 1}` : "Detected on page";
-    infoDiv.append(titleDiv, pageDiv);
+    const titleRow = document.createElement("div");
+    titleRow.className = "pii-title-row";
+
+    const catBadge = document.createElement("span");
+    catBadge.className = `pii-cat-tag pii-cat-${f.category || "pii"}`;
+    catBadge.textContent = catShortTag[f.category] || "PII";
+
+    const titleText = document.createElement("span");
+    titleText.textContent = f.label;
+    titleRow.append(catBadge, titleText);
+
+    const metaDiv = document.createElement("div");
+    metaDiv.className = "pii-item-meta";
+    const locLabel = f.isDocxText
+      ? f.occurrences > 1
+        ? `${f.occurrences} matches in document`
+        : "In Word text"
+      : r.pageCount > 1
+      ? `Page ${f.pageIndex + 1}`
+      : f.enabled
+      ? "Blacked out"
+      : "Highlighted on page";
+    metaDiv.textContent = `${f.masked} · ${locLabel}`;
+    infoDiv.append(titleRow, metaDiv);
 
     const chk = document.createElement("input");
     chk.type = "checkbox";
     chk.checked = f.enabled;
-    chk.addEventListener("change", () => {
+    chk.addEventListener("change", async () => {
       f.enabled = chk.checked;
-      if (r.currentPage !== f.pageIndex) {
-        r.renderPage(f.pageIndex);
+      if (!f.isDocxText && r.format === "pdf" && r.currentPage !== f.pageIndex) {
+        await r.renderPage(f.pageIndex);
       } else {
         r.redrawOverlay();
       }
@@ -378,7 +467,7 @@ function renderRedactorSidebarState() {
 
   if (r.manualBoxes.length > 0) {
     const manualRow = document.createElement("div");
-    manualRow.className = "pii-item";
+    manualRow.className = "pii-item is-covered";
     const lbl = document.createElement("span");
     lbl.textContent = `${r.manualBoxes.length} custom blackout area${r.manualBoxes.length === 1 ? "" : "s"}`;
     const pill = document.createElement("span");
@@ -400,9 +489,21 @@ function wireScrubControls() {
   });
   el("btn-undo-box").addEventListener("click", () => state.redactor.undoLastManualBox());
   el("btn-clear-boxes").addEventListener("click", () => state.redactor.clearManualBoxes());
+  el("btn-blackout-all").addEventListener("click", () => {
+    state.redactor.setAllAutoFindings(true, state.piiCategoryFilter);
+  });
+  el("btn-unselect-all").addEventListener("click", () => {
+    state.redactor.setAllAutoFindings(false, "all");
+  });
+  document.querySelectorAll(".cat-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.piiCategoryFilter = btn.dataset.cat || "all";
+      renderRedactorSidebarState();
+    });
+  });
   el("inp-output-stem").addEventListener("input", checkFilenameWarning);
   el("btn-anonymize-name").addEventListener("click", () => {
-    el("inp-output-stem").value = generateAnonymousStem().replace("Sanitized_", "Clean_");
+    el("inp-output-stem").value = generateAnonymousStem();
     checkFilenameWarning();
   });
 

@@ -43,7 +43,7 @@ async def security_headers_middleware(request: Request, call_next):
         "style-src 'self' 'unsafe-inline'; "
         "font-src 'self' data:; "
         "img-src 'self' blob: data:; "
-        "connect-src 'self' https://api.box.com https://upload.box.com https://*.boxcloud.com https://*.box.com; "
+        "connect-src 'self' blob: data: https://api.box.com https://upload.box.com https://*.boxcloud.com https://*.box.com; "
         "frame-ancestors 'self' https://*.box.com https://*.app.box.com https://box.com;"
     )
     response.headers["Content-Security-Policy"] = csp

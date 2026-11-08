@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafeShare for Box</title>
-  <link rel="stylesheet" href="/static/css/styles.css?v=2" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=3" />
   <script src="/static/vendor/pdf-lib.min.js"></script>
   <script src="/static/vendor/pdf.min.js"></script>
   <script src="/static/vendor/exifr.full.umd.js"></script>
@@ -87,7 +87,7 @@
           <div class="preview-header">
             <div class="file-title-group">
               <span class="file-name" id="scrub-file-label">Document</span>
-              <span class="draw-tip" id="draw-helper-tip">Drag anywhere on the page to black out extra areas</span>
+              <span class="draw-tip" id="draw-helper-tip">Click highlighted items or drag anywhere to black out</span>
             </div>
 
             <div class="preview-controls">
@@ -111,9 +111,9 @@
             <!-- Friendly Word (.docx) Card instead of raw blank canvas -->
             <div id="docx-friendly-card" class="docx-card hidden">
               <div class="docx-icon" aria-hidden="true">DOCX</div>
-              <h3>Ready to save a clean Word document</h3>
+              <h3>Ready to clean &amp; redact Word document</h3>
               <p>
-                SafeShare will create a fresh copy with hidden author names, company properties, edit counts, and reviewer comments removed—while keeping all your formatting intact.
+                SafeShare automatically removes hidden author names, company properties, and reviewer comments—and replaces any PII or PHI items you select on the right with permanent solid blocks (<code>&#9608;&#9608;&#9608;&#9608;</code>) while keeping your Word formatting intact.
               </p>
             </div>
           </div>
@@ -136,12 +136,34 @@
             </details>
           </div>
 
-          <!-- Step 2: Sensitive Info on Page (Hidden for .docx) -->
+          <!-- Step 2: Pre-Identified Sensitive PII & PHI -->
           <div class="side-card" id="pii-section-card">
             <div class="side-header-between">
-              <span class="side-title">Black out sensitive text</span>
+              <span class="side-title">Detected PII &amp; PHI</span>
               <span class="soft-pill" id="pii-count-badge">None found</span>
             </div>
+
+            <div class="ocr-status-row hidden" id="ocr-progress-row">
+              <span class="ocr-pulse-dot" aria-hidden="true"></span>
+              <span id="ocr-progress-text">Scanning image text for PII &amp; PHI...</span>
+            </div>
+
+            <div class="pii-bulk-bar hidden" id="pii-bulk-bar">
+              <button class="btn btn-primary btn-sm pii-bulk-main" id="btn-blackout-all" type="button">
+                Black Out All
+              </button>
+              <button class="btn btn-ghost btn-sm" id="btn-unselect-all" type="button">
+                Reset
+              </button>
+            </div>
+
+            <div class="pii-cat-pills hidden" id="pii-category-pills">
+              <button class="cat-pill active" data-cat="all" type="button">All</button>
+              <button class="cat-pill" data-cat="phi" type="button">PHI / Medical</button>
+              <button class="cat-pill" data-cat="pii" type="button">Personal</button>
+              <button class="cat-pill" data-cat="financial" type="button">Financial</button>
+            </div>
+
             <div class="pii-list" id="pii-checklist"></div>
           </div>
 
@@ -283,6 +305,6 @@
     </section>
   </main>
 
-  <script type="module" src="/static/js/app.js?v=2"></script>
+  <script type="module" src="/static/js/app.js?v=3"></script>
 </body>
 </html>

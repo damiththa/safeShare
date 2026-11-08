@@ -13,7 +13,7 @@
  *  9. Tracked Open Duration in Days (first_seen_open_at stored in User's Box — Zero GCP Storage)
  */
 
-import { SNAPSHOT_FILENAME } from "./box_client.js?v=2";
+import { SNAPSHOT_FILENAME } from "./box_client.js?v=3";
 
 function daysBetween(isoStart, nowMs = Date.now()) {
   if (!isoStart) return null;

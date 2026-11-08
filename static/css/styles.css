@@ -618,8 +618,70 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
+  max-height: 250px;
   overflow-y: auto;
+}
+
+.ocr-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ocr-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  flex-shrink: 0;
+  animation: ocrPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ocrPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.88); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.pii-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+
+.pii-bulk-main {
+  flex: 1;
+}
+
+.pii-cat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 9px;
+}
+
+.cat-pill {
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cat-pill.active {
+  background: var(--primary-soft);
+  border-color: #bfdbfe;
+  color: var(--primary);
 }
 
 .pii-item {
@@ -633,11 +695,48 @@ body {
   background: var(--surface-subtle);
   cursor: pointer;
   font-size: 12.5px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pii-item.is-covered {
+  background: var(--safe-soft);
+  border-color: var(--safe-border);
 }
 
 .pii-item:hover {
-  border-color: var(--border-strong);
+  border-color: var(--primary);
+}
+
+.pii-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.pii-cat-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 1px 6px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.pii-cat-phi {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.pii-cat-pii {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.pii-cat-financial {
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .pii-item-meta {
