@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1310 575" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="blueprint" data-theme="dark" data-quality-profile="showcase" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
         <title id="archify-diagram-title">SafeShare for Box — Zero-PII Client-Side Scrubber, Redactor &amp; ShareRadar Process Architecture</title>
-        <desc id="archify-diagram-description">100% In-Browser Wasm/Canvas Processing • Parent-Scoped _SafeCopy v1 Export • 9-Metric ShareRadar Telemetry • Stateless HMAC Cloud Run</desc>
+        <desc id="archify-diagram-description">100% In-Browser Wasm/Canvas Processing • Parent-Scoped _Clean v1 Export • Popup-Ready Box UX • Stateless HMAC Cloud Run</desc>
         <style>
 
   svg {
@@ -114,7 +114,7 @@
         <rect width="100%" height="100%" fill="#030816" />
         <rect width="100%" height="100%" fill="url(#grid)" />
         <text x="36" y="34" class="t-primary" font-size="15" font-weight="700">SafeShare for Box — Zero-PII Client-Side Scrubber, Redactor &amp; ShareRadar Process Architecture</text>
-        <text x="36" y="52" class="t-muted" font-size="9.5">100% In-Browser Wasm/Canvas Processing • Parent-Scoped _SafeCopy v1 Export • 9-Metric ShareRadar Telemetry • Stateless HMAC Cloud Run</text>
+        <text x="36" y="52" class="t-muted" font-size="9.5">100% In-Browser Wasm/Canvas Processing • Parent-Scoped _Clean v1 Export • Popup-Ready Box UX • Stateless HMAC Cloud Run</text>
 
         <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Box.com Cloud &amp; User Account" x="16" y="86" width="226" height="400" rx="12" class="c-region" stroke-width="1"/>
         <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="1" data-composition-frame-label="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)" x="276" y="86" width="490" height="400" rx="8" class="c-security-group" stroke-width="1"/>
@@ -165,8 +165,8 @@
         <text data-detail="fine" x="129.0" y="316" class="t-external" font-size="7.0" text-anchor="middle">302 Stream &amp; Multipart</text>
         </g>
 
-        <g id="node-box_user_vault" data-node-id="box_user_vault" data-node-label="User&#x27;s Box Folder Vault" tabindex="0" role="button" aria-label="Focus User&#x27;s Box Folder Vault, _SafeCopy v1, CSV &amp; Snapshot, Box.com Cloud &amp; User Account, 0 Version History Leak" aria-pressed="false" data-node-kind="database" data-node-sublabel="_SafeCopy v1, CSV &amp; Snapshot" data-node-tag="0 Version History Leak" data-node-context="Box.com Cloud &amp; User Account">
-          <title>User&#x27;s Box Folder Vault · _SafeCopy v1, CSV &amp; Snapshot · Box.com Cloud &amp; User Account · 0 Version History Leak</title>
+        <g id="node-box_user_vault" data-node-id="box_user_vault" data-node-label="User&#x27;s Box Folder Vault" tabindex="0" role="button" aria-label="Focus User&#x27;s Box Folder Vault, _Clean v1, CSV &amp; Snapshot, Box.com Cloud &amp; User Account, 0 Version History Leak" aria-pressed="false" data-node-kind="database" data-node-sublabel="_Clean v1, CSV &amp; Snapshot" data-node-tag="0 Version History Leak" data-node-context="Box.com Cloud &amp; User Account">
+          <title>User&#x27;s Box Folder Vault · _Clean v1, CSV &amp; Snapshot · Box.com Cloud &amp; User Account · 0 Version History Leak</title>
           <rect x="36" y="400" width="186" height="68" rx="6" class="c-mask"/>
           <rect x="36" y="400" width="186" height="68" rx="6" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(42 406) scale(0.6875)">
@@ -174,12 +174,12 @@
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="129.0" y="433.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">User&#x27;s Box Folder Vault</text>
-        <text data-detail="context" x="129.0" y="447.0" class="t-muted" font-size="8.2" text-anchor="middle">_SafeCopy v1, CSV &amp; Snapshot</text>
+        <text data-detail="context" x="129.0" y="447.0" class="t-muted" font-size="8.2" text-anchor="middle">_Clean v1, CSV &amp; Snapshot</text>
         <text data-detail="fine" x="129.0" y="461" class="t-database" font-size="7.0" text-anchor="middle">0 Version History Leak</text>
         </g>
 
-        <g id="node-spa_controller" data-node-id="spa_controller" data-node-label="SafeShare Browser SPA" tabindex="0" role="button" aria-label="Focus SafeShare Browser SPA, URL Scrub, Tabs &amp; RAM Token, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), ES Modules • 0 Storage" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="URL Scrub, Tabs &amp; RAM Token" data-node-tag="ES Modules • 0 Storage" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
-          <title>SafeShare Browser SPA · URL Scrub, Tabs &amp; RAM Token · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · ES Modules • 0 Storage</title>
+        <g id="node-spa_controller" data-node-id="spa_controller" data-node-label="SafeShare Browser SPA" tabindex="0" role="button" aria-label="Focus SafeShare Browser SPA, Contextual Popup &amp; RAM Token, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), ES Modules • 0 Storage" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Contextual Popup &amp; RAM Token" data-node-tag="ES Modules • 0 Storage" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)" data-node-brand="JavaScript" data-node-brand-id="javascript" data-node-brand-status="preset" data-node-brand-source="https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg">
+          <title>SafeShare Browser SPA · Contextual Popup &amp; RAM Token · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · ES Modules • 0 Storage</title>
           <rect x="296" y="110" width="194" height="68" rx="6" class="c-mask"/>
           <rect x="296" y="110" width="194" height="68" rx="6" class="c-frontend" data-animate="node" style="--step:3" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(302 116) scale(0.6875)">
@@ -198,7 +198,7 @@
             <text x="16" y="9.5">3 SRC</text>
           </g>
           <text data-node-label="" data-detail-anchor="" x="393.0" y="143.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">SafeShare Browser SPA</text>
-        <text data-detail="context" x="393.0" y="157.0" class="t-muted" font-size="8.2" text-anchor="middle">URL Scrub, Tabs &amp; RAM Token</text>
+        <text data-detail="context" x="393.0" y="157.0" class="t-muted" font-size="8.2" text-anchor="middle">Contextual Popup &amp; RAM Token</text>
         <text data-detail="fine" x="393.0" y="171" class="t-frontend" font-size="7.0" text-anchor="middle">ES Modules • 0 Storage</text>
         </g>
 
@@ -250,8 +250,8 @@
         <text data-detail="fine" x="393.0" y="461" class="t-frontend" font-size="7.0" text-anchor="middle">Revoke / View-Only / 30d</text>
         </g>
 
-        <g id="node-xray_pii_engine" data-node-id="xray_pii_engine" data-node-label="Metadata X-Ray &amp; Auto-PII" tabindex="0" role="button" aria-label="Focus Metadata X-Ray &amp; Auto-PII, EXIF/GPS, XMP, Luhn/SSN/ABA, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), Filename PII Anonymizer" aria-pressed="false" data-node-kind="security" data-node-sublabel="EXIF/GPS, XMP, Luhn/SSN/ABA" data-node-tag="Filename PII Anonymizer" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
-          <title>Metadata X-Ray &amp; Auto-PII · EXIF/GPS, XMP, Luhn/SSN/ABA · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · Filename PII Anonymizer</title>
+        <g id="node-xray_pii_engine" data-node-id="xray_pii_engine" data-node-label="Metadata Clean &amp; Auto-PII" tabindex="0" role="button" aria-label="Focus Metadata Clean &amp; Auto-PII, EXIF/GPS, XMP, Luhn/SSN/ABA, Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP), Filename PII Anonymizer" aria-pressed="false" data-node-kind="security" data-node-sublabel="EXIF/GPS, XMP, Luhn/SSN/ABA" data-node-tag="Filename PII Anonymizer" data-node-context="Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP)">
+          <title>Metadata Clean &amp; Auto-PII · EXIF/GPS, XMP, Luhn/SSN/ABA · Browser Zero-PII Sandbox (100% Client RAM — 0 File Bytes Sent to GCP) · Filename PII Anonymizer</title>
           <rect x="548" y="110" width="198" height="68" rx="6" class="c-mask"/>
           <rect x="548" y="110" width="198" height="68" rx="6" class="c-security" data-animate="node" style="--step:6" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(554 116) scale(0.6875)">
@@ -262,7 +262,7 @@
             <rect width="32" height="14" rx="3"/>
             <text x="16" y="9.5">2 SRC</text>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="647.0" y="143.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Metadata X-Ray &amp; Auto-PII</text>
+          <text data-node-label="" data-detail-anchor="" x="647.0" y="143.0" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle">Metadata Clean &amp; Auto-PII</text>
         <text data-detail="context" x="647.0" y="157.0" class="t-muted" font-size="8.2" text-anchor="middle">EXIF/GPS, XMP, Luhn/SSN/ABA</text>
         <text data-detail="fine" x="647.0" y="171" class="t-security" font-size="7.0" text-anchor="middle">Filename PII Anonymizer</text>
         </g>
