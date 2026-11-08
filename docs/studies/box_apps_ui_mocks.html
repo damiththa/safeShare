@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BoxDiff & SafeShare — Interactive Box.com UI Mocks</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-6 select-none">
+
+  <!-- Top Mockup Switcher Header -->
+  <div class="max-w-6xl mx-auto space-y-4">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">Interactive UI Prototype</span>
+          <span class="text-xs text-[var(--muted-foreground)]">Zero-PII GCP + Box CORS Architecture</span>
+        </div>
+        <h1 class="text-lg font-semibold mt-1">Box.com Web App Integration Mocks</h1>
+        <p class="text-xs text-[var(--muted-foreground)]">Click through the Box right-click launch flow, App 1 (BoxDiff), and App 2 (SafeShare: Scrub + ShareRadar).</p>
+      </div>
+
+      <!-- Primary View Switcher -->
+      <div class="flex flex-wrap items-center gap-2 bg-[var(--background)] p-1.5 rounded-lg border border-[var(--border)]">
+        <button onclick="switchMainApp('launcher')" id="btn-app-launcher" class="px-3 py-1.5 rounded-md text-xs font-medium transition">
+          1. Box Right-Click Launch
+        </button>
+        <button onclick="switchMainApp('boxdiff')" id="btn-app-boxdiff" class="px-3 py-1.5 rounded-md text-xs font-medium transition">
+          2. App 1: BoxDiff Modal
+        </button>
+        <button onclick="switchMainApp('safeshare')" id="btn-app-safeshare" class="px-3 py-1.5 rounded-md text-xs font-medium transition">
+          3. App 2: SafeShare Modal (2-in-1)
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="hidden bg-emerald-500/15 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 px-4 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between">
+      <span id="toast-msg">Action completed inside Box!</span>
+      <button onclick="hideToast()" class="underline ml-4">Dismiss</button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: SIMULATED BOX.COM FILE BROWSER & RIGHT-CLICK LAUNCHER         -->
+    <!-- ===================================================================== -->
+    <div id="view-launcher" class="hidden bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+      <!-- Simulated Box Top Bar -->
+      <div class="bg-[var(--sidebar)] border-b border-[var(--border)] px-5 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="px-2.5 py-1 rounded bg-blue-600 text-white font-bold text-sm tracking-tight">box</div>
+          <div class="text-sm font-medium">All Files <span class="text-[var(--muted-foreground)] mx-1">/</span> Client &amp; Personal Workspace</div>
+        </div>
+        <div class="text-xs text-[var(--muted-foreground)]">Click any <span class="font-semibold text-[var(--foreground)]">"Integrations ▾"</span> button below to test launching each modal</div>
+      </div>
+
+      <div class="p-5 space-y-3">
+        <div class="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider px-2">Folders &amp; Files in Box Web UI</div>
+
+        <!-- Folder Row (Triggers SafeShare -> ShareRadar) -->
+        <div class="border border-[var(--border)] rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--background)]">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">📁</div>
+            <div>
+              <div class="text-sm font-semibold">Client Projects &amp; Tax Docs (2024–2026)</div>
+              <div class="text-xs text-[var(--muted-foreground)]">Folder • 142 items • Shared links active</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openSafeShareTab('radar')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+              Integrations ▸ Audit Links &amp; Guests (SafeShare)
+            </button>
+          </div>
+        </div>
+
+        <!-- File Row 1 (Triggers BoxDiff) -->
+        <div class="border border-[var(--border)] rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--background)]">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xs">PDF</div>
+            <div>
+              <div class="text-sm font-semibold flex items-center gap-2">
+                Master_Services_Agreement_2026.pdf
+                <span class="px-2 py-0.5 rounded text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)]">v4</span>
+              </div>
+              <div class="text-xs text-[var(--muted-foreground)]">Updated 14 mins ago by Vendor Legal • 4 versions in Box History</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="switchMainApp('boxdiff')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+              Integrations ▸ Compare Versions (BoxDiff)
+            </button>
+          </div>
+        </div>
+
+        <!-- File Row 2 (Triggers SafeShare -> Scrub & Redact) -->
+        <div class="border border-[var(--border)] rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--background)]">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs">PDF</div>
+            <div>
+              <div class="text-sm font-semibold">Signed_Lease_And_Driver_ID_Scan.pdf</div>
+              <div class="text-xs text-[var(--muted-foreground)]">Uploaded from iPhone • Contains raw EXIF GPS &amp; unredacted SSN</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openSafeShareTab('scrub')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+              Integrations ▸ Scrub &amp; Redact Copy (SafeShare)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: APP 1 — BOXDIFF IN-BOX POPUP MODAL                            -->
+    <!-- ===================================================================== -->
+    <div id="view-boxdiff" class="bg-[var(--card)] border-2 border-[var(--border)] rounded-xl overflow-hidden shadow-md">
+      <!-- Simulated Box Modal Chrome -->
+      <div class="bg-[var(--sidebar)] border-b border-[var(--border)] px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">⇄</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-sm">BoxDiff</span>
+              <span class="text-xs text-[var(--muted-foreground)]">• Master_Services_Agreement_2026.pdf</span>
+            </div>
+            <div class="text-xs text-emerald-600 dark:text-emerald-400">🔒 Zero-Storage Mode: Comparing directly in browser memory via Box CORS</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-2.5 py-1 rounded-md text-xs bg-[var(--background)] border border-[var(--border)]">
+            Free Tier: <strong>3 / 5</strong> diffs left
+          </span>
+          <button onclick="showToast('Saved Master_Services_Agreement_Redline_v3_vs_v4.pdf directly to your Box folder!')" class="px-3.5 py-1.5 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+            Save Redline PDF to Box
+          </button>
+        </div>
+      </div>
+
+      <!-- Version Selector Bar -->
+      <div class="px-5 py-3 bg-[var(--background)] border-b border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-[var(--muted-foreground)] font-medium">Base:</span>
+          <select class="bg-[var(--card)] border border-[var(--border)] rounded-md px-2.5 py-1.5 text-xs font-medium">
+            <option>v3 — Oct 28, 4:15 PM (Vendor Legal)</option>
+            <option>v2 — Oct 19, 11:02 AM (Internal Draft)</option>
+            <option>v1 — Oct 10, 9:00 AM (Template)</option>
+          </select>
+          <span class="text-[var(--muted-foreground)] font-bold px-1">→</span>
+          <span class="text-[var(--muted-foreground)] font-medium">Compare To:</span>
+          <select class="bg-[var(--card)] border border-[var(--border)] rounded-md px-2.5 py-1.5 text-xs font-medium">
+            <option>v4 (Current) — Today, 9:12 AM</option>
+            <option>Pick another file in folder...</option>
+          </select>
+        </div>
+
+        <!-- Diff Mode Sub-Tabs -->
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="switchDiffTab('text')" id="tab-diff-text" class="px-3 py-1.5 rounded-md text-xs font-medium transition">Text Redline (4)</button>
+          <button onclick="switchDiffTab('visual')" id="tab-diff-visual" class="px-3 py-1.5 rounded-md text-xs font-medium transition">Visual Curtain Slider</button>
+          <button onclick="switchDiffTab('sheet')" id="tab-diff-sheet" class="px-3 py-1.5 rounded-md text-xs font-medium transition">CSV / Excel Diff</button>
+          <button onclick="switchDiffTab('ai')" id="tab-diff-ai" class="px-3 py-1.5 rounded-md text-xs font-medium transition">✨ Gemini Brief (Pro)</button>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 1: TEXT REDLINE -->
+      <div id="panel-diff-text" class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 bg-[var(--background)] border border-[var(--border)] rounded-lg p-5 space-y-4 text-sm leading-relaxed">
+          <div class="flex items-center justify-between border-b border-[var(--border)] pb-2 text-xs text-[var(--muted-foreground)]">
+            <span>MASTER SERVICES AGREEMENT — SECTION 4 &amp; SECTION 8</span>
+            <span>Page 4 of 11</span>
+          </div>
+
+          <div id="clause-1" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--card)] space-y-1">
+            <div class="text-xs font-semibold text-[var(--muted-foreground)]">4.2 Payment &amp; Invoicing Terms</div>
+            <p class="text-xs sm:text-sm">
+              Client shall remit undisputed invoice balances within
+              <span class="line-through bg-rose-500/20 text-rose-700 dark:text-rose-300 px-1 rounded">thirty (30) days (Net-30)</span>
+              <span class="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-1 rounded">sixty (60) days (Net-60)</span>
+              from receipt of invoice. Late balances shall accrue interest at
+              <span class="line-through bg-rose-500/20 text-rose-700 dark:text-rose-300 px-1 rounded">1.5%</span>
+              <span class="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-1 rounded">0.75%</span> per month.
+            </p>
+          </div>
+
+          <div id="clause-2" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--card)] space-y-1">
+            <div class="text-xs font-semibold text-[var(--muted-foreground)]">8.1 Limitation of Liability</div>
+            <p class="text-xs sm:text-sm">
+              In no event shall Provider's aggregate liability exceed
+              <span class="line-through bg-rose-500/20 text-rose-700 dark:text-rose-300 px-1 rounded">$250,000 USD</span>
+              <span class="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-1 rounded">$100,000 USD</span>
+              or the fees paid in the preceding
+              <span class="line-through bg-rose-500/20 text-rose-700 dark:text-rose-300 px-1 rounded">twelve (12)</span>
+              <span class="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-1 rounded">six (6)</span> months.
+            </p>
+          </div>
+
+          <div id="clause-3" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--card)] space-y-1">
+            <div class="text-xs font-semibold text-[var(--muted-foreground)]">11.4 Auto-Renewal Notice Window</div>
+            <p class="text-xs sm:text-sm">
+              This Agreement renews automatically unless either party provides written notice at least
+              <span class="line-through bg-rose-500/20 text-rose-700 dark:text-rose-300 px-1 rounded">30 calendar days</span>
+              <span class="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-1 rounded">60 calendar days</span> prior to term expiration.
+            </p>
+          </div>
+        </div>
+
+        <!-- Jump-to-Change Sidebar -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Detected Edits (4)</span>
+            <span class="text-xs text-rose-600 dark:text-rose-400 font-medium">-4 Deletions / +4 Insertions</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded border border-amber-500/40 bg-amber-500/10">
+              <div class="font-semibold">Page 4 • Payment Terms</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">Net-30 changed to <strong>Net-60</strong>; late fee halved.</div>
+            </div>
+            <div class="p-2.5 rounded border border-rose-500/40 bg-rose-500/10">
+              <div class="font-semibold">Page 7 • Liability Cap Reduced</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">Cap lowered from $250,000 → <strong>$100,000</strong>.</div>
+            </div>
+            <div class="p-2.5 rounded border border-[var(--border)] bg-[var(--card)]">
+              <div class="font-semibold">Page 9 • Renewal Notice</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">Cancellation notice doubled to <strong>60 days</strong>.</div>
+            </div>
+            <button onclick="switchDiffTab('ai')" class="w-full mt-2 py-2 px-3 rounded-md bg-indigo-500/15 border border-indigo-500/40 text-indigo-600 dark:text-indigo-400 font-semibold text-xs hover:opacity-90 transition">
+              ✨ Open Gemini Risk Summary →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 2: VISUAL CURTAIN SLIDER (SCANS / INVOICES / SLIDES) -->
+      <div id="panel-diff-visual" class="hidden p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[var(--background)] p-3 rounded-lg border border-[var(--border)]">
+          <div class="text-xs">
+            <strong>Visual Pixel &amp; Curtain Overlay</strong> — Drag the slider below to spot changed figures or signatures on scanned PDFs &amp; slides:
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <span class="text-rose-600 dark:text-rose-400 font-medium">◀ Left: v3 ($42,000)</span>
+            <input id="curtain-range" type="range" min="10" max="90" value="50" oninput="updateCurtain(this.value)" class="w-36 accent-indigo-600 cursor-pointer" />
+            <span class="text-emerald-600 dark:text-emerald-400 font-medium">Right: v4 ($48,500) ▶</span>
+          </div>
+        </div>
+
+        <!-- Split Visual Canvas Comparison -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div id="visual-card-v3" class="border border-[var(--border)] rounded-lg p-4 bg-[var(--background)] space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="px-2 py-0.5 rounded bg-[var(--secondary)] font-semibold">v3 Scan (Oct 28)</span>
+              <span class="text-[var(--muted-foreground)]">Exhibit_A_Invoice_Scan.pdf</span>
+            </div>
+            <div class="p-3 rounded bg-[var(--card)] border border-[var(--border)] space-y-2 text-xs">
+              <div class="flex justify-between"><span>Platform Implementation</span><span>$32,000.00</span></div>
+              <div class="flex justify-between"><span>Data Migration Package</span><span>$10,000.00</span></div>
+              <div class="border-t border-[var(--border)] pt-2 flex justify-between font-bold text-sm">
+                <span>TOTAL DUE:</span>
+                <span>$42,000.00</span>
+              </div>
+              <div class="pt-3 text-[var(--muted-foreground)] italic">Authorized Signature: [ unsigned ]</div>
+            </div>
+          </div>
+
+          <div id="visual-card-v4" class="border-2 border-rose-500/50 rounded-lg p-4 bg-[var(--background)] space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold">v4 Scan (Current — 2 Pixel Regions Changed)</span>
+              <span id="curtain-indicator" class="text-xs font-medium text-indigo-600 dark:text-indigo-400">Curtain Split: 50%</span>
+            </div>
+            <div class="p-3 rounded bg-[var(--card)] border border-[var(--border)] space-y-2 text-xs">
+              <div class="flex justify-between"><span>Platform Implementation</span><span>$32,000.00</span></div>
+              <div class="flex justify-between items-center p-1 rounded border-2 border-dashed border-rose-500 bg-rose-500/10">
+                <span>Data Migration + Rush Fee</span>
+                <span class="font-bold text-rose-600 dark:text-rose-400">$16,500.00 (Pixel Shift!)</span>
+              </div>
+              <div class="border-t border-[var(--border)] pt-2 flex justify-between font-bold text-sm p-1 rounded bg-amber-500/15">
+                <span>TOTAL DUE:</span>
+                <span>$48,500.00 (+$6,500)</span>
+              </div>
+              <div class="pt-2 p-1 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-medium">
+                Authorized Signature: ✓ Signed (A. Vance — Nov 1)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 3: SPREADSHEET DIFF -->
+      <div id="panel-diff-sheet" class="hidden p-5 space-y-3">
+        <div class="text-xs text-[var(--muted-foreground)]">Comparing tabular Box files (`.csv` / `.xlsx`) cell-by-cell without Excel leading-zero corruption:</div>
+        <div class="overflow-x-auto border border-[var(--border)] rounded-lg">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-[var(--sidebar)] border-b border-[var(--border)]">
+              <tr>
+                <th class="p-2.5">Status</th>
+                <th class="p-2.5">SKU / Cost Code</th>
+                <th class="p-2.5">Line Item</th>
+                <th class="p-2.5">v3 Amount</th>
+                <th class="p-2.5">v4 Amount</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              <tr>
+                <td class="p-2.5 text-[var(--muted-foreground)]">Unchanged</td>
+                <td class="p-2.5 font-mono">00481</td>
+                <td class="p-2.5">Core Cloud Seats (50)</td>
+                <td class="p-2.5">$18,000</td>
+                <td class="p-2.5">$18,000</td>
+              </tr>
+              <tr class="bg-amber-500/10">
+                <td class="p-2.5 font-semibold text-amber-600 dark:text-amber-400">Modified Cell</td>
+                <td class="p-2.5 font-mono">00482</td>
+                <td class="p-2.5">Onboarding &amp; Training</td>
+                <td class="p-2.5 line-through text-rose-600 dark:text-rose-400">$12,400</td>
+                <td class="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">$14,900 (+$2,500)</td>
+              </tr>
+              <tr class="bg-emerald-500/10">
+                <td class="p-2.5 font-semibold text-emerald-600 dark:text-emerald-400">+ Added Row</td>
+                <td class="p-2.5 font-mono">00499</td>
+                <td class="p-2.5 font-medium">Annual SOC2 Compliance Pack</td>
+                <td class="p-2.5 text-[var(--muted-foreground)]">—</td>
+                <td class="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">$4,000</td>
+              </tr>
+              <tr class="bg-rose-500/10">
+                <td class="p-2.5 font-semibold text-rose-600 dark:text-rose-400">- Removed Row</td>
+                <td class="p-2.5 font-mono">00310</td>
+                <td class="p-2.5 line-through">Complimentary Dedicated TAM</td>
+                <td class="p-2.5">$0 (Included)</td>
+                <td class="p-2.5 text-rose-600 dark:text-rose-400">Removed</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUB-TAB 4: GEMINI EXECUTIVE CHANGE BRIEF (PRO) -->
+      <div id="panel-diff-ai" class="hidden p-5 space-y-4">
+        <div class="p-4 rounded-xl border border-indigo-500/40 bg-indigo-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="text-sm font-semibold flex items-center gap-2">
+              ✨ Vertex AI (Gemini) Executive Change Brief
+              <span class="px-2 py-0.5 rounded text-xs bg-indigo-600 text-white">PRO ($6/mo)</span>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-0.5">
+              Only the 4 changed text hunks (1.8 KB) were sent ephemerally over TLS to GCP Vertex AI. Zero data logged or stored.
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3.5 rounded-lg border border-rose-500/40 bg-rose-500/10 space-y-1.5">
+            <div class="font-semibold text-rose-600 dark:text-rose-400">🚨 High-Priority Risk Shifts</div>
+            <p>• <strong>Liability Cap cut by 60%</strong> ($250k → $100k) and lookback shortened from 12 to 6 months (Sec 8.1).</p>
+          </div>
+          <div class="p-3.5 rounded-lg border border-amber-500/40 bg-amber-500/10 space-y-1.5">
+            <div class="font-semibold text-amber-600 dark:text-amber-400">💰 Cash-Flow &amp; Price Impact</div>
+            <p>• <strong>Payment terms doubled to Net-60</strong> (Sec 4.2), delaying vendor payout by 30 days, while Exhibit A total rose <strong>+$6,500</strong>.</p>
+          </div>
+          <div class="p-3.5 rounded-lg border border-[var(--border)] bg-[var(--background)] space-y-1.5">
+            <div class="font-semibold">📅 Deadlines &amp; Lock-In</div>
+            <p>• <strong>Non-renewal notice window expanded</strong> from 30 → 60 days prior to expiration (Sec 11.4).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: APP 2 — SAFESHARE MODAL (SCRUB & REDACT + SHARERADAR)         -->
+    <!-- ===================================================================== -->
+    <div id="view-safeshare" class="hidden bg-[var(--card)] border-2 border-[var(--border)] rounded-xl overflow-hidden shadow-md">
+      <!-- Simulated Box Modal Chrome -->
+      <div class="bg-[var(--sidebar)] border-b border-[var(--border)] px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">🛡️</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-sm">SafeShare for Box</span>
+              <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">100% Browser Wasm • 0 Bytes Sent to GCP</span>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)]">Clean hidden leaks inside files &amp; audit exposed shared links across folders</div>
+          </div>
+        </div>
+
+        <!-- Unified 2-Mode Switcher Inside SafeShare -->
+        <div class="flex items-center gap-1.5 bg-[var(--background)] p-1 rounded-lg border border-[var(--border)]">
+          <button onclick="openSafeShareTab('scrub')" id="tab-ss-scrub" class="px-3 py-1.5 rounded-md text-xs font-medium transition">
+            📄 File: Scrub &amp; Redact
+          </button>
+          <button onclick="openSafeShareTab('radar')" id="tab-ss-radar" class="px-3 py-1.5 rounded-md text-xs font-medium transition">
+            📡 Folder: ShareRadar Audit
+          </button>
+        </div>
+      </div>
+
+      <!-- SAFESHARE MODE 1: FILE SCRUB & REDACT -->
+      <div id="panel-ss-scrub" class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Left Controls: Privacy X-Ray + Auto-PII Checkboxes -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- Privacy X-Ray Card -->
+          <div id="xray-card" class="p-4 rounded-xl border border-rose-500/40 bg-rose-500/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <span id="xray-badge" class="text-xs font-bold text-rose-600 dark:text-rose-400">⚠️ 4 Hidden Metadata Leaks Found</span>
+              <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                <input type="checkbox" id="chk-strip-meta" onchange="updateScrubPreview()" checked class="accent-emerald-600 w-4 h-4" />
+                Strip All Metadata
+              </label>
+            </div>
+            <ul id="xray-list" class="space-y-1.5 text-xs">
+              <li>📍 <strong>Exact Home GPS:</strong> 37.7891° N, 122.4014° W (Embedded in iPhone scan)</li>
+              <li>📱 <strong>Camera Serial:</strong> Apple iPhone 16 Pro • Lens Serial #F2L9910A</li>
+              <li>👤 <strong>Hidden PDF Author:</strong> "Madushan P." + 4 prior edit timestamps</li>
+              <li>💬 <strong>Hidden Annotations:</strong> 2 deleted reviewer notes in XML stream</li>
+            </ul>
+          </div>
+
+          <!-- Auto-PII Detector Checkboxes -->
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold">Auto-Detected Sensitive PII (Click to toggle)</span>
+              <span class="px-2 py-0.5 rounded text-xs bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-medium">Byte-Destructive</span>
+            </div>
+
+            <label class="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--card)] text-xs cursor-pointer">
+              <span>Social Security Number (SSN)</span>
+              <input type="checkbox" id="pii-ssn" checked onchange="updateScrubPreview()" class="accent-emerald-600 w-4 h-4" />
+            </label>
+            <label class="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--card)] text-xs cursor-pointer">
+              <span>Driver License Number</span>
+              <input type="checkbox" id="pii-dl" checked onchange="updateScrubPreview()" class="accent-emerald-600 w-4 h-4" />
+            </label>
+            <label class="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--card)] text-xs cursor-pointer">
+              <span>Bank Routing &amp; Checking Account</span>
+              <input type="checkbox" id="pii-bank" checked onchange="updateScrubPreview()" class="accent-emerald-600 w-4 h-4" />
+            </label>
+            <label class="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--card)] text-xs cursor-pointer">
+              <span>Personal Mobile Number</span>
+              <input type="checkbox" id="pii-phone" onchange="updateScrubPreview()" class="accent-emerald-600 w-4 h-4" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Right Live Document Redaction Canvas Preview -->
+        <div class="lg:col-span-7 flex flex-col justify-between bg-[var(--background)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+              <span class="text-xs font-semibold">Live Flattened Output Preview: <code class="font-mono">Signed_Lease_And_Driver_ID_SafeCopy.pdf</code></span>
+              <span id="meta-status-pill" class="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">EXIF &amp; Author Stripped ✓</span>
+            </div>
+
+            <div class="p-4 rounded-lg bg-[var(--card)] border border-[var(--border)] space-y-3 text-xs sm:text-sm">
+              <div class="font-bold text-sm border-b border-[var(--border)] pb-1.5">RESIDENTIAL LEASE &amp; TENANT VERIFICATION</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span class="text-[var(--muted-foreground)]">Tenant Name:</span>
+                  <span class="font-semibold ml-1">Alex Rivera</span>
+                </div>
+                <div>
+                  <span class="text-[var(--muted-foreground)]">Mobile:</span>
+                  <span id="preview-phone" class="ml-1 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 font-mono">(415) 891-0492</span>
+                </div>
+                <div>
+                  <span class="text-[var(--muted-foreground)]">SSN:</span>
+                  <span id="preview-ssn" class="ml-1 px-2 py-0.5 rounded font-mono">███████████</span>
+                </div>
+                <div>
+                  <span class="text-[var(--muted-foreground)]">Driver License:</span>
+                  <span id="preview-dl" class="ml-1 px-2 py-0.5 rounded font-mono">█████████</span>
+                </div>
+                <div class="sm:col-span-2">
+                  <span class="text-[var(--muted-foreground)]">ACH Auto-Debit Account:</span>
+                  <span id="preview-bank" class="ml-1 px-2 py-0.5 rounded font-mono">██████████████████</span>
+                </div>
+              </div>
+              <div class="p-2.5 rounded bg-[var(--background)] border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                Note: Redacted regions are permanently rasterized &amp; stripped from the underlying PDF glyph layer—impossible to highlight, copy, or reverse.
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-[var(--border)] space-y-2.5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-1">
+                <span class="text-xs font-medium text-[var(--muted-foreground)] whitespace-nowrap">Save New File As:</span>
+                <input id="output-filename" type="text" value="Alex_Rivera_Lease_And_ID_SafeCopy" class="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-md px-2.5 py-1 text-xs font-mono" />
+                <span class="text-xs font-mono text-[var(--muted-foreground)]">.pdf</span>
+              </div>
+              <button onclick="anonymizeFilename()" class="px-2.5 py-1 rounded text-xs font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:opacity-90 transition whitespace-nowrap">
+                ⚠️ Name in Filename → Anonymize
+              </button>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs text-[var(--muted-foreground)]">Creates brand-new v1 file (0 unredacted Box Version History).</span>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="saveSafeCopy(false)" class="px-3.5 py-2 rounded-md text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:opacity-90 transition">
+                  Save _SafeCopy to Box
+                </button>
+                <button onclick="saveSafeCopy(true)" class="px-3.5 py-2 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+                  Save &amp; Copy Clean Box Link
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAFESHARE MODE 2: SHARERADAR FOLDER AUDIT -->
+      <div id="panel-ss-radar" class="hidden p-5 space-y-4">
+        <!-- KPI Summary Cards (With Live Link Opens & Downloads Telemetry) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-xl border border-rose-500/40 bg-rose-500/10">
+            <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold">🔴 Open "Anyone with Link"</div>
+            <div id="kpi-open-count" class="text-2xl font-bold mt-1">3 Exposed</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Public URLs • ♾️ Never Expire</div>
+          </div>
+          <div class="p-3.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10">
+            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">👁️ Shared-Link Opens (Views)</div>
+            <div class="text-2xl font-bold mt-1">249 Opens</div>
+            <div class="text-xs text-rose-600 dark:text-rose-400 font-medium">🔥 +14 new opens since Oct 18 scan</div>
+          </div>
+          <div class="p-3.5 rounded-xl border border-amber-500/40 bg-amber-500/10">
+            <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold">⬇️ Shared-Link Downloads</div>
+            <div class="text-2xl font-bold mt-1">81 Downloads</div>
+            <div class="text-xs text-rose-600 dark:text-rose-400 font-medium">🔥 +6 new downloads on exposed files</div>
+          </div>
+          <div class="p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10">
+            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">🟡 Guests &amp; Clean Items</div>
+            <div id="kpi-guest-count" class="text-2xl font-bold mt-1">1 Guest (412d)</div>
+            <div id="kpi-safe-count" class="text-xs text-[var(--muted-foreground)]">138 items clean • 0 file bytes downloaded</div>
+          </div>
+        </div>
+
+        <!-- Bulk Action Bar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+          <div class="text-xs">
+            <span class="font-semibold">Live Box Telemetry + User-Box Snapshot Deltas</span>
+            <span class="text-[var(--muted-foreground)] ml-1">(Sorted by highest external download &amp; view activity)</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="bulkFixRadar('Revoked Public Link')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-rose-600 text-white hover:opacity-90 transition">
+              Revoke Selected Links
+            </button>
+            <button onclick="bulkFixRadar('Downloads Disabled (View-Only)')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:opacity-90 transition">
+              Force View-Only
+            </button>
+            <button onclick="bulkFixRadar('30-Day Expiry Added')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+              Stamp 30-Day Expiry (Pro)
+            </button>
+            <button onclick="showToast('Saved ShareRadar_Audit_2026-11-01.csv + updated delta snapshot inside your Box folder!')" class="px-3 py-1.5 rounded-md text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:opacity-90 transition">
+              Save Snapshot &amp; CSV to Box
+            </button>
+          </div>
+        </div>
+
+        <!-- Risk & Traffic Table -->
+        <div class="overflow-x-auto border border-[var(--border)] rounded-lg">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-[var(--sidebar)] border-b border-[var(--border)]">
+              <tr>
+                <th class="p-3 w-8"><input type="checkbox" checked onclick="toggleAllRadar(this.checked)" class="accent-indigo-600" /></th>
+                <th class="p-3">Box Item &amp; Path</th>
+                <th class="p-3">Exposure &amp; Permissions</th>
+                <th class="p-3">Opens &amp; Downloads (`shared_link` Stats)</th>
+                <th class="p-3">Duration Open / Dormancy</th>
+                <th class="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              <tr id="radar-row-0">
+                <td class="p-3"><input type="checkbox" checked class="radar-chk accent-indigo-600" data-row="0" /></td>
+                <td class="p-3">
+                  <div class="font-semibold">Client_Rate_Card_Internal.xlsx</div>
+                  <div class="text-[var(--muted-foreground)]">/Client Projects/Pricing/</div>
+                </td>
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-medium">Anyone with link</span>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">Download ON • No Password</div>
+                </td>
+                <td class="p-3">
+                  <div class="font-semibold">👁️ 183 Opens • ⬇️ 64 Downloads</div>
+                  <div class="text-rose-600 dark:text-rose-400 font-medium mt-0.5">🔥 +11 opens / +4 downloads (14d)</div>
+                </td>
+                <td class="p-3">
+                  <div>Tracked open: <strong>94 days</strong></div>
+                  <div class="text-[var(--muted-foreground)]">♾️ Never expires</div>
+                </td>
+                <td class="p-3 font-semibold text-rose-600 dark:text-rose-400" id="radar-status-0">Active Leak</td>
+              </tr>
+              <tr id="radar-row-1">
+                <td class="p-3"><input type="checkbox" checked class="radar-chk accent-indigo-600" data-row="1" /></td>
+                <td class="p-3">
+                  <div class="font-semibold">2025_Federal_Tax_Return_Signed.pdf</div>
+                  <div class="text-[var(--muted-foreground)]">/Tax Docs/2025/</div>
+                </td>
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-medium">Anyone with link</span>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">Download ON • No Password</div>
+                </td>
+                <td class="p-3">
+                  <div class="font-semibold">👁️ 47 Opens • ⬇️ 12 Downloads</div>
+                  <div class="text-rose-600 dark:text-rose-400 font-medium mt-0.5">🔥 +3 opens / +2 downloads (14d)</div>
+                </td>
+                <td class="p-3">
+                  <div>File dormant: <strong>14 mos</strong></div>
+                  <div class="text-[var(--muted-foreground)]">♾️ Never expires</div>
+                </td>
+                <td class="p-3 font-semibold text-rose-600 dark:text-rose-400" id="radar-status-1">Exposed</td>
+              </tr>
+              <tr id="radar-row-2">
+                <td class="p-3"><input type="checkbox" checked class="radar-chk accent-indigo-600" data-row="2" /></td>
+                <td class="p-3">
+                  <div class="font-semibold">Passport_And_Visa_Scans/</div>
+                  <div class="text-[var(--muted-foreground)]">/Personal IDs/</div>
+                </td>
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-medium">Anyone with link</span>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">Entire Folder Public ZIP</div>
+                </td>
+                <td class="p-3">
+                  <div class="font-semibold">👁️ 19 Opens • ⬇️ 5 Downloads</div>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">No new traffic since Oct 18</div>
+                </td>
+                <td class="p-3">
+                  <div>File dormant: <strong>22 mos</strong></div>
+                  <div class="text-[var(--muted-foreground)]">♾️ Never expires</div>
+                </td>
+                <td class="p-3 font-semibold text-rose-600 dark:text-rose-400" id="radar-status-2">Exposed</td>
+              </tr>
+              <tr id="radar-row-3">
+                <td class="p-3"><input type="checkbox" checked class="radar-chk accent-indigo-600" data-row="3" /></td>
+                <td class="p-3">
+                  <div class="font-semibold">Q1_Brand_Assets_Folder/</div>
+                  <div class="text-[var(--muted-foreground)]">/Client Projects/Archive/</div>
+                </td>
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-medium">Guest: contractor@oldstudio.io</span>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">Role: Editor (Upload / Delete / v1 History)</div>
+                </td>
+                <td class="p-3">
+                  <div class="font-semibold">Direct Collaborator</div>
+                  <div class="text-[var(--muted-foreground)] mt-0.5">Bypasses link counters</div>
+                </td>
+                <td class="p-3">
+                  <div>Access granted: <strong>412 days ago</strong></div>
+                  <div class="text-[var(--muted-foreground)]">♾️ No guest expiration</div>
+                </td>
+                <td class="p-3 font-semibold text-amber-600 dark:text-amber-400" id="radar-status-3">Stale Editor</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function setBtnActive(btn, active) {
+      if (active) {
+        btn.className = 'px-3 py-1.5 rounded-md text-xs font-semibold transition bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm';
+      } else {
+        btn.className = 'px-3 py-1.5 rounded-md text-xs font-medium transition text-[var(--muted-foreground)] hover:text-[var(--foreground)]';
+      }
+    }
+
+    function switchMainApp(app) {
+      ['launcher', 'boxdiff', 'safeshare'].forEach(id => {
+        document.getElementById('view-' + id).classList.toggle('hidden', id !== app);
+        setBtnActive(document.getElementById('btn-app-' + id), id === app);
+      });
+    }
+
+    function switchDiffTab(tab) {
+      ['text', 'visual', 'sheet', 'ai'].forEach(id => {
+        document.getElementById('panel-diff-' + id).classList.toggle('hidden', id !== tab);
+        setBtnActive(document.getElementById('tab-diff-' + id), id === tab);
+      });
+    }
+
+    function openSafeShareTab(tab) {
+      switchMainApp('safeshare');
+      ['scrub', 'radar'].forEach(id => {
+        document.getElementById('panel-ss-' + id).classList.toggle('hidden', id !== tab);
+        setBtnActive(document.getElementById('tab-ss-' + id), id === tab);
+      });
+    }
+
+    function updateCurtain(val) {
+      document.getElementById('curtain-indicator').textContent = 'Curtain Split: ' + val + '%';
+      document.getElementById('visual-card-v3').style.opacity = (1.15 - (val / 130)).toFixed(2);
+    }
+
+    function applyRedactionBar(elId, redacted, rawText) {
+      const el = document.getElementById(elId);
+      if (redacted) {
+        el.textContent = '████████████';
+        el.className = 'ml-1 px-2 py-0.5 rounded bg-[var(--foreground)] text-[var(--foreground)] font-mono select-none';
+      } else {
+        el.textContent = rawText;
+        el.className = 'ml-1 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 font-mono';
+      }
+    }
+
+    function updateScrubPreview() {
+      const stripMeta = document.getElementById('chk-strip-meta').checked;
+      const pill = document.getElementById('meta-status-pill');
+      const card = document.getElementById('xray-card');
+      const badge = document.getElementById('xray-badge');
+
+      if (stripMeta) {
+        pill.textContent = 'EXIF, GPS & Author Stripped ✓';
+        pill.className = 'px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
+        card.className = 'p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 space-y-3';
+        badge.textContent = '✓ All 4 Metadata Leaks Queued for Removal';
+        badge.className = 'text-xs font-bold text-emerald-600 dark:text-emerald-400';
+      } else {
+        pill.textContent = '⚠️ Raw Metadata Still Present';
+        pill.className = 'px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-700 dark:text-rose-300';
+        card.className = 'p-4 rounded-xl border border-rose-500/40 bg-rose-500/10 space-y-3';
+        badge.textContent = '⚠️ 4 Hidden Metadata Leaks Found';
+        badge.className = 'text-xs font-bold text-rose-600 dark:text-rose-400';
+      }
+
+      applyRedactionBar('preview-ssn', document.getElementById('pii-ssn').checked, '419-00-4829');
+      applyRedactionBar('preview-dl', document.getElementById('pii-dl').checked, 'CA-D8492011');
+      applyRedactionBar('preview-bank', document.getElementById('pii-bank').checked, 'Routing 121000358 • Acct 88410293');
+      applyRedactionBar('preview-phone', document.getElementById('pii-phone').checked, '(415) 891-0492');
+    }
+
+    function toggleAllRadar(checked) {
+      document.querySelectorAll('.radar-chk').forEach(c => { c.checked = checked; });
+    }
+
+    function bulkFixRadar(actionLabel) {
+      let fixed = 0;
+      document.querySelectorAll('.radar-chk').forEach(chk => {
+        if (chk.checked) {
+          const idx = chk.getAttribute('data-row');
+          const statusEl = document.getElementById('radar-status-' + idx);
+          statusEl.textContent = '✓ ' + actionLabel;
+          statusEl.className = 'p-3 font-semibold text-emerald-600 dark:text-emerald-400';
+          chk.checked = false;
+          fixed++;
+        }
+      });
+      if (fixed > 0) {
+        document.getElementById('kpi-open-count').textContent = '0 Exposed';
+        document.getElementById('kpi-guest-count').textContent = '0 Stale Guests';
+        document.getElementById('kpi-safe-count').textContent = '142 items clean • 0 file bytes downloaded';
+        showToast('Updated ' + fixed + ' items directly in Box (' + actionLabel + ')!');
+      } else {
+        showToast('Select at least one row to remediate.');
+      }
+    }
+
+    function anonymizeFilename() {
+      const inp = document.getElementById('output-filename');
+      inp.value = 'Redacted_Document_2026-11-01';
+      showToast('Removed personal name from output filename → Redacted_Document_2026-11-01.pdf');
+    }
+
+    function saveSafeCopy(withLink) {
+      const name = (document.getElementById('output-filename').value || 'Redacted_SafeCopy') + '.pdf';
+      if (withLink) {
+        showToast('Saved ' + name + ' (brand-new v1) to Box and copied clean Shared Link!');
+      } else {
+        showToast('Saved ' + name + ' (brand-new v1, 0 metadata, PII burned) to Box!');
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = '✓ ' + msg;
+      t.classList.remove('hidden');
+    }
+
+    function hideToast() {
+      document.getElementById('toast').classList.add('hidden');
+    }
+
+    // Initialize default active states
+    switchMainApp('boxdiff');
+    switchDiffTab('text');
+    updateScrubPreview();
+  </script>
+</body>
+</html>

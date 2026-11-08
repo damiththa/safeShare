@@ -1,0 +1,97 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >>
+   /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 1250 >>
+stream
+BT
+/F2 16 Tf
+54 736 Td
+(MERCY GENERAL CLINIC - PATIENT INTAKE & BILLING SUMMARY) Tj
+/F1 10 Tf
+0 -18 Td
+(Synthetic Test Document for SafeShare PII, HIPAA PHI & Custom Redaction Verification) Tj
+/F2 12 Tf
+0 -32 Td
+(1. CLINICAL & HIPAA PHI RECORD) Tj
+/F1 11 Tf
+0 -20 Td
+(Patient Name: Evelyn Carter) Tj
+0 -18 Td
+(Attending Physician: Dr. Marcus Vance) Tj
+0 -18 Td
+(Date of Birth: 04/18/1982      Admission Date: 10/29/2026) Tj
+0 -18 Td
+(MRN: 8849201-C      Medicare ID: 1EG4-TE5-MK72) Tj
+0 -18 Td
+(Provider NPI: 1234567893      DEA #: BV1234563) Tj
+0 -18 Td
+(Diagnosis Code: J45.40) Tj
+/F2 12 Tf
+0 -30 Td
+(2. PERSONAL & CONTACT DETAILS \(PII\)) Tj
+/F1 11 Tf
+0 -20 Td
+(SSN: 453-29-8174      Driver License: D8492017) Tj
+0 -18 Td
+(Email: evelyn.carter@example.org      Phone: \(415\) 555-0194) Tj
+0 -18 Td
+(Home Address: 742 Evergreen Terrace, Suite 4B) Tj
+0 -18 Td
+(Portal Login IP: 198.51.100.42) Tj
+/F2 12 Tf
+0 -30 Td
+(3. BILLING & PAYMENT AUTHORIZATION) Tj
+/F1 11 Tf
+0 -20 Td
+(Card on File: 4532 0151 1283 0366) Tj
+0 -18 Td
+(Bank Routing: 021000021      Account #: 9940182741) Tj
+/F2 12 Tf
+0 -34 Td
+(4. CUSTOM DRAG-TO-REDACT PRACTICE AREA) Tj
+/F1 11 Tf
+0 -20 Td
+( Authorized Signature:   /s/ Evelyn M. Carter   [Drag a box over this signature] ) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Title (Confidential Patient Intake & Billing Summary)
+   /Author (Dr. Marcus Vance - Mercy General Clinic)
+   /Subject (Synthetic HIPAA PHI & PII Test Chart)
+   /Keywords (PHI, PII, Intake, Billing, Confidential)
+   /Creator (Epic Clinical Document Exporter)
+   /Producer (SafeShare Synthetic Test Generator)
+   /CreationDate (D:20261105143000Z) >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000257 00000 n 
+0000000327 00000 n 
+0000000402 00000 n 
+0000001704 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+2072
+%%EOF

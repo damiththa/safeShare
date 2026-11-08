@@ -8,7 +8,7 @@
 
 - [x] **Explicit Owner Approval Before Every Deployment:** **Always check with the repository owner and obtain explicit confirmation BEFORE executing any GCP Cloud Run deployment (`gcloud run deploy`).** Never auto-deploy unprompted.
 - [x] **100% Cloud Execution (Zero Local Compute):** Never run local Python servers, virtual environments, npm/Node installs, Docker builds, or `.env` secrets on the local machine. Container builds execute exclusively in **GCP Cloud Build** (`us-central1`) and Archify diagram compilation executes in **GitHub Actions** (`ubuntu-latest`).
-- [x] **Single Local Git Folder:** `/Users/madushan/GitStuff/safeshare-box` is the sole directory containing project source files on the developer machine.
+- [x] **Single Local Project Folder (Everything Together):** `/Users/madushan/GitStuff/safeshare-box` is the sole directory for **all** project-related files—including source code, feasibility studies (`docs/studies/`), architecture specs (`docs/`), UI mocks, and synthetic test files (`samples/`). Never scatter project files in `/tmp` or external folders.
 - [x] **Zero-PII Cloud Guarantee:**
   - Zero file bytes, filenames, folder paths, Shared Link URLs, emails, display names, or Box OAuth tokens ever touch GCP storage or logs (`uvicorn --no-access-log`).
   - `/api/oauth/exchange` requests strictly `/2.0/users/me?fields=id` (numeric ID only—never `name` or `login`), hashes it irreversibly via `HMAC_SHA256(HMAC_PEPPER, numeric_box_user_id)`, discards `refresh_token`, and returns the short-lived `access_token` solely to volatile browser RAM.

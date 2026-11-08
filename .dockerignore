@@ -8,5 +8,6 @@ __pycache__/
 .DS_Store
 README.md
 docs/
+samples/
 scripts/
 marketplace/
