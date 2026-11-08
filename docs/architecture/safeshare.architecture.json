@@ -3,7 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "SafeShare for Box — Zero-PII Client-Side Scrubber, Redactor & ShareRadar Process Architecture",
-    "subtitle": "100% In-Browser Wasm/Canvas Processing • Parent-Scoped _SafeCopy v1 Export • 9-Metric ShareRadar Telemetry • Stateless HMAC Cloud Run",
+    "subtitle": "100% In-Browser Wasm/Canvas Processing • Parent-Scoped _Clean v1 Export • Popup-Ready Box UX • Stateless HMAC Cloud Run",
     "output": "docs/architecture/safeshare-architecture.html",
     "visual_preset": "blueprint",
     "animation": "trace",
@@ -29,7 +29,7 @@
           "vendored_bundles",
           "box_user_vault"
         ],
-        "note": "User right-clicks PDF/Image/DOCX in Box (Parent-Folder scope) -> Browser downloads via ?access_token 302 stream -> Runs EXIF/GPS/XMP X-Ray + Luhn/SSN/ABA PII scan + Filename PII guard -> Rasterizes 250-DPI pixel burn -> Uploads brand-new v1 _SafeCopy (0 unredacted Version History)."
+        "note": "User right-clicks PDF/Image/DOCX in Box (Parent-Folder scope, popup or tab) -> Browser downloads via ?access_token 302 stream -> Runs plain-English EXIF/GPS/XMP clean-up + Luhn/SSN/ABA PII scan -> Rasterizes 250-DPI pixel burn -> Uploads brand-new v1 _Clean copy (0 unredacted Version History)."
       },
       {
         "id": "shareradar-folder-audit",
@@ -99,7 +99,7 @@
       "id": "box_user_vault",
       "type": "database",
       "label": "User's Box Folder Vault",
-      "sublabel": "_SafeCopy v1, CSV & Snapshot",
+      "sublabel": "_Clean v1, CSV & Snapshot",
       "brand": "box",
       "tag": "0 Version History Leak",
       "pos": [36, 400],
@@ -109,15 +109,15 @@
       "id": "spa_controller",
       "type": "frontend",
       "label": "SafeShare Browser SPA",
-      "sublabel": "URL Scrub, Tabs & RAM Token",
+      "sublabel": "Contextual Popup & RAM Token",
       "brand": "javascript",
       "tag": "ES Modules • 0 Storage",
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 235, "label": "3-Tab Scrub, ShareRadar & Box Browser UI" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 682, "label": "Stateless launch orchestrator & UI state" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 527, "label": "Light/dark Box-native stylesheet" }
+        { "path": "static/index.html", "line": 1, "end_line": 288, "label": "Contextual popup-ready Clean & Folder Sharing UI" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 791, "label": "Stateless contextual launch & popup orchestrator" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1005, "label": "Calm daylight Box-native responsive stylesheet" }
       ]
     },
     {
@@ -149,14 +149,14 @@
     {
       "id": "xray_pii_engine",
       "type": "security",
-      "label": "Metadata X-Ray & Auto-PII",
+      "label": "Metadata Clean & Auto-PII",
       "sublabel": "EXIF/GPS, XMP, Luhn/SSN/ABA",
       "brand": "webassembly",
       "tag": "Filename PII Anonymizer",
       "pos": [548, 110],
       "size": [198, 68],
       "sources": [
-        { "path": "static/js/metadata_xray.js", "line": 1, "end_line": 268, "label": "Magic-byte EXIF/GPS/Thumb, PDF & DOCX X-Ray" },
+        { "path": "static/js/metadata_xray.js", "line": 1, "end_line": 246, "label": "Plain-English EXIF/GPS/Thumb, PDF & DOCX check" },
         { "path": "static/js/pii_detector.js", "line": 1, "end_line": 164, "label": "Luhn, SSN, ABA routing & filename PII scanner" }
       ]
     },
@@ -170,7 +170,7 @@
       "pos": [548, 255],
       "size": [198, 68],
       "sources": [
-        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 398, "label": "Interactive canvas & 250-DPI PDFLib exporter" }
+        { "path": "static/js/redactor_engine.js", "line": 1, "end_line": 383, "label": "Unified pointer canvas & 250-DPI PDFLib exporter" }
       ]
     },
     {

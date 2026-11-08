@@ -1,11 +1,11 @@
 /**
- * Interactive Preview Canvas & True Byte-Destructive Redaction Exporter.
+ * Interactive Preview Canvas & Permanent Redaction Exporter.
  *
  * Security design:
  *  - Images: Decoded to raw RGBA canvas pixels (100% EXIF/GPS/thumbnail stripped),
  *    redaction regions overwritten directly with #000000 in the bitmap, re-encoded cleanly.
- *  - PDFs: Redacted pages (or all pages when "Flatten All Pages" is checked) are rasterized
- *    at high print resolution (250 DPI) onto an offscreen canvas with #000000 pixel burns,
+ *  - PDFs: Redacted pages (or all pages when "Convert all pages to flat images" is checked)
+ *    are rasterized at crisp 250 DPI onto an offscreen canvas with #000000 pixel burns,
  *    then embedded into a brand-new, zero-metadata `PDFLib.PDFDocument` so zero underlying
  *    selectable text glyphs survive underneath black bars.
  *  - DOCX: Strips `docProps/core.xml`, `docProps/app.xml`, and `word/comments.xml`.
@@ -31,38 +31,37 @@ export class RedactorWorkspace {
     this.currentPage = 0; // 0-indexed
     this.basePageCanvas = document.createElement("canvas");
 
-    this.autoFindings = []; // From PII detector
-    this.manualBoxes = []; // `{ id, pageIndex, rectNorm: {x, y, w, h} }`
+    this.autoFindings = [];
+    this.manualBoxes = [];
     this._dragStart = null;
     this._dragCurrent = null;
 
-    this._bindMouseEvents();
+    this._bindPointerEvents();
   }
 
-  _bindMouseEvents() {
+  _bindPointerEvents() {
     const getNormCoords = (evt) => {
       const rect = this.canvas.getBoundingClientRect();
-      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
       return {
-        x: Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width))),
-        y: Math.max(0, Math.min(1, (clientY - rect.top) / Math.max(1, rect.height))),
+        x: Math.max(0, Math.min(1, (evt.clientX - rect.left) / Math.max(1, rect.width))),
+        y: Math.max(0, Math.min(1, (evt.clientY - rect.top) / Math.max(1, rect.height))),
       };
     };
 
-    this.canvas.addEventListener("mousedown", (e) => {
+    this.canvas.addEventListener("pointerdown", (e) => {
       if (!this.rawBytes || this.format === "docx") return;
+      this.canvas.setPointerCapture?.(e.pointerId);
       this._dragStart = getNormCoords(e);
       this._dragCurrent = this._dragStart;
     });
 
-    window.addEventListener("mousemove", (e) => {
+    this.canvas.addEventListener("pointermove", (e) => {
       if (!this._dragStart) return;
       this._dragCurrent = getNormCoords(e);
       this.redrawOverlay();
     });
 
-    window.addEventListener("mouseup", () => {
+    const finishDrag = () => {
       if (!this._dragStart || !this._dragCurrent) return;
       const x = Math.min(this._dragStart.x, this._dragCurrent.x);
       const y = Math.min(this._dragStart.y, this._dragCurrent.y);
@@ -80,7 +79,10 @@ export class RedactorWorkspace {
         this.onStateChange?.();
       }
       this.redrawOverlay();
-    });
+    };
+
+    this.canvas.addEventListener("pointerup", finishDrag);
+    this.canvas.addEventListener("pointercancel", finishDrag);
   }
 
   async loadDocument(uint8, format) {
@@ -93,7 +95,6 @@ export class RedactorWorkspace {
     this.imageBitmap = null;
 
     if (format === "pdf") {
-      // Pass a copy because pdf.js transfers the ArrayBuffer to its worker!
       const workerCopy = uint8.slice();
       this.pdfDocProxy = await window.pdfjsLib.getDocument({ data: workerCopy }).promise;
       this.pageCount = this.pdfDocProxy.numPages;
@@ -106,7 +107,6 @@ export class RedactorWorkspace {
       await this.renderPage(0);
     } else if (format === "docx") {
       this.pageCount = 1;
-      this._renderDocxPlaceholder();
     }
     this.onStateChange?.();
   }
@@ -122,7 +122,6 @@ export class RedactorWorkspace {
 
       for (const item of textContent.items) {
         if (!item.str || !item.transform) continue;
-        // PDF transform: [scaleX, skewY, skewX, scaleY, tx, ty] in bottom-left origin
         const tx = item.transform[4];
         const ty = item.transform[5];
         const fontH = Math.hypot(item.transform[2], item.transform[3]) || Math.abs(item.height) || 11;
@@ -146,10 +145,11 @@ export class RedactorWorkspace {
 
   async renderPage(pageIdx) {
     this.currentPage = Math.max(0, Math.min(this.pageCount - 1, pageIdx));
+    if (this.format === "docx") return;
 
     if (this.format === "pdf" && this.pdfDocProxy) {
       const page = await this.pdfDocProxy.getPage(this.currentPage + 1);
-      const viewport = page.getViewport({ scale: 1.35 });
+      const viewport = page.getViewport({ scale: 1.4 });
       this.basePageCanvas.width = Math.floor(viewport.width);
       this.basePageCanvas.height = Math.floor(viewport.height);
       const baseCtx = this.basePageCanvas.getContext("2d");
@@ -170,21 +170,6 @@ export class RedactorWorkspace {
     this.redrawOverlay();
   }
 
-  _renderDocxPlaceholder() {
-    this.canvas.width = 640;
-    this.canvas.height = 320;
-    const ctx = this.ctx;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 640, 320);
-    ctx.fillStyle = "#1e293b";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("Word Document (.docx) Metadata Scrubber Ready", 36, 70);
-    ctx.fillStyle = "#475569";
-    ctx.font = "13px sans-serif";
-    ctx.fillText("Saving _SafeCopy.docx strips Author, LastModifiedBy, Company,", 36, 106);
-    ctx.fillText("Revision counts, and embedded reviewer comments XML.", 36, 128);
-  }
-
   redrawOverlay() {
     if (this.format === "docx") return;
     const w = this.canvas.width;
@@ -200,12 +185,12 @@ export class RedactorWorkspace {
       const rw = f.rectNorm.w * w;
       const rh = f.rectNorm.h * h;
       if (f.enabled) {
-        this.ctx.fillStyle = "#000000";
+        this.ctx.fillStyle = "#0f172a";
         this.ctx.fillRect(rx, ry, rw, rh);
       } else {
-        this.ctx.fillStyle = "rgba(245, 158, 11, 0.28)";
+        this.ctx.fillStyle = "rgba(0, 97, 213, 0.14)";
         this.ctx.fillRect(rx, ry, rw, rh);
-        this.ctx.strokeStyle = "#d97706";
+        this.ctx.strokeStyle = "#0061d5";
         this.ctx.lineWidth = 1.5;
         this.ctx.strokeRect(rx, ry, rw, rh);
       }
@@ -214,19 +199,19 @@ export class RedactorWorkspace {
     // Draw Manual Redaction boxes on current page
     for (const m of this.manualBoxes) {
       if (m.pageIndex !== this.currentPage) continue;
-      this.ctx.fillStyle = "#000000";
+      this.ctx.fillStyle = "#0f172a";
       this.ctx.fillRect(m.rectNorm.x * w, m.rectNorm.y * h, m.rectNorm.w * w, m.rectNorm.h * h);
     }
 
-    // Draw active drag selection rectangle
+    // Calm Box-Blue selection rectangle while dragging
     if (this._dragStart && this._dragCurrent) {
       const dx = Math.min(this._dragStart.x, this._dragCurrent.x) * w;
       const dy = Math.min(this._dragStart.y, this._dragCurrent.y) * h;
       const dw = Math.abs(this._dragCurrent.x - this._dragStart.x) * w;
       const dh = Math.abs(this._dragCurrent.y - this._dragStart.y) * h;
-      this.ctx.fillStyle = "rgba(217, 45, 32, 0.25)";
+      this.ctx.fillStyle = "rgba(0, 97, 213, 0.18)";
       this.ctx.fillRect(dx, dy, dw, dh);
-      this.ctx.strokeStyle = "#d92d20";
+      this.ctx.strokeStyle = "#0061d5";
       this.ctx.lineWidth = 2;
       this.ctx.strokeRect(dx, dy, dw, dh);
     }
@@ -240,6 +225,11 @@ export class RedactorWorkspace {
         this.onStateChange?.();
         return;
       }
+    }
+    if (this.manualBoxes.length > 0) {
+      this.manualBoxes.pop();
+      this.redrawOverlay();
+      this.onStateChange?.();
     }
   }
 
@@ -261,8 +251,7 @@ export class RedactorWorkspace {
   }
 
   /**
-   * Produces a 100% metadata-scrubbed, byte-destructively redacted output binary.
-   * Returns `{ bytes: Uint8Array, mimeType: string, extension: string }`.
+   * Produces a 100% metadata-scrubbed, permanently redacted output binary.
    */
   async exportSanitizedBytes({ flattenAllPages = false } = {}) {
     if (this.format === "jpeg" || this.format === "png" || this.format === "webp") {
@@ -296,7 +285,6 @@ export class RedactorWorkspace {
     if (this.format === "pdf") {
       const { PDFDocument } = window.PDFLib;
       const outPdf = await PDFDocument.create();
-      // Ensure zero metadata in brand-new container
       outPdf.setTitle("");
       outPdf.setAuthor("");
       outPdf.setSubject("");
@@ -311,7 +299,6 @@ export class RedactorWorkspace {
         const mustRasterize = flattenAllPages || boxes.length > 0;
 
         if (mustRasterize) {
-          // Render at crisp ~250 DPI (scale = 250 / 72 ≈ 3.47) and burn #000000 directly into pixels
           const pdfPage = await this.pdfDocProxy.getPage(p + 1);
           const origVp = pdfPage.getViewport({ scale: 1.0 });
           const renderScale = 250 / 72;
@@ -353,7 +340,6 @@ export class RedactorWorkspace {
             });
           }
           const [copiedPage] = await outPdf.copyPages(srcPdfLibDoc, [p]);
-          // Strip page-level annotations (comments, links) from copied unredacted pages
           copiedPage.node.delete(window.PDFLib.PDFName.of("Annots"));
           outPdf.addPage(copiedPage);
         }
@@ -369,7 +355,6 @@ export class RedactorWorkspace {
 
     if (this.format === "docx") {
       const zip = await window.JSZip.loadAsync(this.rawBytes);
-      // Replace core.xml and app.xml with clean zero-identity XML & remove comments.xml
       const cleanCoreXml =
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ' +

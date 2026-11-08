@@ -1,7 +1,8 @@
 /**
- * Client-Side Binary & XML Metadata X-Ray Inspector (Zero-LLM, 100% Browser Memory).
- * Detects magic bytes and inspects hidden EXIF/GPS/Thumbnails (images),
- * PDF /Info & XMP & Annotations (PDFs), and core.xml/app.xml/comments (DOCX).
+ * Client-Side Binary & XML Metadata Inspector (100% In-Browser Memory).
+ * Detects file formats from magic bytes and identifies hidden personal or device details
+ * (GPS coordinates, author names, camera serials, embedded thumbnails, and comments)
+ * that SafeShare strips automatically when saving a clean copy.
  */
 
 export function detectFileFormatFromBytes(uint8, fallbackName = "") {
@@ -39,7 +40,6 @@ export function detectFileFormatFromBytes(uint8, fallbackName = "") {
     ) {
       return "webp";
     }
-    // PK\x03\x04 ZIP container (.docx)
     if (uint8[0] === 0x50 && uint8[1] === 0x4b && uint8[2] === 0x03 && uint8[3] === 0x04) {
       return "docx";
     }
@@ -53,7 +53,7 @@ export function detectFileFormatFromBytes(uint8, fallbackName = "") {
 }
 
 export async function runMetadataXray(uint8, format) {
-  const leaks = [];
+  const items = [];
 
   if (format === "jpeg" || format === "png" || format === "webp") {
     try {
@@ -68,52 +68,47 @@ export async function runMetadataXray(uint8, format) {
         });
         if (meta) {
           if (typeof meta.latitude === "number" && typeof meta.longitude === "number") {
-            leaks.push({
+            items.push({
               severity: "high",
-              icon: "📍",
-              title: "Exact GPS Coordinates",
-              detail: `${meta.latitude.toFixed(5)}°, ${meta.longitude.toFixed(5)}°`,
-            });
-          }
-          const deviceParts = [meta.Make, meta.Model, meta.LensModel].filter(Boolean);
-          if (deviceParts.length) {
-            leaks.push({
-              severity: "medium",
-              icon: "📱",
-              title: "Camera / Device Identity",
-              detail: deviceParts.join(" • "),
-            });
-          }
-          const serial = meta.BodySerialNumber || meta.SerialNumber || meta.LensSerialNumber;
-          if (serial) {
-            leaks.push({
-              severity: "high",
-              icon: "🔢",
-              title: "Hardware Serial Number",
-              detail: String(serial),
+              title: "Photo GPS location",
+              detail: `${meta.latitude.toFixed(4)}°, ${meta.longitude.toFixed(4)}°`,
             });
           }
           const author = meta.Artist || meta.XPAuthor || meta.Creator || meta.Copyright;
           if (author) {
-            leaks.push({
+            items.push({
               severity: "high",
-              icon: "👤",
-              title: "Embedded Author / Creator",
+              title: "Author / photographer name",
               detail: String(author),
             });
           }
-          if (meta.Software || meta.ModifyDate || meta.DateTimeOriginal) {
+          const deviceParts = [meta.Make, meta.Model, meta.LensModel].filter(Boolean);
+          if (deviceParts.length) {
+            items.push({
+              severity: "medium",
+              title: "Camera or phone model",
+              detail: deviceParts.join(" · "),
+            });
+          }
+          const serial = meta.BodySerialNumber || meta.SerialNumber || meta.LensSerialNumber;
+          if (serial) {
+            items.push({
+              severity: "high",
+              title: "Device serial number",
+              detail: String(serial),
+            });
+          }
+          if (meta.Software || meta.DateTimeOriginal) {
             const info = [
-              meta.Software ? `Software: ${meta.Software}` : null,
-              meta.DateTimeOriginal ? `Captured: ${new Date(meta.DateTimeOriginal).toLocaleString()}` : null,
+              meta.Software ? String(meta.Software) : null,
+              meta.DateTimeOriginal ? new Date(meta.DateTimeOriginal).toLocaleDateString() : null,
             ]
               .filter(Boolean)
-              .join(" • ");
+              .join(" · ");
             if (info) {
-              leaks.push({
+              items.push({
                 severity: "low",
-                icon: "🕒",
-                title: "Capture Timestamp & Software",
+                title: "App & capture date",
                 detail: info,
               });
             }
@@ -121,11 +116,10 @@ export async function runMetadataXray(uint8, format) {
         }
         const thumb = await window.exifr.thumbnail(uint8).catch(() => null);
         if (thumb && thumb.byteLength > 0) {
-          leaks.push({
+          items.push({
             severity: "high",
-            icon: "🖼️",
-            title: "Hidden EXIF Preview Thumbnail",
-            detail: `${(thumb.byteLength / 1024).toFixed(1)} KB embedded preview (can leak cropped content)`,
+            title: "Embedded preview thumbnail",
+            detail: `${(thumb.byteLength / 1024).toFixed(0)} KB original preview image`,
           });
         }
       }
@@ -143,48 +137,37 @@ export async function runMetadataXray(uint8, format) {
       const subject = pdfDoc.getSubject();
       const keywords = pdfDoc.getKeywords();
       const created = pdfDoc.getCreationDate();
-      const modified = pdfDoc.getModificationDate();
 
       if (author) {
-        leaks.push({ severity: "high", icon: "👤", title: "Hidden PDF Author", detail: author });
+        items.push({ severity: "high", title: "Author name", detail: author });
       }
       if (title || subject || keywords) {
-        leaks.push({
+        items.push({
           severity: "medium",
-          icon: "🏷️",
-          title: "Document Title / Subject Tags",
-          detail: [title, subject, keywords].filter(Boolean).join(" • "),
+          title: "Document title & tags",
+          detail: [title, subject, keywords].filter(Boolean).join(" · "),
         });
       }
       if (creator || producer) {
-        leaks.push({
+        items.push({
           severity: "low",
-          icon: "⚙️",
-          title: "Originating App & Producer",
+          title: "Created with",
           detail: [creator, producer].filter(Boolean).join(" / "),
         });
       }
-      if (created || modified) {
-        leaks.push({
+      if (created) {
+        items.push({
           severity: "low",
-          icon: "🕒",
-          title: "Internal Revision Timestamps",
-          detail: [
-            created ? `Created ${created.toISOString().slice(0, 10)}` : null,
-            modified ? `Modified ${modified.toISOString().slice(0, 10)}` : null,
-          ]
-            .filter(Boolean)
-            .join(" • "),
+          title: "Creation date",
+          detail: created.toISOString().slice(0, 10),
         });
       }
-      // Check raw bytes for embedded XMP packet
       const rawSample = new TextDecoder("latin1").decode(uint8.subarray(0, Math.min(uint8.length, 500000)));
       if (rawSample.includes("<x:xmpmeta") || rawSample.includes("http://ns.adobe.com/xap/1.0/")) {
-        leaks.push({
-          severity: "medium",
-          icon: "🧬",
-          title: "Embedded XMP XML Stream",
-          detail: "Contains raw Adobe XMP history metadata packet",
+        items.push({
+          severity: "low",
+          title: "Embedded editing history",
+          detail: "Document XMP property history",
         });
       }
     } catch {
@@ -202,24 +185,22 @@ export async function runMetadataXray(uint8, format) {
         const lastModBy = doc.getElementsByTagName("cp:lastModifiedBy")[0]?.textContent;
         const revision = doc.getElementsByTagName("cp:revision")[0]?.textContent;
         if (creator || lastModBy) {
-          leaks.push({
+          items.push({
             severity: "high",
-            icon: "👤",
-            title: "Word Author & Last Editor",
+            title: "Author & last editor",
             detail: [
-              creator ? `Author: ${creator}` : null,
-              lastModBy ? `Last edited by: ${lastModBy}` : null,
+              creator ? `Created by ${creator}` : null,
+              lastModBy && lastModBy !== creator ? `Edited by ${lastModBy}` : null,
             ]
               .filter(Boolean)
-              .join(" • "),
+              .join(" · "),
           });
         }
         if (revision) {
-          leaks.push({
+          items.push({
             severity: "low",
-            icon: "📝",
-            title: "Edit Revision Counter",
-            detail: `${revision} saved editing sessions recorded`,
+            title: "Revision count",
+            detail: `${revision} saved editing sessions`,
           });
         }
       }
@@ -230,32 +211,29 @@ export async function runMetadataXray(uint8, format) {
         const company = doc.getElementsByTagName("Company")[0]?.textContent;
         const manager = doc.getElementsByTagName("Manager")[0]?.textContent;
         if (company || manager) {
-          leaks.push({
+          items.push({
             severity: "medium",
-            icon: "🏢",
-            title: "Organization / Manager Property",
-            detail: [company, manager].filter(Boolean).join(" • "),
+            title: "Organization details",
+            detail: [company, manager].filter(Boolean).join(" · "),
           });
         }
       }
 
       if (zip.file("word/comments.xml")) {
-        leaks.push({
+        items.push({
           severity: "high",
-          icon: "💬",
-          title: "Reviewer Comments XML",
-          detail: "Embedded Word reviewer comments present inside archive",
+          title: "Reviewer comments",
+          detail: "Hidden Word comments attached to document",
         });
       }
 
       if (zip.file("word/document.xml")) {
         const bodyXml = await zip.file("word/document.xml").async("string");
         if (bodyXml.includes("<w:del ") || bodyXml.includes("<w:ins ")) {
-          leaks.push({
+          items.push({
             severity: "high",
-            icon: "🔍",
-            title: "Tracked Changes / Deleted Text",
-            detail: "Contains unaccepted Word Track Changes history",
+            title: "Tracked changes",
+            detail: "Unaccepted Word Track Changes present",
           });
         }
       }
@@ -264,5 +242,5 @@ export async function runMetadataXray(uint8, format) {
     }
   }
 
-  return leaks;
+  return items;
 }

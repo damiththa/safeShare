@@ -9,25 +9,50 @@ const state = {
   sessionProof: null,
   entitlement: null,
   returnUrl: null,
+  contextualLaunch: false,
   activeFileMeta: null,
   activeFileFormat: null,
+  lastSavedFileId: null,
+  lastSharedLinkUrl: null,
   pickerFolderId: "0",
   pickerParentId: null,
   radarScanner: null,
+  radarFilter: "all",
   redactor: null,
 };
 
 const el = (id) => document.getElementById(id);
 
-function showToast(message, isError = false) {
+function showToast(message, variant = "info") {
   const banner = el("toast-banner");
-  banner.className = `toast ${isError ? "toast-error" : "toast-info"}`;
+  const cls =
+    variant === "error" ? "toast-error" : variant === "success" ? "toast-success" : "toast-info";
+  banner.className = `toast ${cls}`;
   el("toast-text").textContent = message;
   banner.classList.remove("hidden");
 }
 
 function hideToast() {
   el("toast-banner").classList.add("hidden");
+}
+
+function closeOrReturnToBox() {
+  if (state.returnUrl) {
+    window.location.href = state.returnUrl;
+    return;
+  }
+  // When opened as a popup window from Box, window.close() cleanly closes the popup right back to Box!
+  try {
+    window.close();
+  } catch {
+    // Ignore if blocked
+  }
+  // Fallback if opened in a standard tab where script close is ignored
+  setTimeout(() => {
+    if (!document.hidden) {
+      window.location.href = "https://app.box.com";
+    }
+  }, 180);
 }
 
 function updateQuotaBadge() {
@@ -38,11 +63,10 @@ function updateQuotaBadge() {
   }
   badge.classList.remove("hidden");
   if (state.entitlement.plan === "pro") {
-    badge.className = "badge badge-safe";
-    badge.textContent = "SafeShare Pro • Unlimited";
+    badge.textContent = "Pro Plan";
   } else {
-    badge.className = "badge badge-neutral";
-    badge.textContent = `Free: ${state.entitlement.scrub_remaining} scrubs • ${state.entitlement.radar_fixes_remaining} link fixes left`;
+    const scrubs = state.entitlement.scrub_remaining;
+    badge.textContent = `${scrubs} free save${scrubs === 1 ? "" : "s"} left`;
   }
 }
 
@@ -62,7 +86,7 @@ async function consumeQuotaOrWarn(action, units = 1) {
     updateQuotaBadge();
   }
   if (!resp.ok || !data.allowed) {
-    showToast(data.message || "Monthly Free tier quota reached.", true);
+    showToast(data.message || "Monthly Free plan limit reached.", "error");
     return false;
   }
   return true;
@@ -89,7 +113,6 @@ function parseLaunchParams() {
     fromCallback: get("from_callback") === "1",
   };
 
-  // Scrub sensitive auth_code from browser URL bar immediately
   if (params.authCode && window.history?.replaceState) {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
@@ -108,6 +131,14 @@ async function bootstrap() {
     switchTab("picker");
     loadPickerFolder(state.pickerFolderId);
   });
+  el("btn-switch-item").addEventListener("click", () => {
+    el("main-tabs").classList.remove("hidden");
+    el("btn-switch-item").classList.add("hidden");
+    switchTab("picker");
+    loadPickerFolder(state.pickerFolderId);
+  });
+  el("btn-done-window").addEventListener("click", closeOrReturnToBox);
+  el("btn-done-after-save").addEventListener("click", closeOrReturnToBox);
 
   state.redactor = new RedactorWorkspace(el("redactor-canvas"), renderRedactorSidebarState);
   wireScrubControls();
@@ -117,7 +148,7 @@ async function bootstrap() {
   const pubCfg = await fetch("/api/public-config").then((r) => r.json());
   el("btn-oauth-connect").addEventListener("click", () => {
     if (!pubCfg.authorize_url_template) {
-      showToast("Box OAuth credentials are not yet configured in GCP Secret Manager.", true);
+      showToast("Box OAuth credentials are not configured yet.", "error");
       return;
     }
     window.location.href = pubCfg.authorize_url_template;
@@ -126,19 +157,14 @@ async function bootstrap() {
   const launch = parseLaunchParams();
   if (launch.returnUrl && /^https:\/\/([a-z0-9-]+\.)*(box\.com|app\.box\.com)\//i.test(launch.returnUrl)) {
     state.returnUrl = launch.returnUrl;
-    const btnRet = el("btn-return-box");
-    btnRet.classList.remove("hidden");
-    btnRet.addEventListener("click", () => {
-      window.location.href = state.returnUrl;
-    });
   }
 
   if (!launch.authCode) {
     return;
   }
 
-  // Exchange short-lived auth_code via stateless Cloud Run endpoint
-  el("connect-heading").textContent = "Establishing Zero-PII Box Session...";
+  el("connect-heading").textContent = "Opening your Box file...";
+  el("connect-subtext").textContent = "Just a moment while we prepare your workspace.";
   el("btn-oauth-connect").disabled = true;
 
   try {
@@ -152,7 +178,7 @@ async function bootstrap() {
     });
     const exchData = await exchResp.json();
     if (!exchResp.ok) {
-      throw new Error(exchData.detail || "Box OAuth exchange failed.");
+      throw new Error(exchData.detail || "Could not sign in with Box.");
     }
 
     state.boxClient = new BoxBrowserClient(exchData.access_token);
@@ -161,41 +187,51 @@ async function bootstrap() {
     state.radarScanner = new ShareRadarScanner(state.boxClient);
 
     el("screen-connect").classList.add("hidden");
-    el("main-tabs").classList.remove("hidden");
+    el("btn-done-window").classList.remove("hidden");
     updateQuotaBadge();
 
-    if (launch.fileId || launch.mode === "scrub") {
+    // Contextual Launch Mode: keep UI super clean & focused on the single item clicked in Box!
+    if (launch.fileId) {
+      state.contextualLaunch = true;
+      el("btn-switch-item").textContent = "Switch file";
+      el("btn-switch-item").classList.remove("hidden");
       switchTab("scrub");
-      if (launch.fileId) {
-        await openFileInScrubber(launch.fileId);
-      } else {
-        el("scrub-empty-prompt").classList.remove("hidden");
-      }
-    } else if (launch.folderId || launch.mode === "radar") {
+      await openFileInScrubber(launch.fileId);
+    } else if (launch.folderId) {
+      state.contextualLaunch = true;
+      el("btn-switch-item").textContent = "Switch folder";
+      el("btn-switch-item").classList.remove("hidden");
       switchTab("radar");
-      await runRadarOnFolder(launch.folderId || "0");
+      await runRadarOnFolder(launch.folderId);
     } else {
+      el("main-tabs").classList.remove("hidden");
       switchTab("picker");
       await loadPickerFolder("0");
     }
   } catch (err) {
-    el("connect-heading").textContent = "Connect SafeShare to Your Box Account";
+    el("connect-heading").textContent = "Share Box files with confidence";
+    el("connect-subtext").textContent =
+      "Automatically remove hidden personal details, black out sensitive info, and review shared folders.";
     el("btn-oauth-connect").disabled = false;
-    showToast(err.message || "Authentication failed.", true);
+    showToast(err.message || "Sign-in failed.", "error");
   }
 }
 
 /* ========================================================================= */
-/* TAB 1: SCRUB & REDACT WORKFLOW                                            */
+/* SCREEN 1: CLEAN & REDACT FILE                                             */
 /* ========================================================================= */
 
 async function openFileInScrubber(fileId) {
   hideToast();
   el("scrub-empty-prompt").classList.add("hidden");
   el("scrub-workspace").classList.remove("hidden");
-  el("xray-title").textContent = "Downloading into browser RAM...";
+  el("save-success-box").classList.add("hidden");
+  el("xray-summary").textContent = "Checking hidden file properties...";
+  el("xray-details-wrap").classList.add("hidden");
   el("xray-list").innerHTML = "";
   el("pii-checklist").innerHTML = "";
+  state.lastSavedFileId = null;
+  state.lastSharedLinkUrl = null;
 
   try {
     const meta = await state.boxClient.getFileMetadata(fileId);
@@ -203,49 +239,60 @@ async function openFileInScrubber(fileId) {
     if (meta.parent?.id) {
       state.pickerFolderId = String(meta.parent.id);
     }
-    el("active-context-label").textContent = `File: ${meta.name}`;
+    el("active-context-label").textContent = meta.name;
     el("scrub-file-label").textContent = meta.name;
 
     const bytes = await state.boxClient.downloadFileBytes(fileId);
     const fmt = detectFileFormatFromBytes(bytes, meta.name);
     state.activeFileFormat = fmt;
 
-    // Populate default output stem & check if filename itself leaks PII
+    const isDocx = fmt === "docx";
+    el("canvas-wrapper").classList.toggle("hidden", isDocx);
+    el("docx-friendly-card").classList.toggle("hidden", !isDocx);
+    el("draw-helper-tip").classList.toggle("hidden", isDocx);
+    el("pii-section-card").classList.toggle("hidden", isDocx);
+    el("advanced-pdf-options").classList.toggle("hidden", fmt !== "pdf");
+
+    // Clean, friendly default output filename (`_Clean`)
     const rawStem = meta.name.replace(/\.[^.]+$/, "");
-    const defaultStem = `${rawStem}_SafeCopy`;
-    el("inp-output-stem").value = defaultStem;
-    el("lbl-output-ext").textContent = fmt === "pdf" ? ".pdf" : fmt === "docx" ? ".docx" : fmt === "png" ? ".png" : ".jpg";
+    el("inp-output-stem").value = `${rawStem}_Clean`;
+    el("lbl-output-ext").textContent =
+      fmt === "pdf" ? ".pdf" : fmt === "docx" ? ".docx" : fmt === "png" ? ".png" : ".jpg";
     checkFilenameWarning();
 
-    // Run Metadata X-Ray
+    // Calm Metadata Check
     const leaks = await runMetadataXray(bytes, fmt);
-    const xrayCard = el("xray-card");
     const xrayList = el("xray-list");
     xrayList.innerHTML = "";
 
     if (leaks.length === 0) {
-      xrayCard.className = "xray-box clean";
-      el("xray-title").textContent = "✓ No Hidden Header Leaks Detected";
-      const li = document.createElement("li");
-      li.textContent = "Container will still be cleanly rebuilt on export.";
-      xrayList.appendChild(li);
+      el("xray-summary").textContent = "No hidden personal details found in file headers.";
+      el("xray-details-wrap").classList.add("hidden");
     } else {
-      xrayCard.className = "xray-box";
-      el("xray-title").textContent = `⚠️ ${leaks.length} Hidden Metadata Leak${leaks.length > 1 ? "s" : ""} Found`;
+      const topNames = leaks
+        .slice(0, 2)
+        .map((l) => l.title.toLowerCase())
+        .join(", ");
+      el("xray-summary").textContent = `${leaks.length} hidden item${
+        leaks.length === 1 ? "" : "s"
+      } (${topNames}) will be removed automatically.`;
+      el("xray-details-wrap").classList.remove("hidden");
+
       for (const lk of leaks) {
         const li = document.createElement("li");
-        li.innerHTML = `${lk.icon} <strong></strong>: <span></span>`;
-        li.querySelector("strong").textContent = lk.title;
-        li.querySelector("span").textContent = lk.detail;
+        const b = document.createElement("strong");
+        b.textContent = `${lk.title}: `;
+        const sp = document.createElement("span");
+        sp.textContent = lk.detail;
+        li.append(b, sp);
         xrayList.appendChild(li);
       }
     }
 
-    // Load into Redactor Canvas & run local PII scan
     await state.redactor.loadDocument(bytes, fmt);
     renderRedactorSidebarState();
   } catch (err) {
-    showToast(err.message || "Failed to load file from Box.", true);
+    showToast(err.message || "Unable to open this file from Box.", "error");
   }
 }
 
@@ -259,23 +306,33 @@ function renderRedactorSidebarState() {
   const r = state.redactor;
   if (!r) return;
 
-  el("page-indicator").textContent = `Page ${r.currentPage + 1} / ${r.pageCount}`;
-  el("btn-prev-page").disabled = r.currentPage <= 0;
-  el("btn-next-page").disabled = r.currentPage >= r.pageCount - 1;
+  // Only show page stepper on multi-page PDFs
+  const showStepper = r.format === "pdf" && r.pageCount > 1;
+  el("page-stepper").classList.toggle("hidden", !showStepper);
+  if (showStepper) {
+    el("page-indicator").textContent = `${r.currentPage + 1} / ${r.pageCount}`;
+    el("btn-prev-page").disabled = r.currentPage <= 0;
+    el("btn-next-page").disabled = r.currentPage >= r.pageCount - 1;
+  }
 
-  const totalRedactions = r.autoFindings.filter((f) => f.enabled).length + r.manualBoxes.length;
-  el("pii-count-badge").textContent = `${totalRedactions} active`;
+  // Only show Undo/Clear buttons when user has actually drawn custom blackout boxes
+  el("manual-box-controls").classList.toggle("hidden", r.manualBoxes.length === 0);
+
+  if (r.format === "docx") return;
+
+  const activeAuto = r.autoFindings.filter((f) => f.enabled).length;
+  const totalActive = activeAuto + r.manualBoxes.length;
+  el("pii-count-badge").textContent =
+    totalActive === 0 ? "None selected" : `${totalActive} covered`;
 
   const list = el("pii-checklist");
   list.innerHTML = "";
+
   if (r.autoFindings.length === 0 && r.manualBoxes.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "muted";
-    empty.style.padding = "6px 2px";
+    empty.className = "pii-empty";
     empty.textContent =
-      r.format === "docx"
-        ? "Metadata-clean mode active for Word archive."
-        : "No structured SSN/card/phone/email strings detected. Drag on the preview to draw custom black-out boxes.";
+      "No SSNs, card numbers, emails, or phone numbers detected. Drag anywhere on the document preview to black out extra text or signatures.";
     list.appendChild(empty);
     return;
   }
@@ -283,25 +340,43 @@ function renderRedactorSidebarState() {
   for (const f of r.autoFindings) {
     const row = document.createElement("label");
     row.className = "pii-item";
-    const left = document.createElement("span");
-    left.textContent = `${f.label} (${f.masked}) • p.${f.pageIndex + 1}`;
+
+    const infoDiv = document.createElement("div");
+    const titleDiv = document.createElement("div");
+    titleDiv.style.fontWeight = "600";
+    titleDiv.textContent = `${f.label} (${f.masked})`;
+    const pageDiv = document.createElement("div");
+    pageDiv.className = "pii-item-meta";
+    pageDiv.textContent = r.pageCount > 1 ? `Page ${f.pageIndex + 1}` : "Detected on page";
+    infoDiv.append(titleDiv, pageDiv);
+
     const chk = document.createElement("input");
     chk.type = "checkbox";
     chk.checked = f.enabled;
     chk.addEventListener("change", () => {
       f.enabled = chk.checked;
-      r.redrawOverlay();
+      if (r.currentPage !== f.pageIndex) {
+        r.renderPage(f.pageIndex);
+      } else {
+        r.redrawOverlay();
+      }
       renderRedactorSidebarState();
     });
-    row.append(left, chk);
+
+    row.append(infoDiv, chk);
     list.appendChild(row);
   }
 
   if (r.manualBoxes.length > 0) {
-    const manualSummary = document.createElement("div");
-    manualSummary.className = "pii-item";
-    manualSummary.innerHTML = `<span>Custom Drawn Redaction Boxes (${r.manualBoxes.length})</span><span class="badge badge-safe">Active</span>`;
-    list.appendChild(manualSummary);
+    const manualRow = document.createElement("div");
+    manualRow.className = "pii-item";
+    const lbl = document.createElement("span");
+    lbl.textContent = `${r.manualBoxes.length} custom blackout area${r.manualBoxes.length === 1 ? "" : "s"}`;
+    const pill = document.createElement("span");
+    pill.className = "badge badge-safe";
+    pill.textContent = "Covered";
+    manualRow.append(lbl, pill);
+    list.appendChild(manualRow);
   }
 }
 
@@ -318,8 +393,24 @@ function wireScrubControls() {
   el("btn-clear-boxes").addEventListener("click", () => state.redactor.clearManualBoxes());
   el("inp-output-stem").addEventListener("input", checkFilenameWarning);
   el("btn-anonymize-name").addEventListener("click", () => {
-    el("inp-output-stem").value = generateAnonymousStem();
+    el("inp-output-stem").value = generateAnonymousStem().replace("Sanitized_", "Clean_");
     checkFilenameWarning();
+  });
+
+  el("btn-copy-saved-link").addEventListener("click", async () => {
+    if (!state.lastSavedFileId) return;
+    try {
+      if (!state.lastSharedLinkUrl) {
+        const sl = await state.boxClient.createSharedLinkForFile(state.lastSavedFileId, "open", true);
+        state.lastSharedLinkUrl = sl?.url || null;
+      }
+      if (state.lastSharedLinkUrl && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(state.lastSharedLinkUrl);
+        showToast("Share link copied to clipboard!", "success");
+      }
+    } catch (err) {
+      showToast(err.message || "Could not create share link.", "error");
+    }
   });
 
   const handleExport = async (createLinkAfter) => {
@@ -331,13 +422,14 @@ function wireScrubControls() {
     const btnB = el("btn-save-and-link");
     btnA.disabled = true;
     btnB.disabled = true;
+    el("save-success-box").classList.add("hidden");
 
     try {
-      showToast("Flattening redactions & stripping metadata locally in browser...");
+      showToast("Saving clean copy to your Box folder...", "info");
       const flattenAll = el("chk-flatten-all").checked;
       const result = await state.redactor.exportSanitizedBytes({ flattenAllPages: flattenAll });
       const parentId = state.activeFileMeta.parent?.id || "0";
-      const stem = el("inp-output-stem").value.trim() || generateAnonymousStem();
+      const stem = el("inp-output-stem").value.trim() || "Clean_Copy";
 
       const uploaded = await state.boxClient.uploadNewSafeCopy(
         parentId,
@@ -347,17 +439,26 @@ function wireScrubControls() {
         result.bytes
       );
 
+      state.lastSavedFileId = uploaded.id;
+      state.lastSharedLinkUrl = null;
+
       if (createLinkAfter) {
         const sl = await state.boxClient.createSharedLinkForFile(uploaded.id, "open", true);
-        if (sl?.url && navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(sl.url).catch(() => {});
+        state.lastSharedLinkUrl = sl?.url || null;
+        if (state.lastSharedLinkUrl && navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(state.lastSharedLinkUrl).catch(() => {});
         }
-        showToast(`Saved "${uploaded.name}" (clean v1) to Box! Clean Shared Link: ${sl?.url || "created"}`);
+        hideToast();
+        el("save-success-title").textContent = `Saved "${uploaded.name}" & copied share link!`;
       } else {
-        showToast(`Saved "${uploaded.name}" (clean v1, zero unredacted history) directly to your Box folder!`);
+        hideToast();
+        el("save-success-title").textContent = `Saved "${uploaded.name}" to your Box folder!`;
       }
+
+      el("btn-copy-saved-link").classList.remove("hidden");
+      el("save-success-box").classList.remove("hidden");
     } catch (err) {
-      showToast(err.message || "Failed to export sanitized copy.", true);
+      showToast(err.message || "Could not save clean copy to Box.", "error");
     } finally {
       btnA.disabled = false;
       btnB.disabled = false;
@@ -369,71 +470,75 @@ function wireScrubControls() {
 }
 
 /* ========================================================================= */
-/* TAB 2: SHARERADAR FOLDER TELEMETRY & BULK REMEDIATION                     */
+/* SCREEN 2: FOLDER SHARING SUMMARY (SHARERADAR)                             */
 /* ========================================================================= */
 
 async function runRadarOnFolder(folderId) {
   hideToast();
   state.pickerFolderId = String(folderId || "0");
   el("radar-tbody").innerHTML =
-    '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">Scanning Box folder metadata (0 file bytes downloaded)...</td></tr>';
+    '<tr><td colspan="6" class="empty-cell">Checking shared links and guests in this folder...</td></tr>';
 
   try {
-    const folderMeta = folderId === "0" ? { id: "0", name: "All Files (Root)" } : await state.boxClient.getFolderMetadata(folderId);
-    el("active-context-label").textContent = `Auditing Folder: ${folderMeta.name}`;
+    const folderMeta =
+      folderId === "0"
+        ? { id: "0", name: "All Files" }
+        : await state.boxClient.getFolderMetadata(folderId);
+    el("active-context-label").textContent = folderMeta.name;
+    el("radar-folder-heading").textContent = `Sharing Summary — ${folderMeta.name}`;
 
-    await state.radarScanner.scanFolderTree(folderId, (scannedCount, riskCount) => {
-      el("kpi-scan-progress").textContent = `Scanned ${scannedCount} items (${riskCount} findings)`;
+    await state.radarScanner.scanFolderTree(folderId, (scannedCount) => {
+      el("kpi-scan-progress").textContent = `Checking ${scannedCount} items...`;
     });
 
     refreshRadarUi();
   } catch (err) {
-    showToast(err.message || "ShareRadar folder scan failed.", true);
+    showToast(err.message || "Could not scan this Box folder.", "error");
   }
 }
 
 function refreshRadarUi() {
   const stats = state.radarScanner.getSummaryStats();
-  el("kpi-open-links").textContent = `${stats.openPublicLinks} Exposed`;
-  el("kpi-total-opens").textContent = `${stats.totalOpens.toLocaleString()} Opens`;
-  el("kpi-total-downloads").textContent = `${stats.totalDownloads.toLocaleString()} Downloads`;
-  el("kpi-external-guests").textContent = `${stats.externalGuests} Guests`;
-  el("kpi-scan-progress").textContent = `${stats.totalScannedItems} items scanned • 0 file bytes downloaded`;
+  el("kpi-open-links").textContent = stats.openPublicLinks.toLocaleString();
+  el("kpi-total-opens").textContent = stats.totalOpens.toLocaleString();
+  el("kpi-total-downloads").textContent = stats.totalDownloads.toLocaleString();
+  el("kpi-external-guests").textContent = stats.externalGuests.toLocaleString();
+  el("kpi-scan-progress").textContent = `Checked ${stats.totalScannedItems} files and folders`;
 
   if (stats.hasPriorSnapshot) {
-    const snapDay = stats.priorSnapshotDate ? stats.priorSnapshotDate.slice(0, 10) : "last scan";
+    const snapDay = stats.priorSnapshotDate ? stats.priorSnapshotDate.slice(0, 10) : "last check";
     el("kpi-delta-opens").textContent =
-      stats.deltaOpensSum > 0 ? `🔥 +${stats.deltaOpensSum} new opens since ${snapDay}` : `No new opens since ${snapDay}`;
+      stats.deltaOpensSum > 0
+        ? `+${stats.deltaOpensSum} new views since ${snapDay}`
+        : `No new views since ${snapDay}`;
     el("kpi-delta-downloads").textContent =
       stats.deltaDownloadsSum > 0
-        ? `🔥 +${stats.deltaDownloadsSum} new downloads since ${snapDay}`
+        ? `+${stats.deltaDownloadsSum} new downloads since ${snapDay}`
         : `No new downloads since ${snapDay}`;
   } else {
-    el("kpi-delta-opens").textContent = "Save snapshot to track +Δ new opens";
-    el("kpi-delta-downloads").textContent = "Save snapshot to track +Δ downloads";
+    el("kpi-delta-opens").textContent = "Times shared links were opened";
+    el("kpi-delta-downloads").textContent = "Times shared files were downloaded";
   }
 
-  const filterMode = el("sel-radar-filter").value;
   const tbody = el("radar-tbody");
   tbody.innerHTML = "";
 
   const filtered = state.radarScanner.findings.filter((f) => {
-    if (filterMode === "open_links") return f.kind === "shared_link" && f.accessLevel === "open";
-    if (filterMode === "high_traffic") return f.kind === "shared_link" && (f.opens > 0 || f.downloads > 0);
-    if (filterMode === "guests") return f.kind === "external_guest";
+    if (state.radarFilter === "open_links") return f.kind === "shared_link" && f.accessLevel === "open";
+    if (state.radarFilter === "high_traffic") return f.kind === "shared_link" && (f.opens > 0 || f.downloads > 0);
+    if (state.radarFilter === "guests") return f.kind === "external_guest";
     return true;
   });
 
   if (filtered.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">✓ Zero matching shared-link or external-guest exposures found in this folder tree!</td></tr>';
+      '<tr><td colspan="6" class="empty-cell">Everything looks clean — no matching shared links or outside guests found.</td></tr>';
     return;
   }
 
   for (const f of filtered) {
     const tr = document.createElement("tr");
 
-    // Checkbox cell
     const tdChk = document.createElement("td");
     const chk = document.createElement("input");
     chk.type = "checkbox";
@@ -447,84 +552,76 @@ function refreshRadarUi() {
     const tdItem = document.createElement("td");
     const nameStrong = document.createElement("div");
     nameStrong.style.fontWeight = "600";
-    nameStrong.textContent = `${f.itemType === "folder" ? "📁 " : "📄 "}${f.name}`;
+    nameStrong.textContent = f.name;
     const pathSub = document.createElement("div");
     pathSub.className = "muted";
-    pathSub.textContent = f.path;
+    pathSub.style.fontSize = "12px";
+    pathSub.textContent = `${f.itemType === "folder" ? "Folder" : "File"} · ${f.path}`;
     tdItem.append(nameStrong, pathSub);
 
-    // Exposure / Guest Role
+    // Access
     const tdExp = document.createElement("td");
     const expBadge = document.createElement("span");
     if (f.kind === "shared_link") {
-      expBadge.className = `badge ${f.accessLevel === "open" ? "badge-danger" : "badge-warn"}`;
-      expBadge.textContent = f.accessLevel === "open" ? "Anyone with link" : `Link: ${f.accessLevel}`;
+      expBadge.className = `badge ${f.accessLevel === "open" ? "badge-warn" : "badge-neutral"}`;
+      expBadge.textContent =
+        f.accessLevel === "open" ? "Anyone with link" : `Shared link (${f.accessLevel})`;
       const permLine = document.createElement("div");
       permLine.className = "muted";
+      permLine.style.fontSize = "12px";
       permLine.style.marginTop = "3px";
       permLine.textContent = [
-        f.canDownload ? "Download ON" : "View-Only",
-        f.hasPassword ? "Password ON" : "No Password",
-      ].join(" • ");
+        f.canDownload ? "Can download" : "View only",
+        f.hasPassword ? "Password protected" : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
       tdExp.append(expBadge, permLine);
     } else {
-      expBadge.className = "badge badge-warn";
-      expBadge.textContent = `Guest: ${f.guestEmail}`;
+      expBadge.className = "badge badge-neutral";
+      expBadge.textContent = f.guestEmail;
       const roleLine = document.createElement("div");
       roleLine.className = "muted";
+      roleLine.style.fontSize = "12px";
       roleLine.style.marginTop = "3px";
-      roleLine.textContent = `Role: ${f.guestRole} (${f.collabStatus})`;
+      roleLine.textContent = `Outside ${f.guestRole}`;
       tdExp.append(expBadge, roleLine);
     }
 
-    // Opens & Downloads Telemetry
+    // Views & Downloads
     const tdStats = document.createElement("td");
     if (f.kind === "shared_link") {
       const countsDiv = document.createElement("div");
-      countsDiv.style.fontWeight = "600";
-      countsDiv.textContent = `👁️ ${f.opens.toLocaleString()} Opens • ⬇️ ${f.downloads.toLocaleString()} Downloads`;
+      countsDiv.textContent = `${f.opens.toLocaleString()} views · ${f.downloads.toLocaleString()} downloads`;
       tdStats.appendChild(countsDiv);
-      if (f.deltaOpens !== null || f.deltaDownloads !== null) {
+      if ((f.deltaOpens || 0) > 0 || (f.deltaDownloads || 0) > 0) {
         const deltaDiv = document.createElement("div");
-        const hasSpike = (f.deltaOpens || 0) > 0 || (f.deltaDownloads || 0) > 0;
-        deltaDiv.className = hasSpike ? "" : "muted";
-        if (hasSpike) deltaDiv.style.color = "var(--danger)";
-        deltaDiv.textContent = hasSpike
-          ? `🔥 +${f.deltaOpens || 0} opens / +${f.deltaDownloads || 0} downloads`
-          : "No new traffic since snapshot";
+        deltaDiv.style.fontSize = "12px";
+        deltaDiv.style.color = "var(--primary)";
+        deltaDiv.textContent = `+${f.deltaOpens || 0} new views, +${f.deltaDownloads || 0} downloads`;
         tdStats.appendChild(deltaDiv);
       }
     } else {
-      tdStats.innerHTML = '<div class="muted">Direct Collaborator</div>';
+      tdStats.innerHTML = '<span class="muted">Invited collaborator</span>';
     }
 
-    // Duration Open / Dormancy
+    // Expiration
     const tdDur = document.createElement("td");
     if (f.kind === "shared_link") {
-      const line1 = document.createElement("div");
-      line1.textContent =
-        f.trackedOpenDays !== null
-          ? `Tracked open: ${f.trackedOpenDays}d`
-          : `File dormant: ${f.dormantDays ?? 0}d`;
-      const line2 = document.createElement("div");
-      line2.className = "muted";
-      line2.textContent =
-        f.expiryDaysLeft !== null ? `Expires in ${f.expiryDaysLeft}d` : "♾️ Never expires";
-      tdDur.append(line1, line2);
+      tdDur.textContent =
+        f.expiryDaysLeft !== null ? `Expires in ${f.expiryDaysLeft} days` : "No expiration set";
     } else {
-      const line1 = document.createElement("div");
-      line1.textContent = `Access held: ${f.tenureDays ?? 0} days`;
-      const line2 = document.createElement("div");
-      line2.className = "muted";
-      line2.textContent = f.guestExpiryLeft !== null ? `Expires in ${f.guestExpiryLeft}d` : "♾️ No guest expiry";
-      tdDur.append(line1, line2);
+      tdDur.textContent =
+        f.guestExpiryLeft !== null
+          ? `Expires in ${f.guestExpiryLeft} days`
+          : `Added ${f.tenureDays ?? 0} days ago`;
     }
 
     // Status
     const tdStatus = document.createElement("td");
     const stSpan = document.createElement("span");
-    stSpan.className = `badge ${f.remediated ? "badge-safe" : f.severity === "high" ? "badge-danger" : "badge-warn"}`;
-    stSpan.textContent = f.statusLabel;
+    stSpan.className = `badge ${f.remediated ? "badge-safe" : "badge-neutral"}`;
+    stSpan.textContent = f.remediated ? f.statusLabel.replace(/^✓\s*/, "") : "Active";
     tdStatus.appendChild(stSpan);
 
     tr.append(tdChk, tdItem, tdExp, tdStats, tdDur, tdStatus);
@@ -533,7 +630,15 @@ function refreshRadarUi() {
 }
 
 function wireRadarControls() {
-  el("sel-radar-filter").addEventListener("change", refreshRadarUi);
+  document.querySelectorAll(".filter-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.radarFilter = btn.dataset.filter || "all";
+      refreshRadarUi();
+    });
+  });
+
   el("btn-rescan-radar").addEventListener("click", () => {
     const targetFolder =
       state.radarScanner?.totalScannedItems > 0
@@ -541,6 +646,7 @@ function wireRadarControls() {
         : state.pickerFolderId || "0";
     runRadarOnFolder(targetFolder);
   });
+
   el("chk-radar-all").addEventListener("change", (e) => {
     document.querySelectorAll(".radar-row-chk:not(:disabled)").forEach((c) => {
       c.checked = e.target.checked;
@@ -552,7 +658,7 @@ function wireRadarControls() {
       (c) => c.dataset.findingId
     );
     if (selectedIds.length === 0) {
-      showToast("Select at least one exposed item first.", true);
+      showToast("Check at least one item in the list first.", "info");
       return;
     }
 
@@ -574,7 +680,7 @@ function wireRadarControls() {
       }
     }
     refreshRadarUi();
-    showToast(`Remediated ${completed} item${completed === 1 ? "" : "s"} directly in your Box account!`);
+    showToast(`Updated ${completed} item${completed === 1 ? "" : "s"} in Box.`, "success");
   };
 
   el("btn-bulk-revoke").addEventListener("click", () => executeBulkAction("revoke"));
@@ -584,30 +690,30 @@ function wireRadarControls() {
   el("btn-save-radar-csv").addEventListener("click", async () => {
     try {
       await state.radarScanner.saveSnapshotAndCsvToBox();
-      showToast("Saved Audit CSV + traffic-delta snapshot directly into your Box folder!");
+      showToast("Saved Sharing Report CSV to your Box folder!", "success");
     } catch (err) {
-      showToast(err.message || "Failed to save Audit CSV to Box.", true);
+      showToast(err.message || "Could not save report to Box.", "error");
     }
   });
 }
 
 /* ========================================================================= */
-/* TAB 3: BUILT-IN BOX FOLDER & FILE BROWSER                                 */
+/* SCREEN 3: SIMPLE BOX FOLDER & FILE PICKER                                 */
 /* ========================================================================= */
 
 async function loadPickerFolder(folderId) {
   state.pickerFolderId = String(folderId || "0");
   const listEl = el("picker-list");
-  listEl.innerHTML = '<div class="muted" style="padding:12px;">Loading Box folder...</div>';
+  listEl.innerHTML = '<div class="muted" style="padding:14px;">Loading Box folder...</div>';
 
   try {
     const folderMeta =
       state.pickerFolderId === "0"
-        ? { id: "0", name: "All Files (Root)", parent: null }
+        ? { id: "0", name: "All Files", parent: null }
         : await state.boxClient.getFolderMetadata(state.pickerFolderId);
 
     state.pickerParentId = folderMeta.parent?.id || null;
-    el("picker-folder-title").textContent = `📁 ${folderMeta.name}`;
+    el("picker-folder-title").textContent = folderMeta.name;
     el("btn-picker-up").disabled = !state.pickerParentId;
 
     const page = await state.boxClient.listFolderPage(state.pickerFolderId, 0, 200);
@@ -615,7 +721,7 @@ async function loadPickerFolder(folderId) {
     const entries = page.entries || [];
 
     if (entries.length === 0) {
-      listEl.innerHTML = '<div class="muted" style="padding:12px;">This Box folder is empty.</div>';
+      listEl.innerHTML = '<div class="muted" style="padding:14px;">This folder is empty.</div>';
       return;
     }
 
@@ -625,21 +731,23 @@ async function loadPickerFolder(folderId) {
 
       const title = document.createElement("div");
       title.style.fontWeight = "600";
-      title.textContent = `${item.type === "folder" ? "📁" : "📄"} ${item.name}`;
+      title.textContent = item.name;
 
       const actions = document.createElement("div");
       actions.style.display = "flex";
-      actions.style.gap = "6px";
+      actions.style.gap = "8px";
 
       if (item.type === "folder") {
         const btnOpen = document.createElement("button");
-        btnOpen.className = "btn btn-secondary";
+        btnOpen.className = "btn btn-ghost btn-sm";
+        btnOpen.type = "button";
         btnOpen.textContent = "Open";
         btnOpen.addEventListener("click", () => loadPickerFolder(item.id));
 
         const btnAudit = document.createElement("button");
-        btnAudit.className = "btn btn-primary";
-        btnAudit.textContent = "📡 Audit in ShareRadar";
+        btnAudit.className = "btn btn-secondary btn-sm";
+        btnAudit.type = "button";
+        btnAudit.textContent = "Check Sharing";
         btnAudit.addEventListener("click", () => {
           switchTab("radar");
           runRadarOnFolder(item.id);
@@ -649,9 +757,10 @@ async function loadPickerFolder(folderId) {
         const ext = (item.extension || "").toLowerCase();
         const supported = ["pdf", "jpg", "jpeg", "png", "webp", "docx"].includes(ext);
         const btnScrub = document.createElement("button");
-        btnScrub.className = "btn btn-primary";
+        btnScrub.className = supported ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm";
+        btnScrub.type = "button";
         btnScrub.disabled = !supported;
-        btnScrub.textContent = supported ? "🛡️ Scrub & Redact" : `.${ext || "file"} unsupported`;
+        btnScrub.textContent = supported ? "Clean & Redact" : "Unsupported";
         if (supported) {
           btnScrub.addEventListener("click", () => {
             switchTab("scrub");
@@ -665,7 +774,7 @@ async function loadPickerFolder(folderId) {
       listEl.appendChild(row);
     }
   } catch (err) {
-    showToast(err.message || "Unable to list Box folder.", true);
+    showToast(err.message || "Unable to list Box folder.", "error");
   }
 }
 

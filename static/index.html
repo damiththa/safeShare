@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeShare for Box — Scrub, Redact &amp; ShareRadar</title>
+  <title>SafeShare for Box</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
   <script src="/static/vendor/pdf-lib.min.js"></script>
   <script src="/static/vendor/pdf.min.js"></script>
@@ -11,201 +11,254 @@
   <script src="/static/vendor/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Top Modal Bar -->
   <header class="topbar">
     <div class="brand-row">
-      <div class="brand-icon">🛡️</div>
-      <div>
-        <div class="brand-title">
-          <span>SafeShare for Box</span>
-          <span class="badge badge-safe">100% Browser Wasm • 0 Bytes Sent to GCP</span>
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.75L4.75 5.75V11.5C4.75 16.25 7.84 20.58 12 21.75C16.16 20.58 19.25 16.25 19.25 11.5V5.75L12 2.75Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8.75 12.25L11 14.5L15.5 9.75" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title-line">
+          <span class="brand-name">SafeShare</span>
+          <span class="privacy-pill" title="Your files stay inside your browser and are never stored on external servers">
+            Private in browser
+          </span>
         </div>
-        <div class="brand-sub" id="active-context-label">Zero-PII Metadata Scrubber, Byte-Destructive Redactor &amp; ShareRadar</div>
+        <div class="brand-sub" id="active-context-label">Clean &amp; share Box files safely</div>
       </div>
     </div>
 
-    <div class="nav-tabs hidden" id="main-tabs">
-      <button class="tab-btn active" id="btn-tab-scrub">📄 File: Scrub &amp; Redact</button>
-      <button class="tab-btn" id="btn-tab-radar">📡 Folder: ShareRadar Audit</button>
-      <button class="tab-btn" id="btn-tab-picker">📁 Browse Box</button>
-    </div>
+    <nav class="nav-tabs hidden" id="main-tabs" aria-label="Workspace navigation">
+      <button class="tab-btn active" id="btn-tab-scrub" type="button">Clean a File</button>
+      <button class="tab-btn" id="btn-tab-radar" type="button">Folder Sharing</button>
+      <button class="tab-btn" id="btn-tab-picker" type="button">Browse Box</button>
+    </nav>
 
     <div class="header-actions">
-      <span class="badge badge-neutral hidden" id="quota-badge">Free Tier</span>
-      <button class="btn btn-secondary hidden" id="btn-return-box">✕ Close &amp; Refresh Box</button>
+      <button class="btn-link hidden" id="btn-switch-item" type="button">Switch file</button>
+      <span class="quota-pill hidden" id="quota-badge">Free Plan</span>
+      <button class="btn btn-secondary hidden" id="btn-done-window" type="button">Done</button>
     </div>
   </header>
 
   <main class="container">
-    <!-- Toast Banner -->
-    <div id="toast-banner" class="toast toast-info hidden">
+    <div id="toast-banner" class="toast hidden" role="status">
       <span id="toast-text"></span>
-      <button class="btn btn-secondary" id="btn-toast-close">Dismiss</button>
+      <button class="toast-dismiss" id="btn-toast-close" type="button" aria-label="Dismiss">&times;</button>
     </div>
 
     <!-- ================================================================= -->
-    <!-- SCREEN 0: AUTHENTICATING / STANDALONE CONNECT                     -->
+    <!-- SCREEN 0: WELCOME / STANDALONE SIGN-IN                            -->
     <!-- ================================================================= -->
-    <section id="screen-connect" class="card hero-connect">
-      <div style="font-size: 36px;">🛡️</div>
-      <h2 id="connect-heading">Connect SafeShare to Your Box Account</h2>
-      <p class="muted" id="connect-subtext">
-        Inspect &amp; strip hidden EXIF/GPS/Author leaks, burn permanent byte-level redactions into clean
-        <code>_SafeCopy</code> files, and audit exposed Shared Links &amp; external guests across your folders—all
-        100% inside your browser memory.
+    <section id="screen-connect" class="welcome-card">
+      <div class="welcome-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.75L4.75 5.75V11.5C4.75 16.25 7.84 20.58 12 21.75C16.16 20.58 19.25 16.25 19.25 11.5V5.75L12 2.75Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8.75 12.25L11 14.5L15.5 9.75" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 id="connect-heading">Share Box files with confidence</h1>
+      <p class="welcome-lead" id="connect-subtext">
+        Automatically remove hidden personal details (like GPS location and author names), black out sensitive info in seconds, and review who has access to your shared folders.
       </p>
-      <div style="margin-top: 18px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-primary" id="btn-oauth-connect">Authorize with Box OAuth 2.0</button>
-        <a href="/privacy" target="_blank" rel="noopener" class="btn btn-secondary">Zero-PII Privacy Policy</a>
+      <div class="welcome-actions">
+        <button class="btn btn-primary btn-lg" id="btn-oauth-connect" type="button">Continue with Box</button>
+      </div>
+      <div class="welcome-footer">
+        Runs privately in your browser &middot; <a href="/privacy" target="_blank" rel="noopener">Privacy</a> &middot; <a href="/terms" target="_blank" rel="noopener">Terms</a>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- SCREEN 1: FILE SCRUB & REDACT                                     -->
+    <!-- SCREEN 1: CLEAN & REDACT FILE                                     -->
     <!-- ================================================================= -->
     <section id="screen-scrub" class="hidden">
-      <div id="scrub-empty-prompt" class="card hero-connect hidden">
-        <h2>Select a File from Box to Scrub or Redact</h2>
-        <p class="muted">Right-click any PDF, Image, or Word file inside Box Web, or choose a file using Browse Box.</p>
-        <button class="btn btn-primary" id="btn-open-picker-from-scrub" style="margin-top: 12px;">📁 Browse Box Files</button>
+      <div id="scrub-empty-prompt" class="welcome-card hidden">
+        <h2>Choose a file from Box</h2>
+        <p class="welcome-lead">Pick a PDF, image, or Word document to clean hidden details or black out sensitive text.</p>
+        <button class="btn btn-primary" id="btn-open-picker-from-scrub" type="button">Browse Box Files</button>
       </div>
 
-      <div id="scrub-workspace" class="scrub-grid hidden">
-        <!-- Left Sidebar: Privacy X-Ray + Auto-PII Checkboxes -->
-        <div class="panel-stack">
-          <div class="xray-box" id="xray-card">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <strong id="xray-title">Scanning File Headers...</strong>
-              <span class="badge badge-safe">Auto-Stripped on Save</span>
-            </div>
-            <ul class="xray-list" id="xray-list"></ul>
-          </div>
-
-          <div class="card">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <strong>Auto-Detected Sensitive PII</strong>
-              <span class="badge badge-neutral" id="pii-count-badge">0 found</span>
-            </div>
-            <p class="muted" style="margin: 4px 0 0; font-size: 12px;">
-              Toggle items below, or <strong>click &amp; drag directly on the document preview</strong> to draw custom black-out boxes over faces, names, or signatures.
-            </p>
-            <div class="pii-list" id="pii-checklist"></div>
-          </div>
-
-          <div class="card">
-            <strong>Output Hardening Options</strong>
-            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
-              <input type="checkbox" id="chk-flatten-all" />
-              <span>Maximum Paranoia: Flatten <em>every</em> PDF page to pixels (even pages without redactions)</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Right Stage: Live Document Redaction Canvas + Save Bar -->
-        <div class="card">
-          <div class="canvas-toolbar">
-            <div>
-              <strong id="scrub-file-label">Document Preview</strong>
-              <span class="badge badge-safe" style="margin-left: 6px;">Metadata Clean ✓</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <button class="btn btn-secondary" id="btn-prev-page">◀ Prev</button>
-              <span id="page-indicator" style="font-weight: 600; padding: 0 6px;">Page 1 / 1</span>
-              <button class="btn btn-secondary" id="btn-next-page">Next ▶</button>
-              <button class="btn btn-secondary" id="btn-undo-box">Undo Box</button>
-              <button class="btn btn-secondary" id="btn-clear-boxes">Clear Boxes</button>
-            </div>
-          </div>
-
-          <div class="canvas-stage">
-            <div class="canvas-wrapper">
-              <canvas id="redactor-canvas"></canvas>
-            </div>
-          </div>
-
-          <div class="save-footer">
-            <div class="filename-bar">
-              <span class="muted" style="font-weight: 600;">Save New Clean v1 File As:</span>
-              <input type="text" id="inp-output-stem" class="text-input" placeholder="Document_SafeCopy" />
-              <span id="lbl-output-ext" style="font-family: monospace; font-weight: 700;">.pdf</span>
-              <button class="btn btn-warn hidden" id="btn-anonymize-name">⚠️ PII in Filename → Anonymize</button>
+      <div id="scrub-workspace" class="scrub-layout hidden">
+        <!-- Main Document Preview Stage -->
+        <div class="preview-card">
+          <div class="preview-header">
+            <div class="file-title-group">
+              <span class="file-name" id="scrub-file-label">Document</span>
+              <span class="draw-tip" id="draw-helper-tip">Drag anywhere on the page to black out extra areas</span>
             </div>
 
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
-              <span class="muted">Original file in Box stays untouched. Creates a fresh file with zero unredacted Version History.</span>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-secondary" id="btn-save-only">Save _SafeCopy to Box</button>
-                <button class="btn btn-primary" id="btn-save-and-link">Save &amp; Copy Clean Box Link</button>
+            <div class="preview-controls">
+              <div class="draw-actions hidden" id="manual-box-controls">
+                <button class="btn btn-ghost btn-sm" id="btn-undo-box" type="button">Undo</button>
+                <button class="btn btn-ghost btn-sm" id="btn-clear-boxes" type="button">Clear drawn</button>
+              </div>
+              <div class="page-stepper hidden" id="page-stepper">
+                <button class="stepper-btn" id="btn-prev-page" type="button" aria-label="Previous page">&lsaquo;</button>
+                <span id="page-indicator" class="stepper-label">1 / 1</span>
+                <button class="stepper-btn" id="btn-next-page" type="button" aria-label="Next page">&rsaquo;</button>
               </div>
             </div>
           </div>
+
+          <div class="canvas-stage" id="canvas-stage">
+            <div class="canvas-wrapper" id="canvas-wrapper">
+              <canvas id="redactor-canvas"></canvas>
+            </div>
+
+            <!-- Friendly Word (.docx) Card instead of raw blank canvas -->
+            <div id="docx-friendly-card" class="docx-card hidden">
+              <div class="docx-icon" aria-hidden="true">DOCX</div>
+              <h3>Ready to save a clean Word document</h3>
+              <p>
+                SafeShare will create a fresh copy with hidden author names, company properties, edit counts, and reviewer comments removed—while keeping all your formatting intact.
+              </p>
+            </div>
+          </div>
         </div>
+
+        <!-- Calm, Guided Right Sidebar -->
+        <aside class="inspector-column">
+          <!-- Step 1: Automatic Hidden Details Clean-Up -->
+          <div class="side-card">
+            <div class="step-row">
+              <span class="check-circle" aria-hidden="true">&#10003;</span>
+              <div>
+                <div class="side-title">Hidden details cleaned</div>
+                <div class="side-sub" id="xray-summary">Checking file properties...</div>
+              </div>
+            </div>
+            <details class="quiet-details hidden" id="xray-details-wrap">
+              <summary>View items to be removed</summary>
+              <ul class="detail-list" id="xray-list"></ul>
+            </details>
+          </div>
+
+          <!-- Step 2: Sensitive Info on Page (Hidden for .docx) -->
+          <div class="side-card" id="pii-section-card">
+            <div class="side-header-between">
+              <span class="side-title">Black out sensitive text</span>
+              <span class="soft-pill" id="pii-count-badge">None found</span>
+            </div>
+            <div class="pii-list" id="pii-checklist"></div>
+          </div>
+
+          <!-- Step 3: Save Clean Copy -->
+          <div class="side-card save-card">
+            <label class="field-label" for="inp-output-stem">Save clean copy as</label>
+            <div class="filename-group">
+              <input type="text" id="inp-output-stem" class="filename-input" placeholder="Document_Clean" />
+              <span id="lbl-output-ext" class="filename-ext">.pdf</span>
+            </div>
+
+            <button class="name-suggestion hidden" id="btn-anonymize-name" type="button">
+              File name contains personal info &mdash; click to use a generic name
+            </button>
+
+            <div class="cta-stack">
+              <button class="btn btn-primary btn-block" id="btn-save-only" type="button">
+                Save Clean Copy to Box
+              </button>
+              <button class="btn btn-secondary btn-block" id="btn-save-and-link" type="button">
+                Save &amp; Copy Share Link
+              </button>
+            </div>
+
+            <p class="reassure-note">
+              Saves as a separate new file in Box. Your original file stays untouched.
+            </p>
+
+            <details class="quiet-details" id="advanced-pdf-options">
+              <summary>More options</summary>
+              <label class="option-row">
+                <input type="checkbox" id="chk-flatten-all" />
+                <span>Convert every page to a flat image</span>
+              </label>
+            </details>
+
+            <!-- Celebratory Inline Confirmation after Save -->
+            <div id="save-success-box" class="success-box hidden">
+              <div class="success-title" id="save-success-title">Saved to your Box folder!</div>
+              <div class="success-actions">
+                <button class="btn btn-secondary btn-sm hidden" id="btn-copy-saved-link" type="button">Copy Share Link</button>
+                <button class="btn btn-primary btn-sm" id="btn-done-after-save" type="button">Done</button>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- SCREEN 2: SHARERADAR FOLDER TELEMETRY & BULK REMEDIATION          -->
+    <!-- SCREEN 2: FOLDER SHARING SUMMARY (SHARERADAR)                     -->
     <!-- ================================================================= -->
     <section id="screen-radar" class="hidden">
+      <div class="section-topbar">
+        <div>
+          <h2 class="section-heading" id="radar-folder-heading">Folder Sharing Summary</h2>
+          <p class="section-sub" id="kpi-scan-progress">Checking shared links and outside guests...</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-ghost" id="btn-rescan-radar" type="button">Refresh</button>
+          <button class="btn btn-secondary" id="btn-save-radar-csv" type="button">Save CSV Report to Box</button>
+        </div>
+      </div>
+
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">🔴 Open "Anyone with Link"</div>
-          <div class="kpi-value" id="kpi-open-links">—</div>
-          <div class="muted" id="kpi-open-sub">Public internet URLs</div>
+          <div class="kpi-label">Public Links</div>
+          <div class="kpi-value" id="kpi-open-links">0</div>
+          <div class="kpi-sub" id="kpi-open-sub">Anyone with the link can open</div>
         </div>
         <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">👁️ Shared-Link Opens (Views)</div>
-          <div class="kpi-value" id="kpi-total-opens">—</div>
-          <div class="muted" id="kpi-delta-opens">Live Box preview_count</div>
+          <div class="kpi-label">Total Views</div>
+          <div class="kpi-value" id="kpi-total-opens">0</div>
+          <div class="kpi-sub" id="kpi-delta-opens">Times shared links were opened</div>
         </div>
         <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">⬇️ Shared-Link Downloads</div>
-          <div class="kpi-value" id="kpi-total-downloads">—</div>
-          <div class="muted" id="kpi-delta-downloads">Live Box download_count</div>
+          <div class="kpi-label">Total Downloads</div>
+          <div class="kpi-value" id="kpi-total-downloads">0</div>
+          <div class="kpi-sub" id="kpi-delta-downloads">Times shared files were downloaded</div>
         </div>
         <div class="kpi-card">
-          <div class="muted" style="font-weight: 600;">🟡 External Guests &amp; Scope</div>
-          <div class="kpi-value" id="kpi-external-guests">—</div>
-          <div class="muted" id="kpi-scan-progress">Ready to scan</div>
+          <div class="kpi-label">Outside Guests</div>
+          <div class="kpi-value" id="kpi-external-guests">0</div>
+          <div class="kpi-sub">Collaborators outside your domain</div>
         </div>
       </div>
 
       <div class="radar-toolbar">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-secondary" id="btn-rescan-radar">↻ Scan Folder Tree</button>
-          <select id="sel-radar-filter" class="text-input" style="min-width: 170px;">
-            <option value="all">Show All Exposures</option>
-            <option value="open_links">Open Public Links Only</option>
-            <option value="high_traffic">Links With Views / Downloads</option>
-            <option value="guests">External Guests Only</option>
-          </select>
+        <div class="filter-pills" role="tablist">
+          <button class="filter-pill active" data-filter="all" type="button">All shared items</button>
+          <button class="filter-pill" data-filter="open_links" type="button">Public links</button>
+          <button class="filter-pill" data-filter="high_traffic" type="button">Viewed or downloaded</button>
+          <button class="filter-pill" data-filter="guests" type="button">Outside guests</button>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-danger" id="btn-bulk-revoke">Revoke Selected</button>
-          <button class="btn btn-secondary" id="btn-bulk-viewonly">Force View-Only</button>
-          <button class="btn btn-primary" id="btn-bulk-expire30">Stamp 30-Day Expiry</button>
-          <button class="btn btn-secondary" id="btn-save-radar-csv">Save Snapshot &amp; CSV to Box</button>
+        <div class="bulk-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-bulk-expire30" type="button">Set 30-Day Expiry</button>
+          <button class="btn btn-secondary btn-sm" id="btn-bulk-viewonly" type="button">Disable Downloads</button>
+          <button class="btn btn-danger-soft btn-sm" id="btn-bulk-revoke" type="button">Turn Off Selected</button>
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table class="radar-table">
+      <div class="table-card">
+        <table class="clean-table">
           <thead>
             <tr>
-              <th style="width: 34px;"><input type="checkbox" id="chk-radar-all" /></th>
-              <th>Item &amp; Box Path</th>
-              <th>Exposure / Guest Role</th>
-              <th>Opens &amp; Downloads Telemetry</th>
-              <th>Duration Open / Dormancy</th>
+              <th style="width: 38px;"><input type="checkbox" id="chk-radar-all" aria-label="Select all" /></th>
+              <th>File or Folder</th>
+              <th>Who Has Access</th>
+              <th>Views &amp; Downloads</th>
+              <th>Expiration</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="radar-tbody">
             <tr>
-              <td colspan="6" class="muted" style="text-align: center; padding: 24px;">
-                Click "Scan Folder Tree" to audit Shared Links and external collaborators.
-              </td>
+              <td colspan="6" class="empty-cell">Scanning folder sharing settings...</td>
             </tr>
           </tbody>
         </table>
@@ -213,17 +266,17 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- SCREEN 3: BUILT-IN BOX FILE & FOLDER BROWSER                      -->
+    <!-- SCREEN 3: SIMPLE BOX FILE & FOLDER PICKER                         -->
     <!-- ================================================================= -->
-    <section id="screen-picker" class="card hidden">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+    <section id="screen-picker" class="picker-card hidden">
+      <div class="picker-header">
         <div>
-          <strong id="picker-folder-title">All Files (Root)</strong>
-          <div class="muted">Choose any file to Scrub &amp; Redact, or audit any folder in ShareRadar.</div>
+          <h2 class="section-heading" id="picker-folder-title">All Files</h2>
+          <p class="section-sub">Choose a file to clean &amp; redact, or check sharing on any folder.</p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" id="btn-picker-up">↑ Parent Folder</button>
-          <button class="btn btn-primary" id="btn-audit-current-folder">📡 Audit This Folder in ShareRadar</button>
+        <div class="section-actions">
+          <button class="btn btn-ghost" id="btn-picker-up" type="button">&larr; Back</button>
+          <button class="btn btn-secondary" id="btn-audit-current-folder" type="button">Check Sharing on This Folder</button>
         </div>
       </div>
       <div class="picker-list" id="picker-list"></div>
