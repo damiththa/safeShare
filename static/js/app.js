@@ -1,11 +1,11 @@
-import { BoxBrowserClient } from "./box_client.js?v=2";
-import { extractDocumentText, computeTextRedline } from "./text_diff.js?v=2";
-import { VisualComparator, supportsVisualComparison } from "./visual_diff.js?v=2";
-import { diffSpreadsheets, supportsSpreadsheetComparison } from "./spreadsheet_diff.js?v=2";
-import { generateRedlineReportPdf } from "./report_exporter.js?v=2";
+import { BoxBrowserClient } from "./box_client.js?v=7";
+import { extractDocumentText, computeTextRedline } from "./text_diff.js?v=7";
+import { VisualComparator, supportsVisualComparison } from "./visual_diff.js?v=7";
+import { diffSpreadsheets, supportsSpreadsheetComparison } from "./spreadsheet_diff.js?v=7";
+import { generateRedlineReportPdf } from "./report_exporter.js?v=7";
 
 if (window.pdfjsLib) {
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js?v=2";
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/static/vendor/pdf.worker.min.js?v=7";
 }
 
 const TEXT_EXTS = new Set(["pdf", "docx", "txt", "md", "json", "csv"]);
@@ -71,7 +71,32 @@ const state = {
   lastUploadedReportId: null,
 };
 
-const el = (id) => document.getElementById(id);
+const el = (id) => {
+  const node = document.getElementById(id);
+  if (!node) {
+    return new Proxy(document.createElement("div"), {
+      get(target, prop) {
+        if (prop === "classList") {
+          return {
+            add: () => {},
+            remove: () => {},
+            toggle: () => false,
+            contains: () => false,
+          };
+        }
+        if (prop === "style") return {};
+        if (prop === "addEventListener") return () => {};
+        if (prop === "removeEventListener") return () => {};
+        if (prop === "querySelectorAll") return () => [];
+        if (prop === "querySelector") return () => null;
+        if (prop === "appendChild") return () => {};
+        if (prop === "append") return () => {};
+        return target[prop];
+      },
+    });
+  }
+  return node;
+};
 
 function showBanner(message, level = "info") {
   const banner = el("statusBanner");
@@ -206,6 +231,7 @@ async function initApp() {
       .then((me) => {
         if (me && me.login) {
           el("userBadge").textContent = me.login;
+          el("userBadge").title = me.name ? `${me.name} (${me.login})` : me.login;
         }
       })
       .catch(() => {});
