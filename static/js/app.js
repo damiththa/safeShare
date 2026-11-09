@@ -118,6 +118,35 @@ function updateQuotaBadge(ent) {
   }
 }
 
+function renderUserBadge(me) {
+  const badge = el("userBadge");
+  if (!badge || !me) return;
+  const fullName = (me.name || "").trim();
+  const email = (me.login || "").trim();
+
+  let firstName = "";
+  if (fullName) {
+    const parts = fullName.split(/\s+/).filter(Boolean);
+    firstName = parts[0] || "";
+    if (/^(mr|mrs|ms|dr|prof)\.?$/i.test(firstName) && parts.length > 1) {
+      firstName = parts[1];
+    }
+  } else if (email) {
+    const handle = email.split("@")[0];
+    const namePart = handle.split(/[._-]/)[0];
+    firstName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  }
+
+  const firstNameEl = el("userFirstName");
+  const emailEl = el("userEmail");
+
+  if (firstNameEl) firstNameEl.textContent = firstName || "User";
+  if (emailEl) emailEl.textContent = email;
+
+  badge.title = email ? `${fullName || firstName} (${email})` : (fullName || "Box User");
+  badge.classList.remove("hidden");
+}
+
 function parseLaunchParams() {
   const merged = new URLSearchParams(window.location.search);
   if (window.location.hash && window.location.hash.length > 1) {
@@ -204,9 +233,7 @@ async function initApp() {
     state.boxClient
       .getCurrentUser()
       .then((me) => {
-        if (me && me.login) {
-          el("userBadge").textContent = me.login;
-        }
+        renderUserBadge(me);
       })
       .catch(() => {});
 

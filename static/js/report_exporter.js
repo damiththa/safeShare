@@ -18,6 +18,18 @@ function toPdfSafeText(input) {
     .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
 }
 
+function fitSingleLine(rawText, font, fontSize, maxWidth) {
+  const safe = toPdfSafeText(rawText);
+  if (!safe) return "";
+  if (font.widthOfTextAtSize(safe, fontSize) <= maxWidth) return safe;
+  let truncated = safe;
+  const ellipsis = "...";
+  while (truncated.length > 3 && font.widthOfTextAtSize(truncated + ellipsis, fontSize) > maxWidth) {
+    truncated = truncated.slice(0, -1);
+  }
+  return truncated + ellipsis;
+}
+
 function wrapTextLines(rawText, font, fontSize, maxWidth) {
   const safe = toPdfSafeText(rawText);
   if (!safe) return [""];
@@ -119,55 +131,107 @@ export async function generateRedlineReportPdf({
   });
   y -= 70;
 
-  // Baseline vs Target Metadata Box
+  // Baseline vs Target Structured Metadata Box (Two Dedicated Rows, Zero Overlap)
+  const META_BOX_H = 84;
   page.drawRectangle({
     x: MARGIN_X,
-    y: y - 56,
+    y: y - META_BOX_H,
     width: CONTENT_W,
-    height: 56,
-    color: rgb(0.96, 0.97, 0.99),
-    borderColor: rgb(0.82, 0.86, 0.92),
+    height: META_BOX_H,
+    color: rgb(0.975, 0.985, 0.995),
+    borderColor: rgb(0.84, 0.88, 0.93),
     borderWidth: 1,
   });
-  page.drawText(toPdfSafeText(`BASELINE (LEFT):  ${leftDescriptor.label}`), {
-    x: MARGIN_X + 12,
-    y: y - 18,
-    size: 9,
-    font: fontBold,
-    color: rgb(0.55, 0.12, 0.18),
+
+  // Baseline Row Accent Bar (Crimson)
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: y - 42,
+    width: 3.5,
+    height: 42,
+    color: rgb(0.72, 0.16, 0.22),
   });
-  page.drawText(
-    toPdfSafeText(
-      `SHA-1: ${leftDescriptor.sha1 || "n/a"}   |   Size: ${formatBytes(leftDescriptor.size)}`
-    ),
-    {
-      x: MARGIN_X + 12,
-      y: y - 30,
-      size: 7.8,
-      font: fontMono,
-      color: rgb(0.35, 0.41, 0.49),
-    }
-  );
-  page.drawText(toPdfSafeText(`TARGET (RIGHT):   ${rightDescriptor.label}`), {
-    x: MARGIN_X + 12,
-    y: y - 43,
-    size: 9,
+
+  page.drawText("BASELINE (ORIGINAL):", {
+    x: MARGIN_X + 11,
+    y: y - 15,
+    size: 8.5,
     font: fontBold,
-    color: rgb(0.05, 0.45, 0.29),
+    color: rgb(0.68, 0.12, 0.18),
   });
-  page.drawText(
-    toPdfSafeText(
-      `SHA-1: ${rightDescriptor.sha1 || "n/a"}   |   Size: ${formatBytes(rightDescriptor.size)}`
-    ),
-    {
-      x: MARGIN_X + 260,
-      y: y - 43,
-      size: 7.8,
-      font: fontMono,
-      color: rgb(0.35, 0.41, 0.49),
-    }
+
+  const baseLabel = fitSingleLine(
+    leftDescriptor.label || leftDescriptor.name || "Baseline File",
+    fontBold,
+    8.5,
+    CONTENT_W - 145
   );
-  y -= 72;
+  page.drawText(baseLabel, {
+    x: MARGIN_X + 132,
+    y: y - 15,
+    size: 8.5,
+    font: fontBold,
+    color: rgb(0.12, 0.16, 0.24),
+  });
+
+  const baseMetaStr = `SHA-1: ${leftDescriptor.sha1 || "n/a"}   |   Size: ${formatBytes(leftDescriptor.size)}`;
+  page.drawText(fitSingleLine(baseMetaStr, fontMono, 7.5, CONTENT_W - 22), {
+    x: MARGIN_X + 11,
+    y: y - 28,
+    size: 7.5,
+    font: fontMono,
+    color: rgb(0.38, 0.44, 0.52),
+  });
+
+  // Subtle interior divider line between Baseline and Target
+  page.drawLine({
+    start: { x: MARGIN_X + 6, y: y - 42 },
+    end: { x: MARGIN_X + CONTENT_W - 6, y: y - 42 },
+    thickness: 0.5,
+    color: rgb(0.86, 0.9, 0.94),
+  });
+
+  // Target Row Accent Bar (Emerald)
+  page.drawRectangle({
+    x: MARGIN_X,
+    y: y - META_BOX_H,
+    width: 3.5,
+    height: 42,
+    color: rgb(0.06, 0.55, 0.35),
+  });
+
+  page.drawText("TARGET (REVISED):", {
+    x: MARGIN_X + 11,
+    y: y - 57,
+    size: 8.5,
+    font: fontBold,
+    color: rgb(0.05, 0.45, 0.28),
+  });
+
+  const targetLabel = fitSingleLine(
+    rightDescriptor.label || rightDescriptor.name || "Target File",
+    fontBold,
+    8.5,
+    CONTENT_W - 145
+  );
+  page.drawText(targetLabel, {
+    x: MARGIN_X + 132,
+    y: y - 57,
+    size: 8.5,
+    font: fontBold,
+    color: rgb(0.12, 0.16, 0.24),
+  });
+
+  const targetMetaStr = `SHA-1: ${rightDescriptor.sha1 || "n/a"}   |   Size: ${formatBytes(rightDescriptor.size)}`;
+  page.drawText(fitSingleLine(targetMetaStr, fontMono, 7.5, CONTENT_W - 22), {
+    x: MARGIN_X + 11,
+    y: y - 70,
+    size: 7.5,
+    font: fontMono,
+    color: rgb(0.38, 0.44, 0.52),
+  });
+
+  y -= META_BOX_H + 18;
 
   // Section 1: Spreadsheet Diff Report (if spreadsheet mode)
   if (spreadsheetResult) {
@@ -250,7 +314,7 @@ export async function generateRedlineReportPdf({
   // Section 2: Text & Contract Redline Report
   if (textDiffResult) {
     const st = textDiffResult.stats;
-    ensureSpace(46);
+    ensureSpace(54);
     page.drawText("Executive Text & Clause Redline Summary", {
       x: MARGIN_X,
       y,
@@ -259,19 +323,29 @@ export async function generateRedlineReportPdf({
       color: rgb(0.08, 0.12, 0.2),
     });
     y -= 16;
+
+    page.drawRectangle({
+      x: MARGIN_X,
+      y: y - 22,
+      width: CONTENT_W,
+      height: 22,
+      color: rgb(0.955, 0.965, 0.985),
+      borderColor: rgb(0.85, 0.88, 0.93),
+      borderWidth: 0.75,
+    });
     page.drawText(
       toPdfSafeText(
-        `Total Changed Lines: ${st.totalChanges}  |  Modified: ${st.modifiedLines}  |  Added (+): ${st.addedLines}  |  Removed (-): ${st.removedLines}  |  Smart Risk Highlights: ${st.highlightCount}`
+        `Total Changed Lines: ${st.totalChanges}   |   Modified: ${st.modifiedLines}   |   Added (+): ${st.addedLines}   |   Removed (-): ${st.removedLines}   |   Smart Risk Flags: ${st.highlightCount}`
       ),
       {
-        x: MARGIN_X,
-        y,
-        size: 8.5,
-        font: fontReg,
-        color: rgb(0.22, 0.28, 0.36),
+        x: MARGIN_X + 10,
+        y: y - 14.5,
+        size: 7.8,
+        font: fontBold,
+        color: rgb(0.18, 0.24, 0.34),
       }
     );
-    y -= 20;
+    y -= 34;
 
     if (textDiffResult.highlights && textDiffResult.highlights.length > 0) {
       ensureSpace(28);
@@ -424,6 +498,34 @@ export async function generateRedlineReportPdf({
     });
     y -= drawH + 18;
   }
+
+  // Multi-page Audit Footer (Page X of Y + Zero-PII stamp)
+  const pages = pdfDoc.getPages();
+  const totalPages = pages.length;
+  pages.forEach((p, idx) => {
+    p.drawLine({
+      start: { x: MARGIN_X, y: 30 },
+      end: { x: MARGIN_X + CONTENT_W, y: 30 },
+      thickness: 0.5,
+      color: rgb(0.86, 0.9, 0.94),
+    });
+    p.drawText("BoxDiff Verification Report  |  Confidential  |  100% In-Browser Zero-PII", {
+      x: MARGIN_X,
+      y: 18,
+      size: 7.2,
+      font: fontReg,
+      color: rgb(0.5, 0.56, 0.65),
+    });
+    const pageNumStr = `Page ${idx + 1} of ${totalPages}`;
+    const pageNumW = fontReg.widthOfTextAtSize(pageNumStr, 7.2);
+    p.drawText(pageNumStr, {
+      x: MARGIN_X + CONTENT_W - pageNumW,
+      y: 18,
+      size: 7.2,
+      font: fontReg,
+      color: rgb(0.5, 0.56, 0.65),
+    });
+  });
 
   const savedBytes = await pdfDoc.save();
   return new Uint8Array(savedBytes);
