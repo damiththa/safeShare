@@ -115,9 +115,9 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 363, "label": "Deferred-vendor UI shell (<100ms first paint)" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 1062, "label": "Parallel Box launch, safe quota & 1-click verify" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 1288, "label": "Daylight UI, floating toast & inline save alerts" }
+        { "path": "static/index.html", "line": 1, "end_line": 369, "label": "Deferred-vendor UI shell (<100ms first paint)" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 1093, "label": "Parallel Box launch, safe quota & 1-click verify" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1308, "label": "Daylight UI, floating toast & inline save alerts" }
       ]
     },
     {
@@ -197,7 +197,7 @@
       "pos": [824, 110],
       "size": [198, 68],
       "sources": [
-        { "path": "app/main.py", "line": 1, "end_line": 229, "label": "Lifespan HTTP/gRPC warm-up, GZip & launch routes" },
+        { "path": "app/main.py", "line": 1, "end_line": 232, "label": "Lifespan HTTP/gRPC warm-up, GZip & launch routes" },
         { "path": "Dockerfile", "line": 29, "end_line": 41, "label": "Non-root Uvicorn with --no-access-log" }
       ]
     },
