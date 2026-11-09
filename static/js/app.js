@@ -72,35 +72,6 @@ function updateQuotaBadge() {
   }
 }
 
-function renderUserBadge(me) {
-  const badge = el("userBadge");
-  if (!badge || !me) return;
-  const fullName = (me.name || "").trim();
-  const email = (me.login || "").trim();
-
-  let firstName = "";
-  if (fullName) {
-    const parts = fullName.split(/\s+/).filter(Boolean);
-    firstName = parts[0] || "";
-    if (/^(mr|mrs|ms|dr|prof)\.?$/i.test(firstName) && parts.length > 1) {
-      firstName = parts[1];
-    }
-  } else if (email) {
-    const handle = email.split("@")[0];
-    const namePart = handle.split(/[._-]/)[0];
-    firstName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-  }
-
-  const firstNameEl = el("userFirstName");
-  const emailEl = el("userEmail");
-
-  if (firstNameEl) firstNameEl.textContent = firstName || "User";
-  if (emailEl) emailEl.textContent = email;
-
-  badge.title = email ? `${fullName || firstName} (${email})` : (fullName || "Box User");
-  badge.classList.remove("hidden");
-}
-
 async function checkQuotaAvailable(action, units = 1) {
   const resp = await fetch("/api/entitlement/status", {
     method: "POST",
@@ -264,7 +235,12 @@ async function bootstrap() {
     state.boxClient
       .getCurrentUser()
       .then((me) => {
-        renderUserBadge(me);
+        if (me && me.login) {
+          const badge = el("userBadge");
+          badge.textContent = me.login;
+          badge.title = me.name ? `${me.name} (${me.login})` : me.login;
+          badge.classList.remove("hidden");
+        }
       })
       .catch(() => {});
 
@@ -342,7 +318,6 @@ async function openFileInScrubber(fileId) {
     el("docx-friendly-card").classList.toggle("hidden", !isDocx);
     el("draw-helper-tip").classList.toggle("hidden", isDocx);
     el("pii-section-card").classList.remove("hidden");
-    el("advanced-pdf-options").classList.toggle("hidden", fmt !== "pdf");
 
     // Clean, friendly default output filename (`_Clean`)
     const rawStem = meta.name.replace(/\.[^.]+$/, "");
@@ -660,8 +635,7 @@ function wireScrubControls() {
       }
 
       showToast("Saving redacted file to Box...", "info");
-      const flattenAll = el("chk-flatten-all").checked;
-      const result = await state.redactor.exportSanitizedBytes({ flattenAllPages: flattenAll });
+      const result = await state.redactor.exportSanitizedBytes({ flattenAllPages: false });
       const parentId = state.activeFileMeta.parent?.id || "0";
       const stem = el("inp-output-stem").value.trim() || "Clean_Copy";
 

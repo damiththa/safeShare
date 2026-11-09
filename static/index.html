@@ -42,15 +42,7 @@
     <div class="header-actions">
       <button class="btn-link hidden" id="btn-switch-item" type="button">Switch file</button>
       <span class="quota-pill hidden" id="quota-badge">Free Plan</span>
-      <div id="userBadge" class="user-profile-badge hidden" title="Box Connected">
-        <svg class="user-avatar-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span class="user-first-name" id="userFirstName"></span>
-        <span class="user-email-sep">&middot;</span>
-        <span class="user-email" id="userEmail"></span>
-      </div>
+      <span id="userBadge" class="pill-user hidden">Box Connected</span>
       <button class="btn btn-secondary hidden" id="btn-done-window" type="button">Done</button>
     </div>
   </header>
@@ -245,14 +237,6 @@
 
             <!-- Inline Error / Quota Feedback right next to the Save button -->
             <div id="save-error-box" class="error-box hidden" role="alert"></div>
-
-            <details class="quiet-details" id="advanced-pdf-options">
-              <summary>More options</summary>
-              <label class="option-row">
-                <input type="checkbox" id="chk-flatten-all" />
-                <span>Convert every page to a flat image</span>
-              </label>
-            </details>
 
             <!-- Celebratory Inline Confirmation after Save -->
             <div id="save-success-box" class="success-box hidden">

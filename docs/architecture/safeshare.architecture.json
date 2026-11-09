@@ -115,9 +115,9 @@
       "pos": [296, 110],
       "size": [194, 68],
       "sources": [
-        { "path": "static/index.html", "line": 1, "end_line": 379, "label": "Deferred-vendor UI shell (<100ms first paint)" },
-        { "path": "static/js/app.js", "line": 1, "end_line": 1088, "label": "Parallel Box launch, safe quota & 1-click verify" },
-        { "path": "static/css/styles.css", "line": 1, "end_line": 1323, "label": "Daylight UI, floating toast & inline save alerts" }
+        { "path": "static/index.html", "line": 1, "end_line": 363, "label": "Deferred-vendor UI shell (<100ms first paint)" },
+        { "path": "static/js/app.js", "line": 1, "end_line": 1062, "label": "Parallel Box launch, safe quota & 1-click verify" },
+        { "path": "static/css/styles.css", "line": 1, "end_line": 1288, "label": "Daylight UI, floating toast & inline save alerts" }
       ]
     },
     {
