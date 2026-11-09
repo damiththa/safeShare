@@ -241,6 +241,60 @@ body {
   border-radius: 999px;
 }
 
+.user-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  padding: 4px 11px;
+  border-radius: 999px;
+  max-width: 260px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.user-avatar-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.user-first-name {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 85px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email-sep {
+  color: var(--muted);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.user-email {
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+
+@media (max-width: 720px) {
+  .user-email-sep,
+  .user-email {
+    display: none;
+  }
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
