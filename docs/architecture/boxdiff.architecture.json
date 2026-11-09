@@ -140,7 +140,7 @@
         {
           "path": "static/index.html",
           "line": 1,
-          "end_line": 359,
+          "end_line": 365,
           "label": "BoxDiff Workspace UI"
         },
         {
@@ -308,7 +308,7 @@
         {
           "path": "app/main.py",
           "line": 37,
-          "end_line": 209,
+          "end_line": 212,
           "label": "CSP Middleware & Stateless Routes"
         },
         {
