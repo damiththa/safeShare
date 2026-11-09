@@ -24,8 +24,11 @@
       <div class="brand-text">
         <div class="brand-title-line">
           <span class="brand-name">BoxDiff</span>
-          <span class="privacy-pill" title="Your files stay inside your browser and are never stored on external servers">
-            Private in browser
+          <span class="privacy-pill" title="100% In-Browser: Files are streamed directly between Box and your browser's RAM via Box CORS. Zero file bytes are ever stored, cached, or analyzed on external servers.">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            100% In-Browser &middot; Zero-PII
           </span>
         </div>
         <div class="brand-sub" id="active-context-label">Version history &amp; sibling file redlines for Box</div>
@@ -79,6 +82,29 @@
           <p>Multi-sheet OpenXML <code>.xlsx</code> and <code>.csv</code> inspection that catches altered <code>=SUM()</code> formulas and hardcoded overrides.</p>
         </div>
       </div>
+      <div class="trust-guarantee-card">
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">🔒</span>
+          <div>
+            <strong>100% In-Browser RAM</strong>
+            <p>Files flow directly between Box and your browser memory via WebAssembly. Zero file bytes ever touch or sit on our servers.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">🚫</span>
+          <div>
+            <strong>Zero Server Storage</strong>
+            <p>We never download, cache, log, or store your documents, filenames, version history, or text deltas.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">🛡️</span>
+          <div>
+            <strong>Box Enterprise Governance</strong>
+            <p>Your enterprise permissions, Box Shield classifications, and audit logs remain 100% intact.</p>
+          </div>
+        </div>
+      </div>
       <div class="welcome-actions">
         <button id="btnConnectBox" type="button" class="btn btn-primary btn-lg">Continue with Box</button>
       </div>
@@ -91,6 +117,11 @@
 
     <!-- Main Comparison Workspace -->
     <section id="compareWorkspace" class="workspace-section hidden">
+      <div class="privacy-notice-strip">
+        <span class="shield-dot" aria-hidden="true"></span>
+        <span><strong>Zero-PII Active:</strong> Files are read and compared entirely within your browser RAM over direct Box HTTPS. Zero file bytes leave your machine or touch external servers.</span>
+      </div>
+
       <div class="source-selector-card">
         <div class="selector-col selector-left">
           <label for="leftSelect" class="selector-label">
@@ -318,7 +349,7 @@
   </main>
 
   <footer class="app-footer">
-    <span>BoxDiff &middot; 100% In-Browser Execution &middot; Zero File Bytes Sent to Cloud</span>
+    <span>🔒 <strong>Zero-PII Guarantee:</strong> 100% In-Browser RAM Execution &middot; Zero File Bytes Sent to Cloud Servers &middot; Direct Box CORS</span>
     <span>
       <a href="/privacy" target="_blank" rel="noopener">Privacy</a> &middot;
       <a href="/terms" target="_blank" rel="noopener">Terms</a>
