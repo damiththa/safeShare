@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafeShare for Box</title>
-  <link rel="stylesheet" href="/static/css/styles.css?v=6" />
-  <script defer src="/static/vendor/pdf-lib.min.js?v=6"></script>
-  <script defer src="/static/vendor/pdf.min.js?v=6"></script>
-  <script defer src="/static/vendor/exifr.full.umd.js?v=6"></script>
-  <script defer src="/static/vendor/jszip.min.js?v=6"></script>
+  <link rel="stylesheet" href="/static/css/styles.css?v=7" />
+  <script defer src="/static/vendor/pdf-lib.min.js?v=7"></script>
+  <script defer src="/static/vendor/pdf.min.js?v=7"></script>
+  <script defer src="/static/vendor/exifr.full.umd.js?v=7"></script>
+  <script defer src="/static/vendor/jszip.min.js?v=7"></script>
 </head>
 <body>
   <header class="topbar">
@@ -351,13 +351,19 @@
   </main>
 
   <footer class="app-footer">
-    <span>🔒 <strong>Zero-PII Guarantee:</strong> 100% In-Browser RAM Execution &middot; Zero File Bytes Sent to Cloud Servers &middot; Direct Box CORS</span>
-    <span>
+    <div class="footer-trust">
+      <svg class="footer-shield" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span><strong>Zero-PII Guarantee:</strong> 100% In-Browser RAM Execution &middot; Zero File Bytes Sent to Cloud Servers &middot; Direct Box CORS</span>
+    </div>
+    <div class="footer-links">
       <a href="/privacy" target="_blank" rel="noopener">Privacy</a> &middot;
       <a href="/terms" target="_blank" rel="noopener">Terms</a>
-    </span>
+    </div>
   </footer>
 
-  <script type="module" src="/static/js/app.js?v=6"></script>
+  <script type="module" src="/static/js/app.js?v=7"></script>
 </body>
 </html>

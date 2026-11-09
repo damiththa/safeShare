@@ -1,8 +1,8 @@
-import { BoxBrowserClient } from "./box_client.js?v=6";
-import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=6";
-import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=6";
-import { RedactorWorkspace } from "./redactor_engine.js?v=6";
-import { ShareRadarScanner } from "./shareradar_engine.js?v=6";
+import { BoxBrowserClient } from "./box_client.js?v=7";
+import { detectFileFormatFromBytes, runMetadataXray } from "./metadata_xray.js?v=7";
+import { generateAnonymousStem, inspectFilenameForPii } from "./pii_detector.js?v=7";
+import { RedactorWorkspace } from "./redactor_engine.js?v=7";
+import { ShareRadarScanner } from "./shareradar_engine.js?v=7";
 
 const state = {
   boxClient: null,
@@ -23,7 +23,32 @@ const state = {
   redactor: null,
 };
 
-const el = (id) => document.getElementById(id);
+const el = (id) => {
+  const node = document.getElementById(id);
+  if (!node) {
+    return new Proxy(document.createElement("div"), {
+      get(target, prop) {
+        if (prop === "classList") {
+          return {
+            add: () => {},
+            remove: () => {},
+            toggle: () => false,
+            contains: () => false,
+          };
+        }
+        if (prop === "style") return {};
+        if (prop === "addEventListener") return () => {};
+        if (prop === "removeEventListener") return () => {};
+        if (prop === "querySelectorAll") return () => [];
+        if (prop === "querySelector") return () => null;
+        if (prop === "appendChild") return () => {};
+        if (prop === "append") return () => {};
+        return target[prop];
+      },
+    });
+  }
+  return node;
+};
 
 function showToast(message, variant = "info") {
   const banner = el("toast-banner");
@@ -231,12 +256,17 @@ async function bootstrap() {
     state.entitlement = exchData.entitlement;
     state.radarScanner = new ShareRadarScanner(state.boxClient);
 
+    const badge = el("userBadge");
+    if (badge) {
+      badge.textContent = "Box Connected";
+      badge.classList.remove("hidden");
+    }
+
     // Non-blocking user badge personalization in browser memory only
     state.boxClient
       .getCurrentUser()
       .then((me) => {
         if (me && me.login) {
-          const badge = el("userBadge");
           badge.textContent = me.login;
           badge.title = me.name ? `${me.name} (${me.login})` : me.login;
           badge.classList.remove("hidden");
@@ -362,6 +392,7 @@ async function openFileInScrubber(fileId) {
 
     renderRedactorSidebarState();
   } catch (err) {
+    console.error("openFileInScrubber error:", err);
     showToast(err.message || "Unable to open this file from Box.", "error");
   }
 }

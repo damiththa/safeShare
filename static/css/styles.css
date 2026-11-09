@@ -1268,14 +1268,34 @@ body {
 .app-footer {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   padding: 16px 24px;
   border-top: 1px solid var(--border);
   font-size: 12px;
   color: var(--muted);
   background: var(--surface);
   margin-top: auto;
+  box-sizing: border-box;
+}
+
+.footer-trust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-shield {
+  color: var(--safe);
+  flex-shrink: 0;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .app-footer a {
